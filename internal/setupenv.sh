@@ -1,7 +1,8 @@
 #!/bin/bash
 
 VIRTUALENV_LOCATION=${VIRTUALENV_LOCATION:=venv}
-PYTHON=${PYTHON:=/usr/bin/python3}
+PYTHON=${PYTHON:="/usr/bin/env python3"}
+PIP=${PIP:="/usr/bin/env pip"}
 
 if [ ! -d "$VIRTUALENV_LOCATION" ]; then
 
@@ -15,14 +16,21 @@ source "$VIRTUALENV_LOCATION/bin/activate"
 
 echo "Installing software components..."
 
-pip install -r requirements.txt
+$PIP install -r requirements.txt
 
-echo "Setting environment variables..."
+echo -n "Setting environment variables... "
 
-export CARTOGRAM_DATA_DIR="/home/jansky/cartogram" #Do not include a trailing slash
-export CARTOGRAM_COLOR="#aaaaaa"
-export CARTOGRAM_DEBUG=TRUE
-export CARTOGRAM_HOST=127.0.0.1
-export CARTOGRAM_PORT=5000
+source ./envsettings.sh
+
+if [ $? -eq 0 ]; then
+
+    echo "OK"
+else
+
+    echo "FAIL"
+    echo
+    echo "Please make sure that envsettings.sh exists."
+    deactivate
+fi
 
 echo "Done."

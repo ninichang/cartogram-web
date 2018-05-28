@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export CARTOGRAM_DATA_DIR="/home/jansky/cartogram" #Do not include a trailing slash
+export CARTOGRAM_COLOR="#aaaaaa"
+export CARTOGRAM_DEBUG=TRUE
+export CARTOGRAM_HOST=127.0.0.1
+export CARTOGRAM_PORT=5000

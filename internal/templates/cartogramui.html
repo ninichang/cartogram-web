@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Cartogram</title>
+    </head>
+    <body>
+        <h1>Cartogram</h1>
+
+        <p><b>Area String:</b> {{area_string}}</p>
+        <p><b>Make a POST request to:</b> {{cartogram_url}}.</p>
+
+        <script src="{{ url_for('static', filename='my_script.js') }}"></script>
+        <script>
+            draw_cartogram("{{area_string}}", "usa", "{{cartogram_url}}");
+        </script>
+    </body>
+</html>

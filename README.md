@@ -49,7 +49,7 @@ To start the development server, run `./gunicorn.sh`. The server will bind to th
 
 You can test that everything is up and running by running a sample request:
 
-    curl -X POST -s YOUR_HOST_AND_PORT/cartogram -F handler=usa -F values="9;11;6;55;9;7;3;3;29;16;4;20;11;6;6;8;8;3;1;10;11;16;10;6;10;3;5;6;4;14;5;29;15;3;18;7;7;20;4;9;3;11;38;6;3;13;12;5;10;3" > test
+    curl -X POST -s YOUR_HOST_AND_PORT/cartogram -F handler=usa -F values="9;11;6;55;9;7;3;3;29;16;4;20;11;6;6;8;8;4;10;11;16;10;6;10;3;5;6;4;14;5;29;15;3;18;7;7;20;4;9;3;11;38;6;3;13;12;5;10;3" > test
 
 You can then compare the `test` file against `internal/test_result.txt`. I have not yet found a satisfactory way to confirm that the results match. Simple `diff` does not work, because Python's `json.dump` has a tendency to change the order of the JSON values it outputs. However, the file is too large to be analyzed by a more specialized JSON diff tool like `jsondiff` in a reasonable amount of time.
 

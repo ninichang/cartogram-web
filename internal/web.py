@@ -3,15 +3,57 @@ import settings
 from handlers import usa
 
 import json
-from flask import Flask, request, Response
+import csv
+import codecs
+from flask import Flask, request, Response, flash, redirect, render_template, url_for
 
 app = Flask(__name__)
 
+app.secret_key = "LTTNWg8luqfWKfDxjFaeC3vYoGrC2r2f5mtXo5IE/jt1GcY7/JaSq8V/tB"
+
 app.config['ENV'] = 'development' if settings.DEBUG else 'production'
+
 
 cartogram_handlers = {
     'usa': usa.CartogramHandler()
 }
+
+@app.route('/', methods=['GET'])
+def index():
+
+    return render_template('index.html')
+
+@app.route('/cartogramui', methods=['POST'])
+def cartogram_ui():
+
+    if 'handler' not in request.form:
+
+        flash('You must specify a handler.')
+        return redirect(url_for('index'))
+    
+    if request.form['handler'] not in cartogram_handlers:
+
+        flash('The handler specified was invalid.')
+        return redirect(url_for('index'))
+
+    if 'csv' not in request.files:
+
+        flash('You must upload CSV data.')
+        return redirect(url_for('index'))
+    
+    cartogram_handler = cartogram_handlers[request.form['handler']]
+
+    try:
+
+        # This is necessary because Werkzeug's file stream is in binary mode
+        csv_codec = codecs.iterdecode(request.files['csv'].stream, 'utf-8')
+
+        return render_template('cartogramui.html', area_string=cartogram_handler.csv_to_area_string(csv_codec), cartogram_url=url_for('cartogram'))
+
+    except (KeyError, csv.Error, ValueError, UnicodeDecodeError) as error:
+
+        flash('There was a problem reading your CSV file.')
+        return redirect(url_for('index'))
 
 @app.route('/cartogram', methods=['POST'])
 def cartogram():
