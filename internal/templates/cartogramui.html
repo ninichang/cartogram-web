@@ -6,12 +6,27 @@
     <body>
         <h1>Cartogram</h1>
 
-        <p><b>Area String:</b> {{area_string}}</p>
-        <p><b>Make a POST request to:</b> {{cartogram_url}}.</p>
+        <div id="loading">
+            <p style="font-weight: bold">Loading...</p>
+        </div>
 
-        <script src="{{ url_for('static', filename='my_script.js') }}"></script>
+        <div id="error">
+            <p style="font-weight: bold">Error: <span style="font-weight: normal" id="error-message"></span></p>
+        </div>
+
+        <div id="cartogram" style="display: none">        
+        </div>
+
+        <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+        <script src="{{ url_for('static', filename='cartogram.js') }}"></script>	
         <script>
-            draw_cartogram("{{area_string}}", "usa", "{{cartogram_url}}");
+            window.onload = function() {
+
+                cartogram_init("{{cartogram_url}}");
+
+                window.cartogram.draw_cartogram("{{area_string}}", "usa");
+
+            };
         </script>
     </body>
 </html>
