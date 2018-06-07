@@ -5,7 +5,7 @@ import csv
 class CartogramHandler(handlers.base_handler.BaseCartogramHandler):
 
     def get_gen_file(self):
-        return "{}/US_low48.gen".format(settings.CARTOGRAM_DATA_DIR)
+        return "{}/usa_low48_conic.gen".format(settings.CARTOGRAM_DATA_DIR)
     
     def validate_values(self, values):
 

@@ -1,8 +1,7 @@
 #!/bin/bash
 
 VIRTUALENV_LOCATION=${VIRTUALENV_LOCATION:=venv}
-PYTHON=${PYTHON:="/usr/bin/env python3"}
-PIP=${PIP:="/usr/bin/env pip"}
+PYTHON=${PYTHON:="/usr/bin/python3"}
 
 if [ ! -d "$VIRTUALENV_LOCATION" ]; then
 
@@ -16,7 +15,7 @@ source "$VIRTUALENV_LOCATION/bin/activate"
 
 echo "Installing software components..."
 
-$PIP install -r requirements.txt
+pip install -r requirements.txt
 
 echo -n "Setting environment variables... "
 
