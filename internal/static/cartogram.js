@@ -58,11 +58,14 @@ function cartogram_init(c_u)
                         window.cartogram.do_fatal_error('Input string does not have a proper JSON format.');
                         return;
                         }
-
+                        
+                        var a = 0;
+                        var b = 600;
+                        var k = 1;
 
                         var lineFunction = d3.svg.line()
-                                                .x(function(d) { return d[0]; })
-                                                .y(function(d) { return 500 - d[1]; })
+                                                .x(function(d) { return a + k * d[0]; })
+                                                .y(function(d) { return b - k * d[1]; })
                                                 .interpolate("linear");
                                                 
                         var canvas = d3.select("#cartogram").append("svg")
