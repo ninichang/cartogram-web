@@ -7,7 +7,7 @@ import json
 
 def translate(in_fp, color):
 
-    result = {'type': 'FeatureCollection', 'features': []}
+    result = {'type': 'FeatureCollection', 'features': [], 'extrema': {'max_x': None, 'min_x': None, 'min_y': None, 'max_y': None}}
 
     while True:
 
@@ -23,36 +23,36 @@ def translate(in_fp, color):
             'name': 'UNKNOWN',
             'color': color,
             'attribute': str(random.randint(1,100))
-        }, 'coordinates': [], 'extrema': {'max_x': None, 'min_x': None, 'min_y': None, 'max_y': None}}
+        }, 'coordinates': []}
 
         while True:
 
             try:
                 x, y = [float(i) for i in in_fp.readline().split()]
 
-                if feature['extrema']['max_x'] == None:
-                    feature['extrema']['max_x'] = x
+                if result['extrema']['max_x'] == None:
+                    result['extrema']['max_x'] = x
                 
-                if feature['extrema']['max_y'] == None:
-                    feature['extrema']['max_y'] = y
+                if result['extrema']['max_y'] == None:
+                    result['extrema']['max_y'] = y
                 
-                if feature['extrema']['min_x'] == None:
-                    feature['extrema']['min_x'] = x
+                if result['extrema']['min_x'] == None:
+                    result['extrema']['min_x'] = x
                 
-                if feature['extrema']['min_y'] == None:
-                    feature['extrema']['min_y'] = y
+                if result['extrema']['min_y'] == None:
+                    result['extrema']['min_y'] = y
                 
-                if x > feature['extrema']['max_x']:
-                    feature['extrema']['max_x'] = x
+                if x > result['extrema']['max_x']:
+                    result['extrema']['max_x'] = x
                 
-                if x < feature['extrema']['min_x']:
-                    feature['extrema']['min_x'] = x
+                if x < result['extrema']['min_x']:
+                    result['extrema']['min_x'] = x
                 
-                if y > feature['extrema']['max_y']:
-                    feature['extrema']['max_y'] = y
+                if y > result['extrema']['max_y']:
+                    result['extrema']['max_y'] = y
                 
-                if y < feature['extrema']['min_y']:
-                    feature['extrema']['min_y'] = y
+                if y < result['extrema']['min_y']:
+                    result['extrema']['min_y'] = y
 
                 feature['coordinates'].append([x,y])
             except ValueError:

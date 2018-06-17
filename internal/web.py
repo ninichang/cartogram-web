@@ -21,7 +21,7 @@ cartogram_handlers = {
 @app.route('/', methods=['GET'])
 def index():
 
-    return render_template('index.html')
+    return render_template('new_index.html')
 
 @app.route('/cartogramui', methods=['POST'])
 def cartogram_ui():
@@ -47,8 +47,9 @@ def cartogram_ui():
 
         # This is necessary because Werkzeug's file stream is in binary mode
         csv_codec = codecs.iterdecode(request.files['csv'].stream, 'utf-8')
+        cart_data = cartogram_handler.csv_to_area_string_and_colors(csv_codec)
 
-        return render_template('cartogramui.html', area_string=cartogram_handler.csv_to_area_string(csv_codec), cartogram_url=url_for('cartogram'))
+        return render_template('cartogramui_new.html', area_string=cart_data[0], color_data=cart_data[1], cartogram_url=url_for('cartogram'), cartogram_data_dir=url_for('static', filename='cartdata'))
 
     except (KeyError, csv.Error, ValueError, UnicodeDecodeError) as error:
 
