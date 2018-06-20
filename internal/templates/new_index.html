@@ -49,47 +49,97 @@
       </a>
     </div>
 
-       <div class="container">
-         <h2>Input</h2>
+       <div class="container-fluid">
+        
          <div class = "row">
-            <div class = "col-md-4">
+           <div class="col-md-2">
+              <h2>Input</h2>
+           </div>
+            <div class="col-md-10">
+            <div class="row">
+            <div class = "col-md-3">
               <p><a href="tutorial.html">Tutorial</a></p>
-              <p><a class="btn btn-secondary" href="{{ url_for('static', filename='usa_cartogram_template.csv') }}" role="button">Download CSV template &raquo;</a></p>
+              <p><a class="btn btn-secondary" href="{{cartogram_data_dir}}/{{default_cartogram_handler}}/template.csv" role="button" id="template-link">Download CSV template &raquo;</a></p>
             </div>
-            <div class = "col-md-8">
-              {% with messages = get_flashed_messages() %}
-                  {% if messages %}
-                      <ul style="list-style-type: none; padding-left: 0;">
-                      {% for message in messages %}
-                      <li class="text-danger font-weight-bold">{{ message }}</li>
-                      {% endfor %}
-                      </ul>
-                  {% endif %}
-              {% endwith %}
-              <form action="{{ url_for('cartogram_ui') }}" method="POST" enctype="multipart/form-data" class="form-inline">
-                <div class="form-group">
+            <div class = "col-md-7">
+              <p id="non-fatal-error" class="text-danger font-weight-bold"></p>
+              <form action="#" method="POST" enctype="multipart/form-data" class="form-inline" onsubmit="return window.cartogram.request_and_draw_cartogram();">
+                <div class="input-group mb-2 mr-sm-2">
+                  <label for="handler">Map:&nbsp;&nbsp;</label>
+                  <select class="form-control" id="handler">
+                    {% for handler in cartogram_handlers %}
+                    <option value="{{handler.id}}" {% if handler.id == default_cartogram_handler %}selected{% endif %}>{{handler.display_name}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="input-group mb-2 mr-sm-2">
                   <input type="hidden" name="handler" value="usa"/>
                   <label for="csv">Choose CSV File:&nbsp;&nbsp;</label>
                   <input type="file" name="csv" id="csv" class="form-control-file" accept="text/csv,.csv"/>
                 </div>
-                <div class="form-group">
-                  <input type="submit" class="btn btn-primary" value="Generate"/>
-                </div>
+                  <input type="submit" class="btn btn-primary mb-2" value="Generate"/>
+
               </form>
+
+              
+            </div>
+            </div> <!-- /row -->
+
+
+            <div class="row">
+              <div class="col-md-12">
+                <div id="loading">
+                <p style="font-weight: bold">Loading...</p>
+              </div>
+
+              <div id="error" style="display: none">
+                    <p style="font-weight: bold">Error: <span style="font-weight: normal" id="error-message"></span></p>
+              </div>
+              </div>
+            </div>
             </div>
          </div>
+
+      
+
+
+      <div class="row" id="cartogram" style="display: none">
+        <div class="col-md-2">
+              <h2>Output</h2>
+           </div>
+        <div class="col-md-5">
+          <!--<p><a class="btn btn-secondary" href="#" role="button">Download this map &raquo;</a></p>-->
+          <div id="map1-switch" style="height: 50px;display: none">
+            &nbsp;
+          </div>
+          <div id = "map-area" style="margin-top: 20px">
+          <!--<p align="center"><img src="images/usa_ffb.png" width="300px"></p>-->
+          <!-- <p align="center"><img src="images/india_ffb_comp.png" width="300px"></p> -->
+      </div>
+          <!--<p align="center"><img src="images/usa_map.png" width="300px"></p>-->
+          <!--<p align="center"><img src="images/india_map_comp.png" width="300px"></p>-->
+          <!--<p><a class="btn btn-secondary" href="#" role="button">Download this map &raquo;</a></p>-->
+       </div>
+        <div class="col-md-5" id="cartogram-container">
+          <!--<p><a class="btn btn-secondary" href="#" role="button">Download this cartogram &raquo;</a></p>-->
+          <div id="map2-switch" style="height: 50px;display: none">
+            <div class="btn-group">
+              <button type="button" class="btn btn-secondary btn-sm" id="map2-selector"></button>
+              <button type="button" class="btn btn-secondary btn-sm" id="map3-selector"></button>
+            </div>
+          </div>
+          <div id = "cartogram-area" style="margin-top: 20px">
+          <!--<p align="center"><img src="images/usa_ffb.png" width="300px"></p>-->
+          <!-- <p align="center"><img src="images/india_ffb_comp.png" width="300px"></p> -->
+      </div>
         </div>
+      </div>
       </div>
 
       <br/>
     <!-- Main jumbotron for a primary marketing message or call to action -->
-    <div class="container">
-      <!-- Example row of columns -->
-      <div class="row">
-        <div class="col-md-6"></div>
-        <div class="col-md-6"></div>
-      </div>
-      <hr>
+    <div class="container-fluid">
+      <hr/>
 
 {% include 'footer.html' %}
 

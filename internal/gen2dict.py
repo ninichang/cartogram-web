@@ -8,6 +8,7 @@ import json
 def translate(in_fp, color):
 
     result = {'type': 'FeatureCollection', 'features': [], 'extrema': {'max_x': None, 'min_x': None, 'min_y': None, 'max_y': None}}
+    polygon_id = 1
 
     while True:
 
@@ -22,8 +23,11 @@ def translate(in_fp, color):
         feature = {'type': 'Feature', 'id': id, 'properties': {
             'name': 'UNKNOWN',
             'color': color,
-            'attribute': str(random.randint(1,100))
+            'attribute': str(random.randint(1,100)),
+            'polygon_id': polygon_id,
         }, 'coordinates': []}
+
+        polygon_id += 1
 
         while True:
 

@@ -15,5 +15,34 @@
     <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="{{ url_for('static', filename='ie10-viewport-bug-workaround.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='cartogram.js') }}"></script>
+
+    <script>
+      window.onload = function() {
+
+            cartogram_init("{{cartogram_url}}", "{{cartogramui_url}}", "{{cartogram_data_dir}}");
+
+            document.getElementById('handler').addEventListener('change', function(e){
+
+              document.getElementById('template-link').href = "{{cartogram_data_dir}}/" + document.getElementById('handler').value + "/template.csv";
+
+            });
+
+            window.cartogram.enter_loading_state();
+
+            window.cartogram.get_default_colors("{{default_cartogram_handler}}").then(function(colors){
+
+              window.cartogram.color_data = colors;
+
+              window.cartogram.draw_two_maps(window.cartogram.get_pregenerated_map("{{default_cartogram_handler}}", "original"), window.cartogram.get_pregenerated_map("{{default_cartogram_handler}}", "population"), "map-area", "cartogram-area").then(function(v){
+                window.cartogram.exit_loading_state();
+                document.getElementById('cartogram').style.display = 'flex'; // Bootstrap rows use flexbox
+              }, window.cartogram.do_fatal_error); 
+
+            }, window.cartogram.do_fatal_error);
+
+        };
+    </script>
   </body>
 </html>

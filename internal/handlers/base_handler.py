@@ -1,6 +1,9 @@
 
 class BaseCartogramHandler:
 
+    def get_name(self):
+        raise NotImplementedError("This function must be implemented.")
+
     def get_gen_file(self):
         raise NotImplementedError("This function must be implemented.")
     
@@ -22,7 +25,7 @@ class BaseCartogramHandler:
             if name_column not in row or data_column not in row or color_column not in row:
                 raise ValueError('Invalid CSV file.')
             
-            result[order.index(row[name_column])] = int(row[data_column])
+            result[order.index(row[name_column])] = float(row[data_column])
 
             color_values['id_{}'.format(color_data[row[name_column]])] =  row[color_column]
         

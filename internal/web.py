@@ -1,6 +1,6 @@
 import cartwrap, gen2dict
 import settings
-from handlers import usa
+from handlers import usa, india, china
 
 import json
 import csv
@@ -15,31 +15,39 @@ app.config['ENV'] = 'development' if settings.DEBUG else 'production'
 
 
 cartogram_handlers = {
-    'usa': usa.CartogramHandler()
+    'usa': usa.CartogramHandler(),
+    'india': india.CartogramHandler(),
+    'china': china.CartogramHandler()
 }
+
+default_cartogram_handler = "usa"
 
 @app.route('/', methods=['GET'])
 def index():
 
-    return render_template('new_index.html')
+    cartogram_handlers_select = [{'id': key, 'display_name': handler.get_name()} for key, handler in cartogram_handlers.items()]
+
+    return render_template('new_index.html', cartogram_url=url_for('cartogram'), cartogramui_url=url_for('cartogram_ui'), cartogram_data_dir=url_for('static', filename='cartdata'), cartogram_handlers=cartogram_handlers_select, default_cartogram_handler=default_cartogram_handler)
 
 @app.route('/cartogramui', methods=['POST'])
 def cartogram_ui():
 
+    json_response = {}
+
     if 'handler' not in request.form:
 
-        flash('You must specify a handler.')
-        return redirect(url_for('index'))
+        json_response['error'] = 'You must specify a handler.'
+        return Response(json.dumps(json_response), status=200, content_type="application/json")
     
     if request.form['handler'] not in cartogram_handlers:
 
-        flash('The handler specified was invalid.')
-        return redirect(url_for('index'))
+        json_response['error'] = 'The handler specified was invaild.'
+        return Response(json.dumps(json_response), status=200, content_type="application/json")
 
     if 'csv' not in request.files:
 
-        flash('You must upload CSV data.')
-        return redirect(url_for('index'))
+        json_response['error'] = 'You must upload CSV data.'
+        return Response(json.dumps(json_response), status=200, content_type="application/json")
     
     cartogram_handler = cartogram_handlers[request.form['handler']]
 
@@ -49,12 +57,16 @@ def cartogram_ui():
         csv_codec = codecs.iterdecode(request.files['csv'].stream, 'utf-8')
         cart_data = cartogram_handler.csv_to_area_string_and_colors(csv_codec)
 
-        return render_template('cartogramui_new.html', area_string=cart_data[0], color_data=cart_data[1], cartogram_url=url_for('cartogram'), cartogram_data_dir=url_for('static', filename='cartdata'))
+        json_response['error'] = "none"
+        json_response['areas_string'] = cart_data[0]
+        json_response['color_data'] = cart_data[1]
+
+        return Response(json.dumps(json_response), status=200, content_type="application/json")
 
     except (KeyError, csv.Error, ValueError, UnicodeDecodeError) as error:
 
-        flash('There was a problem reading your CSV file.')
-        return redirect(url_for('index'))
+        json_response['error'] = 'There was a problem reading your CSV file.'
+        return Response(json.dumps(json_response), status=200, content_type="application/json")
 
 @app.route('/cartogram', methods=['POST'])
 def cartogram():
