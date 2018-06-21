@@ -49,7 +49,22 @@
       </a>
     </div>
 
+       <div class="container">
+         <div class="row">
+           <div class="col-sm-12">
+             <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <strong>Warning: </strong> This site is currently under heavy development. Certain features may not work properly.
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+           </div>
+         </div>
+        </div>
+
        <div class="container-fluid">
+
+        
         
          <div class = "row">
            <div class="col-md-2">
@@ -62,6 +77,7 @@
               <p><a class="btn btn-secondary" href="{{cartogram_data_dir}}/{{default_cartogram_handler}}/template.csv" role="button" id="template-link">Download CSV template &raquo;</a></p>
             </div>
             <div class = "col-md-7">
+              
               <p id="non-fatal-error" class="text-danger font-weight-bold"></p>
               <form action="#" method="POST" enctype="multipart/form-data" class="form-inline" onsubmit="return window.cartogram.request_and_draw_cartogram();">
                 <div class="input-group mb-2 mr-sm-2">
@@ -107,7 +123,7 @@
         <div class="col-md-2">
               <h2>Output</h2>
            </div>
-        <div class="col-md-5">
+        <div class="col-md-4">
           <!--<p><a class="btn btn-secondary" href="#" role="button">Download this map &raquo;</a></p>-->
           <div id="map1-switch" style="height: 50px;display: none">
             &nbsp;
@@ -120,7 +136,7 @@
           <!--<p align="center"><img src="images/india_map_comp.png" width="300px"></p>-->
           <!--<p><a class="btn btn-secondary" href="#" role="button">Download this map &raquo;</a></p>-->
        </div>
-        <div class="col-md-5" id="cartogram-container">
+        <div class="col-md-4" id="cartogram-container">
           <!--<p><a class="btn btn-secondary" href="#" role="button">Download this cartogram &raquo;</a></p>-->
           <div id="map2-switch" style="height: 50px;display: none">
             <div class="btn-group">

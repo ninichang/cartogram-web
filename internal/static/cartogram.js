@@ -251,7 +251,7 @@ function cartogram_init(c_u, cui_u, c_d)
                         d3.select('#path-' + map_name + '-' + v.id)
                         .attr('d', v.path)
                         .transition()
-                        .ease(d3.easeCubic)
+                        .ease(d3.easeBounce)
                         .duration(750)
                         .attr('d', new_path);
                     }
@@ -284,8 +284,8 @@ function cartogram_init(c_u, cui_u, c_d)
                         d3.select('#path-' + map_name + '-' + v.id)
                         .attr('d', v.path)
                         .transition()
-                        .ease(d3.easeCubic)
-                        .duration(750)
+                        .ease(d3.easeBounce)
+                        .duration(1000)
                         .attr('d', new_path);
                     }
 
