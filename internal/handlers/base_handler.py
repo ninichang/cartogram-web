@@ -16,9 +16,10 @@ class BaseCartogramHandler:
     def csv_to_area_string_and_colors(self, csvfile):
         raise NotImplementedError("This function must be implemented.")    
 
-    def order_by_example(self, dict_reader, name_column, data_column, color_column, order, result, color_data):
+    def order_by_example(self, dict_reader, name_column, data_column, color_column, order, result, id_data):
 
         color_values = {}
+        tooltip = {'label': 'User Data', 'unit': '', 'data': {}}
 
         for row in dict_reader:
 
@@ -27,17 +28,15 @@ class BaseCartogramHandler:
             
             result[order.index(row[name_column])] = float(row[data_column])
 
-            color_values['id_{}'.format(color_data[row[name_column]])] =  row[color_column]
-        
-        if len(color_values) != len(color_data):
-            raise ValueError('Invalid CSV file 1.')
+            color_values['id_{}'.format(id_data[row[name_column]])] =  row[color_column]
+            tooltip['data']['id_{}'.format(id_data[row[name_column]])] = {'name': row[name_column], 'value': float(row[data_column])}
         
         areas_string = ""
 
         for area in result:
             areas_string += "{};".format(area)
         
-        return areas_string.rstrip(';'), color_values
+        return areas_string.rstrip(';'), color_values, tooltip
 
 
     

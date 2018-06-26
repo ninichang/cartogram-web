@@ -5,6 +5,8 @@ from handlers import usa, india, china
 import json
 import csv
 import codecs
+import re
+import io
 from flask import Flask, request, Response, flash, redirect, render_template, url_for
 
 app = Flask(__name__)
@@ -60,6 +62,7 @@ def cartogram_ui():
         json_response['error'] = "none"
         json_response['areas_string'] = cart_data[0]
         json_response['color_data'] = cart_data[1]
+        json_response['tooltip'] = cart_data[2]
 
         return Response(json.dumps(json_response), status=200, content_type="application/json")
 
@@ -92,9 +95,37 @@ def cartogram():
     if cartogram_handler.validate_values(values) != True:
         return Response('{"error":"badvalues"}', status=400, content_type="application/json")
     
-    cartogram_output = cartwrap.generate_cartogram(cartogram_handler.gen_area_data(values), cartogram_handler.get_gen_file(), "{}/cartogram".format(settings.CARTOGRAM_DATA_DIR))
+    #cartogram_output = cartwrap.generate_cartogram(cartogram_handler.gen_area_data(values), cartogram_handler.get_gen_file(), "{}/cartogram".format(settings.CARTOGRAM_DATA_DIR))
 
-    return Response(json.dumps(gen2dict.translate(cartogram_output, settings.CARTOGRAM_COLOR)), status=200, content_type="application/json")
+    #return Response(json.dumps(gen2dict.translate(cartogram_output, settings.CARTOGRAM_COLOR)), status=200, content_type="application/json")
+
+    def generate_streamed_json_response():
+
+        cartogram_gen_output = b''
+        current_loading_point = "null"
+
+        yield '{"loading_progress_points":['
+
+        for source, line in cartwrap.generate_cartogram(cartogram_handler.gen_area_data(values), cartogram_handler.get_gen_file(), "{}/cartogram".format(settings.CARTOGRAM_DATA_DIR)):
+
+            if source == "stdout":
+                cartogram_gen_output += line
+            else:
+                s = re.search(r'max\. abs\. area error: (.+)', line.decode())
+
+                if s != None:
+                    current_loading_point = s.groups(1)[0]
+                
+                yield '{{"loading_point": {}, "stderr_line": "{}"}},'.format(current_loading_point, line.decode())
+        
+        # We create a fake last entry because you can't have dangling commas in JSON
+        yield '{"loading_point":0}],"cartogram_data":'
+
+        yield json.dumps(gen2dict.translate(io.StringIO(cartogram_gen_output.decode()), settings.CARTOGRAM_COLOR))
+
+        yield "}"
+    
+    return Response(generate_streamed_json_response(), content_type='application/json', status=200)            
 
 if __name__ == '__main__':
     app.run(debug=settings.DEBUG,host=settings.HOST,port=settings.PORT)

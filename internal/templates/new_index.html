@@ -106,10 +106,24 @@
               <div class="col-md-12">
                 <div id="loading">
                 <p style="font-weight: bold">Loading...</p>
+
+                <div class="row" id="loading-progress-container" style="display: none">
+                  <div class="col-sm-12 col-md-6">
+                    <div class="progress">
+                      <div class="progress-bar" role="progressbar" id="loading-progress"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div id="error" style="display: none">
                     <p style="font-weight: bold">Error: <span style="font-weight: normal" id="error-message"></span></p>
+
+                    <div id="error-extended" style="display: none">
+                      <p><b>Additional Information: </b> When reporting this error, please include the information below.</p>
+
+                      <pre id="error-extended-content"></pre>
+                    </div>
               </div>
               </div>
             </div>
@@ -125,10 +139,10 @@
            </div>
         <div class="col-md-4">
           <!--<p><a class="btn btn-secondary" href="#" role="button">Download this map &raquo;</a></p>-->
-          <div id="map1-switch" style="height: 50px;display: none">
-            &nbsp;
+          <div style="height: 110px">
+            <p id="tooltip">&nbsp;</p>
           </div>
-          <div id = "map-area" style="margin-top: 20px">
+          <div id = "map-area">
           <!--<p align="center"><img src="images/usa_ffb.png" width="300px"></p>-->
           <!-- <p align="center"><img src="images/india_ffb_comp.png" width="300px"></p> -->
       </div>
@@ -138,13 +152,15 @@
        </div>
         <div class="col-md-4" id="cartogram-container">
           <!--<p><a class="btn btn-secondary" href="#" role="button">Download this cartogram &raquo;</a></p>-->
-          <div id="map2-switch" style="height: 50px;display: none">
+          <div style="height: 110px">
+            <div id="map2-switch">
             <div class="btn-group">
               <button type="button" class="btn btn-secondary btn-sm" id="map2-selector"></button>
               <button type="button" class="btn btn-secondary btn-sm" id="map3-selector"></button>
             </div>
+            </div><p>&nbsp;</p>
           </div>
-          <div id = "cartogram-area" style="margin-top: 20px">
+          <div id = "cartogram-area">
           <!--<p align="center"><img src="images/usa_ffb.png" width="300px"></p>-->
           <!-- <p align="center"><img src="images/india_ffb_comp.png" width="300px"></p> -->
       </div>
@@ -156,6 +172,6 @@
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="container-fluid">
       <hr/>
-
+<span id="map1-switch"></span>
 {% include 'footer.html' %}
 

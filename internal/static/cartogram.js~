@@ -29,7 +29,7 @@ function cartogram_init(c_u, cui_u, c_d)
 
                 this.tooltip.forEach(function(v, i){
 
-                    document.getElementById('tooltip').innerHTML += "<br/><i>" + window.cartogram.tooltip[i].label + ":</i> " + window.cartogram.tooltip[i].data["id_" + id].value.toLocaleString() + " " + window.cartogram.tooltip[i].unit;
+                    document.getElementById('tooltip').innerHTML += "<br/><i>" + window.cartogram.tooltip[i].label + ":</i> " + window.cartogram.tooltip[i].data["id_" + id].value + " " + window.cartogram.tooltip[i].unit;
 
                 });
             }

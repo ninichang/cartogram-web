@@ -15,6 +15,7 @@
     <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="{{ url_for('static', filename='ie10-viewport-bug-workaround.js') }}"></script>
+    <script src="{{ url_for('static', filename='oboe-browser.js') }}"></script>
 
     <script src="{{ url_for('static', filename='cartogram.js') }}"></script>
 
@@ -36,6 +37,10 @@
               window.cartogram.color_data = colors;
 
               window.cartogram.draw_two_maps(window.cartogram.get_pregenerated_map("{{default_cartogram_handler}}", "original"), window.cartogram.get_pregenerated_map("{{default_cartogram_handler}}", "population"), "map-area", "cartogram-area").then(function(v){
+
+                window.cartogram.tooltip.push(v[0].tooltip);
+                window.cartogram.tooltip.push(v[1].tooltip);
+                
                 window.cartogram.exit_loading_state();
                 document.getElementById('cartogram').style.display = 'flex'; // Bootstrap rows use flexbox
               }, window.cartogram.do_fatal_error); 
