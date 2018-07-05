@@ -16,7 +16,7 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 
 app.secret_key = "LTTNWg8luqfWKfDxjFaeC3vYoGrC2r2f5mtXo5IE/jt1GcY7/JaSq8V/tB"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://gocart:0WWIIotFqFgKQmsQ9qLj1RrQqmRlqjKtV@localhost/gocart'
+app.config['SQLALCHEMY_DATABASE_URI'] = settings.DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['ENV'] = 'development' if settings.DEBUG else 'production'
 

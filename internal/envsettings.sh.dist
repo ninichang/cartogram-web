@@ -5,3 +5,5 @@ export CARTOGRAM_COLOR="#aaaaaa"
 export CARTOGRAM_DEBUG=TRUE
 export CARTOGRAM_HOST=127.0.0.1
 export CARTOGRAM_PORT=5000
+
+export CARTOGRAM_DATABASE_URI="postgresql://username:password@localhost/database"
