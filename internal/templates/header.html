@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="favicon.ico">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
     <title>go-cart.io</title>
 
@@ -17,10 +17,21 @@
     <!-- Custom styles for this template -->
     <link href="{{ url_for('static', filename='jumbotron.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='carousel.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
     <style>
       .progress-bar {
     -webkit-transition: width 0.5s ease;
     transition: width 0.5s ease;
+    }
+
+    .social-link {
+      font-size: 32px;
+      color: #777;
+      text-decoration: none;
+    }
+
+    .social-link:hover {
+      color: darkcyan;
     }
     </style>
   </head>

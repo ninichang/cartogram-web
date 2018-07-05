@@ -40,6 +40,8 @@
 
                 window.cartogram.tooltip.push(v[0].tooltip);
                 window.cartogram.tooltip.push(v[1].tooltip);
+
+                window.cartogram.generate_svg_download_links('map-area', 'cartogram-area', 'map-download', 'cartogram-download', 'map', 'cartogram');
                 
                 window.cartogram.exit_loading_state();
                 document.getElementById('cartogram').style.display = 'flex'; // Bootstrap rows use flexbox

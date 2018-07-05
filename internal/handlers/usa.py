@@ -8,7 +8,7 @@ class CartogramHandler(handlers.base_handler.BaseCartogramHandler):
         return "Continental United States"
 
     def get_gen_file(self):
-        return "{}/usa_low48_conic.gen".format(settings.CARTOGRAM_DATA_DIR)
+        return "{}/usa_low48conic.gen".format(settings.CARTOGRAM_DATA_DIR)
     
     def validate_values(self, values):
 

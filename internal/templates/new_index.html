@@ -7,38 +7,38 @@
         <li data-target="#myCarousel" data-slide-to="2"></li>
       </ol>
       <div class="carousel-inner" role="listbox">
-        <div class="carousel-item active">
-          <img class="first-slide" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" alt="First slide">
-          <div class="container">
-            <div class="carousel-caption d-none d-md-block text-left">
-              <h1>gocart.io pre-alpha: </br> Creating Cartograms Online</h1>
-              <p>Generate attractive contiguous cartograms. Neither maths nor programming required.</p>
-              <p>Currently this site is under development, but feel free to give it a try and leave us feedback below so that we can include new features.</p>
-              <p><a class="btn btn-lg btn-primary" href="#" role="button">Learn more about cartograms</a></p>
+          <div class="carousel-item active">
+              <img class="first-slide" src="{{ url_for('static', filename='carousel/p1.png') }}" alt="First slide">
+              <div class="container">
+                <div class="carousel-caption d-none d-md-block text-left">
+                  <h1>gocart.io pre-alpha: </br> Creating Cartograms Online</h1>
+                  <p>Generate attractive contiguous cartograms. Neither maths nor programming required.</p>
+                  <p>Currently this site is under development, but feel free to give it a try and leave us feedback below so that we can include new features.</p>
+                  <p><a class="btn btn-lg btn-primary" href="#" role="button">Make a cartogram now</a></p>
+                </div>
+              </div>
+            </div>
+            <div class="carousel-item">
+              <img class="second-slide" src="{{ url_for('static', filename='carousel/usa.png') }}" alt="Second slide">
+              <div class="container">
+                <div class="carousel-caption d-none d-md-block text-right">
+                  <h1>What is a Cartogram?</h1>
+                  <p> A map in which some variable is substituted for land area.</p>
+                  <p><a class="btn btn-lg btn-primary" href="#" role="button">Learn more about cartograms</a></p>
+                </div>
+              </div>
+            </div>
+            <div class="carousel-item">
+              <img class="third-slide" src="{{ url_for('static', filename='carousel/india.png') }}" alt="Third slide" style="width: 50%">
+              <div class="container">
+                <div class="carousel-caption d-none d-md-block text-right">
+                  <h1>Still have questions?</h1>
+                  <p>You are welcome to approach us directly.</p>
+                  <p><a class="btn btn-lg btn-primary" href="#" role="button">Contact Us </a></p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="carousel-item">
-          <img class="second-slide" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" alt="Second slide">
-          <div class="container">
-            <div class="carousel-caption d-none d-md-block">
-              <h1>What is a Cartogram?</h1>
-              <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
-              <p><a class="btn btn-lg btn-primary" href="#" role="button">See some examples of cartograms </a></p>
-            </div>
-          </div>
-        </div>
-        <div class="carousel-item">
-          <img class="third-slide" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" alt="Third slide">
-          <div class="container">
-            <div class="carousel-caption d-none d-md-block text-right">
-              <h1>Still have questions?</h1>
-              <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
-              <p><a class="btn btn-lg btn-primary" href="#" role="button">Contact us</a></p>
-            </div>
-          </div>
-        </div>
-      </div>
       <a class="carousel-control-prev" href="#myCarousel" role="button" data-slide="prev">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="sr-only">Previous</span>
@@ -72,14 +72,12 @@
            </div>
             <div class="col-md-10">
             <div class="row">
-            <div class = "col-md-3">
-              <p><a href="tutorial.html">Tutorial</a></p>
-              <p><a class="btn btn-secondary" href="{{cartogram_data_dir}}/{{default_cartogram_handler}}/template.csv" role="button" id="template-link">Download CSV template &raquo;</a></p>
+            <div class = "col-md-4">
+                <a class="btn btn-secondary" href="#" role="button">Tutorial</a>
+              <a class="btn btn-secondary" href="{{cartogram_data_dir}}/{{default_cartogram_handler}}/template.csv" role="button" id="template-link">Download CSV template &raquo;</a>
             </div>
-            <div class = "col-md-7">
-              
-              <p id="non-fatal-error" class="text-danger font-weight-bold"></p>
-              <form action="#" method="POST" enctype="multipart/form-data" class="form-inline" onsubmit="return window.cartogram.request_and_draw_cartogram();">
+            <div class = "col-md-6">
+              <form action="#" method="POST" enctype="multipart/form-data" class="form-inline" onsubmit="return window.cartogram.request_and_draw_cartogram();" id="cartogram-form">
                 <div class="input-group mb-2 mr-sm-2">
                   <label for="handler">Map:&nbsp;&nbsp;</label>
                   <select class="form-control" id="handler">
@@ -88,14 +86,14 @@
                     {% endfor %}
                   </select>
                 </div>
-                <div class="input-group mb-2 mr-sm-2">
-                  <input type="hidden" name="handler" value="usa"/>
-                  <label for="csv">Choose CSV File:&nbsp;&nbsp;</label>
-                  <input type="file" name="csv" id="csv" class="form-control-file" accept="text/csv,.csv"/>
-                </div>
-                  <input type="submit" class="btn btn-primary mb-2" value="Generate"/>
+                <!--<div class="input-group mb-2 mr-sm-2">-->
+                  <!--<label for="csv">Choose CSV File:&nbsp;&nbsp;</label>-->
+                  <input type="file" name="csv" id="csv" class="form-control-file" accept="text/csv,.csv" style="display: none" onchange="if(this.value != null) { window.cartogram.request_and_draw_cartogram(); }"/>
+                <!--</div>-->
+                  <input type="button" class="btn btn-primary mb-2" value="Upload Data and Generate" onclick="clearFileInput(document.getElementById('csv'));document.getElementById('csv').click();"/>
 
               </form>
+              <p id="non-fatal-error" class="text-danger font-weight-bold"></p>
 
               
             </div>
@@ -146,6 +144,22 @@
           <!--<p align="center"><img src="images/usa_ffb.png" width="300px"></p>-->
           <!-- <p align="center"><img src="images/india_ffb_comp.png" width="300px"></p> -->
       </div>
+        <p style="margin-top: 20px"><a class="btn btn-secondary" href="" download="" id="map-download">Download this Map</a></p>
+
+        <h4>Share on Social Media</h4>
+        <table border="0">
+          <tr>
+            <td><a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgo-cart.io"
+			   onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;"
+         target="_blank" title="Share on Facebook" class="social-link" id="facebook-share"><i class="fab fa-facebook-square"></i></a></td>
+            <td><a href="https://www.linkedin.com/shareArticle?url=https%3A%2F%2Fgo-cart.io&mini=true&title=Cartogram&summary=Create%20cartograms%20with%20go-cart.io&source=go-cart.io"
+			   onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=520,width=570');return false;"
+			   target="_blank" title="Share on LinkedIn" class="social-link" id="linkedin-share"><i class="fab fa-linkedin"></i></a></td>
+            <td><a href="https://twitter.com/share?url=https%3A%2F%2Fgo-cart.io"
+			   onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;"
+         target="_blank" title="Share on Twitter" class="social-link" id="twitter-share"><i class="fab fa-twitter-square"></i></a></td>            
+          </tr>
+        </table>
           <!--<p align="center"><img src="images/usa_map.png" width="300px"></p>-->
           <!--<p align="center"><img src="images/india_map_comp.png" width="300px"></p>-->
           <!--<p><a class="btn btn-secondary" href="#" role="button">Download this map &raquo;</a></p>-->
@@ -157,13 +171,16 @@
             <div class="btn-group">
               <button type="button" class="btn btn-secondary btn-sm" id="map2-selector"></button>
               <button type="button" class="btn btn-secondary btn-sm" id="map3-selector"></button>
+              <button type="button" class="btn btn-secondary btn-sm" id="map1-selector"></button>
             </div>
             </div><p>&nbsp;</p>
           </div>
           <div id = "cartogram-area">
           <!--<p align="center"><img src="images/usa_ffb.png" width="300px"></p>-->
           <!-- <p align="center"><img src="images/india_ffb_comp.png" width="300px"></p> -->
+          
       </div>
+        <p style="margin-top: 20px"><a class="btn btn-secondary" href="" download="" id="cartogram-download">Download this Cartogram</a></p>
         </div>
       </div>
       </div>

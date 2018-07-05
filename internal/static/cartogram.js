@@ -1,3 +1,12 @@
+function clearFileInput(ctrl) {
+    try {
+      ctrl.value = null;
+    } catch(ex) { }
+    if (ctrl.value) {
+      ctrl.parentNode.replaceChild(ctrl.cloneNode(true), ctrl);
+    }
+  }
+
 function cartogram_init(c_u, cui_u, c_d)
 {
     window.cartogram = {
@@ -8,15 +17,17 @@ function cartogram_init(c_u, cui_u, c_d)
         cartogram_data_dir: c_d,
         color_data: null,
         map_alternates: {
+            map1: null,
             map2: null,
             map3: null,
-            map2_selected: true
+            map_selected: '',
+            maps_possible: ['map1', 'map2', 'map3']
         },
         tooltip: new Array(0),
         loading_state: null,
         fatal_error_extended_info: null,
         tooltip_clear: function() {
-            document.getElementById('tooltip').innerHTML = "&nbsp;";
+            document.getElementById('tooltip').innerHTML = "<b>Hover over map regions to see more information.</b>";
         },
         tooltip_initialize: function() {
             this.tooltip = new Array(0);
@@ -111,6 +122,25 @@ function cartogram_init(c_u, cui_u, c_d)
             });
 
         },
+        generate_svg_download_links: function(map1_container, map2_container, map1_link, map2_link, map1_name, map2_name)
+        {
+            var svg_header = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>';
+
+            document.getElementById(map1_link).href = "data:image/svg+xml;base64," + window.btoa(svg_header + document.getElementById(map1_container).innerHTML);
+            document.getElementById(map1_link).download = map1_name + ".svg";
+
+            document.getElementById(map2_link).href = "data:image/svg+xml;base64," + window.btoa(svg_header + document.getElementById(map2_container).innerHTML);
+            document.getElementById(map2_link).download = map2_name + ".svg";
+        },
+        generate_social_media_links: function(url)
+        {
+            document.getElementById('facebook-share').href = "https://www.facebook.com/sharer/sharer.php?u=" + window.encodeURIComponent(url);
+
+            document.getElementById('linkedin-share').href = "https://www.linkedin.com/shareArticle?url=" + window.encodeURIComponent(url) + "&mini=true&title=Cartogram&summary=Create%20cartograms%20with%20go-cart.io&source=go-cart.io";
+
+            document.getElementById('twitter-share').href = "https://twitter.com/share?url=" + window.encodeURIComponent(url);
+
+        },
         draw_d3_graphic: function(this_map, maps, data, element_id, width, height, scale_x, scale_y) {
 
             var a = data.extrema.min_x;
@@ -156,7 +186,7 @@ function cartogram_init(c_u, cui_u, c_d)
             
             return polygon_paths;
         },
-        get_generated_cartogram: function(areas_string, handler) {
+        get_generated_cartogram: function(areas_string, handler, unique_sharing_key) {
 
             return new Promise(function(resolve,reject){
 
@@ -168,7 +198,8 @@ function cartogram_init(c_u, cui_u, c_d)
                     headers: {'Content-type': 'application/x-www-form-urlencoded'},
                     body: window.cartogram.serialize_post_variables({
                     handler: handler,
-                    values: areas_string
+                    values: areas_string,
+                    unique_sharing_key: unique_sharing_key
                     }),
                 }).node('loading_progress_points.*', function(loading_progress_point){
 
@@ -290,20 +321,21 @@ function cartogram_init(c_u, cui_u, c_d)
         get_default_colors: function(handler) {
             return this.http_get(this.cartogram_data_dir + "/" + handler + "/colors.json");
         },
-        switch_displayed_map: function(map_name){
+        switch_displayed_map: function(map_container, new_map_name){
 
             if(this.in_loading_state)
                 return;
             
             this.in_loading_state = true; // Lock the UI but don't display loading block
+
+            var old_map = this.map_alternates[this.map_alternates.map_selected];
+            var new_map = this.map_alternates[new_map_name];
             
-            if(this.map_alternates.map2_selected) //map2 to map3
-            {
-                this.map_alternates.map2.forEach(function(v, i){
+            old_map.forEach(function(v, i){
 
                     var new_path = null;
 
-                    window.cartogram.map_alternates.map3.forEach(function(w,j){
+                    new_map.forEach(function(w,j){
 
                         if(w.id == v.id)
                             new_path = w.path;
@@ -312,40 +344,7 @@ function cartogram_init(c_u, cui_u, c_d)
 
                     if(new_path != null)
                     {
-                        d3.select('#path-' + map_name + '-' + v.id)
-                        .attr('d', v.path)
-                        .transition()
-                        .ease(d3.easeCubic)
-                        .duration(750)
-                        .attr('d', new_path);
-                    }
-
-                });
-
-                this.map_alternates.map2_selected = false;
-
-                document.getElementById('map3-selector').classList.add('active');
-                document.getElementById('map2-selector').classList.remove('active');
-
-                document.getElementById('map3-selector').setAttribute('onclick', '');
-                document.getElementById('map2-selector').setAttribute('onclick', "window.cartogram.switch_displayed_map('map2')");
-            }
-            else //map3 to map2
-            {
-                this.map_alternates.map3.forEach(function(v, i){
-
-                    var new_path = null;
-
-                    window.cartogram.map_alternates.map2.forEach(function(w,j){
-
-                        if(w.id == v.id)
-                            new_path = w.path;
-
-                    });
-
-                    if(new_path != null)
-                    {
-                        d3.select('#path-' + map_name + '-' + v.id)
+                        d3.select('#path-' + map_container + '-' + v.id)
                         .attr('d', v.path)
                         .transition()
                         .ease(d3.easeCubic)
@@ -355,19 +354,29 @@ function cartogram_init(c_u, cui_u, c_d)
 
                 });
 
-                this.map_alternates.map2_selected = true;
+            this.map_alternates.map_selected = new_map_name;
 
-                document.getElementById('map2-selector').classList.add('active');
-                document.getElementById('map3-selector').classList.remove('active');
+            this.map_alternates.maps_possible.forEach(function(v){
 
-                document.getElementById('map2-selector').setAttribute('onclick', '');
-                document.getElementById('map3-selector').setAttribute('onclick', "window.cartogram.switch_displayed_map('map2')");
-            }
+                if(v == new_map_name)
+                {
+                    document.getElementById(v + '-selector').setAttribute('onclick', '');
+                    document.getElementById(v + '-selector').classList.add('active');
+                }
+                else
+                {
+                    document.getElementById(v + '-selector').setAttribute('onclick', "window.cartogram.switch_displayed_map('map2', '" + v + "')");
+                    document.getElementById(v + '-selector').classList.remove('active');
+                }
+
+            });
+
+            window.setTimeout(function(){window.cartogram.generate_svg_download_links('map-area', 'cartogram-area', 'map-download', 'cartogram-download', 'map', 'cartogram');}, 1100);
 
             this.in_loading_state = false;
 
         },
-        draw_three_maps: function(map1, map2, map3, map1_container, map2_3_container, map2_name, map3_name){
+        draw_three_maps: function(map1, map2, map3, map1_container, map2_3_container, map1_name, map2_name, map3_name){
 
             return new Promise(function(resolve, reject){
 
@@ -406,32 +415,47 @@ function cartogram_init(c_u, cui_u, c_d)
                 
                 window.cartogram.map_alternates.map2 = window.cartogram.draw_d3_graphic("map2", ['map1', 'map2'], values[1], "#" + map2_3_container, map_width, map_height, values[1].scale_x, values[1].scale_y);
 
-                var lineFunction = d3.svg.line()
+                var lineFunction_map1 = d3.svg.line()
+                    .x(function(d) { return values[0].scale_x * (-1*(values[0].extrema.min_x) + d[0]) })
+                    .y(function(d) { return values[0].scale_y * ((values[0].extrema.max_y) - d[1]) })
+                    .interpolate("linear");
+                
+                var lineFunction_map3 = d3.svg.line()
                     .x(function(d) { return values[2].scale_x * (-1*(values[2].extrema.min_x) + d[0]) })
                     .y(function(d) { return values[2].scale_y * ((values[2].extrema.max_y) - d[1]) })
                     .interpolate("linear");
 
+                window.cartogram.map_alternates.map1 = new Array();
                 window.cartogram.map_alternates.map3 = new Array();
 
-                values[2].features.forEach(function(feature){
+                values[0].features.forEach(function(feature){
 
-                    window.cartogram.map_alternates.map3.push({id: feature.properties.polygon_id, path: lineFunction(feature.coordinates)})
+                    window.cartogram.map_alternates.map1.push({id: feature.properties.polygon_id, path: lineFunction_map1(feature.coordinates)})
 
                 });
 
-                window.cartogram.map_alternates.map2_selected = true;
+                values[2].features.forEach(function(feature){
+
+                    window.cartogram.map_alternates.map3.push({id: feature.properties.polygon_id, path: lineFunction_map3(feature.coordinates)})
+
+                });
+
+                window.cartogram.map_alternates.map_selected = "map2";
 
                 document.getElementById('map1-switch').style.display = 'block';
                 document.getElementById('map2-switch').style.display = 'block';
 
+                document.getElementById('map1-selector').innerHTML = map1_name;
                 document.getElementById('map2-selector').innerHTML = map2_name;
                 document.getElementById('map3-selector').innerHTML = map3_name;
 
+                document.getElementById('map1-selector').classList.remove('active');
                 document.getElementById('map2-selector').classList.add('active');
                 document.getElementById('map3-selector').classList.remove('active');
 
                 document.getElementById('map2-selector').setAttribute('onclick', '');
-                document.getElementById('map3-selector').setAttribute('onclick', "window.cartogram.switch_displayed_map('map2')");
+                document.getElementById('map3-selector').setAttribute('onclick', "window.cartogram.switch_displayed_map('map2', 'map3')");
+                document.getElementById('map1-selector').setAttribute('onclick', "window.cartogram.switch_displayed_map('map2', 'map1')");
                 
                 resolve(values);
 
@@ -442,6 +466,8 @@ function cartogram_init(c_u, cui_u, c_d)
 
         },
         draw_two_maps: function(map1, map2, map1_container, map2_container) {
+
+            this.tooltip_clear();
 
             return new Promise(function(resolve, reject){
 
@@ -557,11 +583,15 @@ function cartogram_init(c_u, cui_u, c_d)
                 {
                     window.cartogram.color_data = response.color_data;
 
-                    window.cartogram.draw_three_maps(window.cartogram.get_pregenerated_map(handler, "original"), window.cartogram.get_generated_cartogram(response.areas_string, handler), window.cartogram.get_pregenerated_map(handler, "population"), "map-area", "cartogram-area", "User Data", "Population").then(function(v){
+                    window.cartogram.draw_three_maps(window.cartogram.get_pregenerated_map(handler, "original"), window.cartogram.get_generated_cartogram(response.areas_string, handler, response.unique_sharing_key), window.cartogram.get_pregenerated_map(handler, "population"), "map-area", "cartogram-area", "Land Area", "User Data", "Population").then(function(v){
 
                         window.cartogram.tooltip.push(v[0].tooltip);
                         window.cartogram.tooltip.push(v[2].tooltip);
                         window.cartogram.tooltip.push(response.tooltip);
+
+                        window.cartogram.generate_svg_download_links('map-area', 'cartogram-area', 'map-download', 'cartogram-download', 'map', 'cartogram');
+
+                        window.cartogram.generate_social_media_links("https://go-cart.io/cart/" + v[1].unique_sharing_key);
                         
                         window.cartogram.exit_loading_state();
                         document.getElementById('cartogram').style.display = "flex"; //Bootstrap rows use flexbox
