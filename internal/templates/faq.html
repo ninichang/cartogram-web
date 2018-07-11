@@ -1,0 +1,167 @@
+{% include 'header.html' %}
+
+    <!-- Custom styles for this template -->
+    <link href="{{ url_for('static', filename='starter-template.css') }}" rel="stylesheet">
+
+<style>
+    .faqHeader {
+        font-size: 28px;
+        margin: 20px;
+    }
+    .accordion-toggle {
+        color: #000;
+        font-size: 16px;
+        text-decoration: none;
+    }
+    .accordion-toggle:hover,.accordion-toggle:active,.accordion-toggle:focus {
+        color: #000;
+        text-decoration: none;
+    }
+    h4 {
+        font-size: 18px; 
+    }
+
+    .card-header [data-toggle="collapse"]:after {
+        font-family: "Times New Roman";
+        content: "▶";
+        float: right;
+        color: #000;
+        font-size: 20px;
+        line-height: 10px;
+
+        -webkit-transform: rotate(-90deg);
+        -moz-transform: rotate(-90deg);
+        -ms-transform: rotate(-90deg);
+        -o-transform: rotate(-90deg);
+        transform: rotate(-90deg);
+    }
+
+    .card-header [data-toggle="collapse"].collapsed:after {
+
+        -webkit-transform: rotate(90deg);
+        -moz-transform: rotate(90deg);
+        -ms-transform: rotate(90deg);
+        -o-transform: rotate(90deg);
+        transform: rotate(90deg);
+        color: #000;
+    }*/
+</style>
+
+    <div class="container">
+         <div class="starter-template">
+            <!--<div class="alert alert-warning alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            If you cannot find an answer to your question, 
+            make sure to contact us. 
+            </div>-->
+            <h1>FAQ</h1>
+            <p class="lead">Below are some of the most frequently asked questions we have received.</p>
+        </div>
+        <div class="" id="accordion">
+            <div class="faqHeader">General questions</div>
+            <div class="card ">
+                <div class="card-header">
+                    <h4 class="card-header">
+                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseA">Why aren’t the regions on the cartogram labeled?</a>
+                    </h4>
+                </div>
+                <div id="collapseA" class="panel-collapse collapse">
+                    <div class="card-block">
+                            Automatic placement of region labels is a difficult problem that we haven’t had time to solve yet. As an interim measure, you can see the name and data associated with each region in the top left corner of the output section by hovering over the region you want.
+                    </div>
+                </div>
+            </div>
+            <div class="card ">
+                <div class="card-header">
+                    <h4 class="card-header">
+                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseB">Why don’t the conventional maps and cartograms have scales?</a>
+                    </h4>
+                </div>
+                <div id="collapseB" class="panel-collapse collapse">
+                    <div class="card-block">
+                            Scales are not present because they are not necessary. The conventional maps and cartograms generated on this website are carefully displayed so that they have the same total area. This means that you can gain insight from comparing them without needing a scale.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faqHeader">Cartogram Generation</div>
+            <div class="card ">
+                <div class="card-header">
+                    <h4 class="card-header">
+                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">How long does it take to generate a cartogram?</a>
+                    </h4>
+                </div>
+                <div id="collapseTwo" class="panel-collapse collapse">
+                    <div class="card-block">
+                        It usually takes just a few seconds to generate a cartogram using this website.
+                    </div>
+                </div>
+            </div>
+            <div class="card ">
+            <div class="card ">
+                <div class="card-header">
+                    <h4 class="card-header">
+                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseEleven">How does this website generate cartograms?</a>
+                    </h4>
+                </div>
+                <div id="collapseEleven" class="panel-collapse collapse">
+                    <div class="card-block">
+                        This website uses the Fast Flow-based method developed by Dr. Michael Gastner. You can learn more about how this method works by reading <a href="http://www.pnas.org/content/early/2018/02/15/1712674115">the paper</a> he published in the journal PNAS.
+                    </div>
+                </div>
+            </div>
+            <div class="card ">
+                <div class="card-header">
+                    <h4 class="card-header">
+                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseFive">How can I change the map colours?</a>
+                    </h4>
+                </div>
+                <div id="collapseFive" class="panel-collapse collapse">
+                    <div class="card-block">
+                            The colour of each map region can be changed by editing the values of the 'Colour' column in the downloadable CSV template for each map. You should use the hexadecimal colour code format to specify the colours you want. If you are not familiar with this format, you can learn more about it <a href="https://appendto.com/2017/02/rgb-to-hex-understanding-the-major-web-color-codes/">here</a>. 
+                        <br />
+                    </div>
+                </div>
+            </div>
+            <div class="card ">
+                <div class="card-header">
+                    <h4 class="card-header">
+                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseSix">What kind of data is suited for generating cartograms?</a>
+                    </h4>
+                </div>
+                <div id="collapseSix" class="panel-collapse collapse">
+                    <div class="card-block">
+                        When selecting data to make a cartogram, you should act as if you were making a pie chart. You should not use indices or per capita data, because these do not add in a meaningful way. Instead, you should use “total” categories that can be added, like
+                        <ul>
+                            <li>GDP</li>
+                            <li>Population</li>
+                            <li>Number of college graduates (as oppossed to percent of people with a university degree)</li>
+                        </ul>
+                            
+                    </div>
+                </div>
+            </div>
+           
+        </div>
+    </div>
+</div>
+
+
+<div class="container">
+<hr/>
+<footer>
+        <p>&copy; Michael T. Gastner <br/>
+			Yale-NUS College, Division of Science <br/>
+			16 College Avenue West, #01-220 Singapore 138527</p>
+      </footer>
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="jquery.min.js"><\/script>')</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+
