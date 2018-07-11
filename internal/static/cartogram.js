@@ -21,7 +21,7 @@ function cartogram_init(c_u, cui_u, c_d)
             map2: null,
             map3: null,
             map_selected: '',
-            maps_possible: ['map1', 'map2', 'map3']
+            maps_possible: []
         },
         tooltip: new Array(0),
         loading_state: null,
@@ -365,7 +365,7 @@ function cartogram_init(c_u, cui_u, c_d)
                 }
                 else
                 {
-                    document.getElementById(v + '-selector').setAttribute('onclick', "window.cartogram.switch_displayed_map('map2', '" + v + "')");
+                    document.getElementById(v + '-selector').setAttribute('onclick', "window.cartogram.switch_displayed_map('" + map_container + "', '" + v + "')");
                     document.getElementById(v + '-selector').classList.remove('active');
                 }
 
@@ -374,6 +374,25 @@ function cartogram_init(c_u, cui_u, c_d)
             window.setTimeout(function(){window.cartogram.generate_svg_download_links('map-area', 'cartogram-area', 'map-download', 'cartogram-download', 'map', 'cartogram');}, 1100);
 
             this.in_loading_state = false;
+
+        },
+        create_map_switch_button: function(map, map_container, title, active){
+
+            var button = document.createElement('button');
+            button.innerText = title;
+            button.id = map + "-selector";
+
+            if(active)
+            {
+                button.className = "btn btn-secondary btn-sm active";
+            }
+            else
+            {
+                button.className = "btn btn-secondary btn-sm";
+                button.setAttribute('onclick', "window.cartogram.switch_displayed_map('" + map_container + "', '" + map + "');");
+            }
+
+            return button;
 
         },
         draw_three_maps: function(map1, map2, map3, map1_container, map2_3_container, map1_name, map2_name, map3_name){
@@ -386,6 +405,8 @@ function cartogram_init(c_u, cui_u, c_d)
 
                 document.getElementById(map1_container).innerHTML = "";
                 document.getElementById(map2_3_container).innerHTML = "";
+
+                document.getElementById('map2-switch-buttons').innerHTML = "";
 
                 /* Now we fill the color information into each map */
 
@@ -440,22 +461,15 @@ function cartogram_init(c_u, cui_u, c_d)
 
                 });
 
+                window.cartogram.map_alternates.maps_possible = ['map1', 'map2', 'map3'];
                 window.cartogram.map_alternates.map_selected = "map2";
 
                 document.getElementById('map1-switch').style.display = 'block';
                 document.getElementById('map2-switch').style.display = 'block';
 
-                document.getElementById('map1-selector').innerHTML = map1_name;
-                document.getElementById('map2-selector').innerHTML = map2_name;
-                document.getElementById('map3-selector').innerHTML = map3_name;
-
-                document.getElementById('map1-selector').classList.remove('active');
-                document.getElementById('map2-selector').classList.add('active');
-                document.getElementById('map3-selector').classList.remove('active');
-
-                document.getElementById('map2-selector').setAttribute('onclick', '');
-                document.getElementById('map3-selector').setAttribute('onclick', "window.cartogram.switch_displayed_map('map2', 'map3')");
-                document.getElementById('map1-selector').setAttribute('onclick', "window.cartogram.switch_displayed_map('map2', 'map1')");
+                document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map2', 'map2', map2_name, true));
+                document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map3', 'map2', map3_name, false));
+                document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map1', 'map2', map1_name, false));
                 
                 resolve(values);
 
@@ -465,7 +479,7 @@ function cartogram_init(c_u, cui_u, c_d)
             
 
         },
-        draw_two_maps: function(map1, map2, map1_container, map2_container) {
+        draw_two_maps: function(map1, map2, map1_container, map2_container, map1_name, map2_name) {
 
             this.tooltip_clear();
 
@@ -477,6 +491,8 @@ function cartogram_init(c_u, cui_u, c_d)
 
                 document.getElementById(map1_container).innerHTML = "";
                 document.getElementById(map2_container).innerHTML = "";
+
+                document.getElementById('map2-switch-buttons').innerHTML = "";
 
                 document.getElementById('map1-switch').style.display = 'none';
                 document.getElementById('map2-switch').style.display = 'none';
@@ -498,50 +514,25 @@ function cartogram_init(c_u, cui_u, c_d)
                 var map_width = Math.max((values[0].extrema.max_x-values[0].extrema.min_x), (values[1].extrema.max_x-values[1].extrema.min_x));
                 var map_height = Math.max((values[0].extrema.max_y-values[0].extrema.min_y), (values[1].extrema.max_y-values[1].extrema.min_y));
 
-                var scale_original_x = 1;
-                var scale_original_y = 1;                
-                var scale_cartogram_x = 1;
-                var scale_cartogram_y = 1;
+                values.forEach(function(value, index){
 
-                if((values[0].extrema.max_x - values[0].extrema.min_x) > (values[1].extrema.max_x - values[1].extrema.min_x))
-                {
-                    /* The original map is wider than the cartogram */
+                    values[index].scale_x = map_width/(values[index].extrema.max_x-values[index].extrema.min_x);
+                    values[index].scale_y = map_height/(values[index].extrema.max_y-values[index].extrema.min_y);
 
-                    scale_original_x = (values[0].extrema.max_x - values[0].extrema.min_x)/(values[1].extrema.max_x - values[1].extrema.min_x);
-                }
-                else
-                {
-                    /* The cartogram is wider than the original map */
+                });
 
-                    scale_cartogram_x = (values[1].extrema.max_x - values[1].extrema.min_x)/(values[0].extrema.max_x - values[0].extrema.min_x);
-                }
+                window.cartogram.map_alternates.map1 = window.cartogram.draw_d3_graphic("map1", ['map2', 'map1'], values[0], "#" + map1_container, map_width, map_height, values[0].scale_x, values[0].scale_y);
 
-                if((values[0].extrema.max_y - values[0].extrema.min_y) > (values[1].extrema.max_y - values[1].extrema.min_y))
-                {
-                    /* The original map is taller than the cartogram */
+                window.cartogram.map_alternates.map2 = window.cartogram.draw_d3_graphic("map2", ['map2', 'map1'], values[1], "#" + map2_container, map_width, map_height, values[1].scale_x, values[1].scale_y);
 
-                    scale_original_y = (values[0].extrema.max_y - values[0].extrema.min_y)/(values[1].extrema.max_y - values[1].extrema.min_y);
-                }
-                else
-                {
-                    /* The cartogram is taller than the original map */
+                window.cartogram.map_alternates.maps_possible = ['map1', 'map2'];
+                window.cartogram.map_alternates.map_selected = "map2";
 
-                    scale_cartogram_y = (values[1].extrema.max_y - values[1].extrema.min_y)/(values[0].extrema.max_y - values[0].extrema.min_y);
-                }
+                document.getElementById('map1-switch').style.display = 'block';
+                document.getElementById('map2-switch').style.display = 'block';
 
-                console.log(map_width);
-                console.log(map_height);
-
-                console.log(scale_original_x);
-                console.log(scale_original_y);
-
-                console.log(scale_cartogram_x);
-                console.log(scale_cartogram_y);
-
-
-
-                window.cartogram.draw_d3_graphic("cartogram", ['cartogram', 'original'], values[0], "#" + map1_container, map_width, map_height, scale_cartogram_x, scale_cartogram_y);
-                window.cartogram.draw_d3_graphic("original", ['cartogram', 'original'], values[1], "#" + map2_container, map_width, map_height, scale_original_x, scale_original_y);
+                document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map2', 'map2', map2_name, true));
+                document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map1', 'map2', map1_name, false));
 
                 resolve(values);
 
