@@ -7,3 +7,11 @@ export CARTOGRAM_HOST=127.0.0.1
 export CARTOGRAM_PORT=5000
 
 export CARTOGRAM_DATABASE_URI="postgresql://username:password@localhost/database"
+
+export CARTOGRAM_SMTP_HOST="stmp.example.com"
+export CARTOGRAM_SMTP_PORT="25"
+export CARTOGRAM_SMTP_AUTHENTICATION_REQUIRED=TRUE
+export CARTOGRAM_SMTP_USER="user"
+export CARTOGRAM_SMTP_PASSWORD="password"
+export CARTOGRAM_SMTP_FROM_EMAIL="user@example.com"
+export CARTOGRAM_SMTP_DESTINATION="destination@example.net"

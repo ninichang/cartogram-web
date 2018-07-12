@@ -10,16 +10,30 @@ import io
 import string
 import random
 import datetime
-from flask import Flask, request, Response, flash, redirect, render_template, url_for
+from flask import Flask, request, session, Response, flash, redirect, render_template, url_for
 from flask_sqlalchemy import SQLAlchemy
+import validate_email
+import smtplib
+import email.mime.text
+import socket
 
 app = Flask(__name__)
 
 app.secret_key = "LTTNWg8luqfWKfDxjFaeC3vYoGrC2r2f5mtXo5IE/jt1GcY7/JaSq8V/tB"
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.DATABASE_URI
+# This gets rid of an annoying Flask error message. We don't need this feature anyway.
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['ENV'] = 'development' if settings.DEBUG else 'production'
 
+# Whenever you make changes to the DB models, you must generate the tables using db.create_all() as follows:
+#
+# $ source ./setupenv.sh
+# (venv) $ python3
+# (venv) >>> import web
+# (venv) >>> web.db.create_all()
+#
+# NOTE: SQLAlchemy does not do database migrations. If you do change something, you'll need to figure out how to migrate
+#       the data manually, or delete everything and start from scratch.
 db = SQLAlchemy(app)
 
 cartogram_handlers = {
@@ -42,6 +56,8 @@ class CartogramEntry(db.Model):
     def __repr__(self):
         return "<CartogramEntry {}>".format(self.string_key)
 
+# This function returns a random string containg lowercase letters and numbers that is *length* characters long.
+# This is used to generate the unique string key associated with each cartogram.
 def get_random_string(length):
 
     return ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(length))
@@ -57,6 +73,88 @@ def index():
 def faq():
 
     return render_template('faq.html', page_active='faq')
+
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+
+    if request.method == 'GET':
+        csrf_token = get_random_string(50)
+        session['csrf_token'] = csrf_token
+
+        return render_template('contact.html', page_active='contact',name="",message="",email_address="",subject="", csrf_token=csrf_token)
+    else:
+        
+        name = request.form.get('name', '')
+        email_address = request.form.get('email', '')
+        subject = request.form.get('subject', '')
+        message = request.form.get('message', '')
+        csrf = request.form.get('csrftoken', '')
+
+        if 'csrf_token' not in session:
+            flash('Invalid CSRF token.', 'danger')
+            csrf_token = get_random_string(50)
+            session['csrf_token'] = csrf_token
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token)
+        
+        if session['csrf_token'] != csrf or len(session['csrf_token'].strip()) < 1:
+            flash('Invalid CSRF token.', 'danger')
+            csrf_token = get_random_string(50)
+            session['csrf_token'] = csrf_token
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token)
+        
+        csrf_token = get_random_string(50)
+        session['csrf_token'] = csrf_token
+
+        if len(name.strip()) < 1 or len(subject.strip()) < 1 or len(message.strip()) < 1:
+            flash('You must fill out all of the form fields', 'danger')
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject,csrf_token=csrf_token)
+        
+        if not validate_email.validate_email(email_address):
+            flash('You must enter a valid email address.', 'danger')
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject,csrf_token=csrf_token)
+        
+        # Escape all of the variables:
+        name = name.replace("<", "&lt;")
+        name = name.replace(">", "&gt;")
+
+        subject = subject.replace("<", "&lt;")
+        subject = subject.replace(">", "&gt;")
+
+        message = message.replace("<", "&lt;")
+        message = message.replace(">", "&gt;")
+
+        # Generate the message body
+        message_body = """A message was received from the go-cart.io contact form.
+
+Name:       {}
+Email:      {}
+Subject:    {}
+
+Message:
+
+{}""".format(name, email_address, subject, message)
+
+        mime_message = email.mime.text.MIMEText(message_body)
+        mime_message['Subject'] = "go-cart.io Contact Form: " + subject
+        mime_message['From'] = settings.SMTP_FROM_EMAIL
+        mime_message['To'] = settings.SMTP_DESTINATION
+
+        try:
+            with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as smtp:
+
+                smtp.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+
+                smtp.send_message(mime_message)
+
+                smtp.quit()
+        # For some reason connect doesn't catch the socket error
+        # *sigh*
+        except (smtplib.SMTPException,socket.gaierror):
+            flash('There was an error sending your message.', 'danger')
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject,csrf_token=csrf_token)
+
+        flash('Your message was successfully sent.', 'success')
+        return redirect(url_for('contact'))
 
 @app.route('/cart/<string_key>', methods=['GET'])
 def cartogram_by_key(string_key):
@@ -155,11 +253,16 @@ def cartogram():
 
     #return Response(json.dumps(gen2dict.translate(cartogram_output, settings.CARTOGRAM_COLOR)), status=200, content_type="application/json")
 
+    # This function returns a generator used by Flask to generate a streaming HTTP response.
+    # It uses output from stderr to determine the generation progress (particularly the value 'max abs. error')
+    # When generation is done, it returns the .gen output converted into JSON by gen2dict
     def generate_streamed_json_response():
 
         cartogram_gen_output = b''
         current_loading_point = "null"
 
+        # We have to format our JSON manually, since we're not sending a complete object.
+        # On the client side, Oboe.js is intelligent enough to parse this and get the loading information and cartogram output
         yield '{"loading_progress_points":['
 
         for source, line in cartwrap.generate_cartogram(cartogram_handler.gen_area_data(values), cartogram_handler.get_gen_file(), "{}/cartogram".format(settings.CARTOGRAM_DATA_DIR)):
@@ -172,10 +275,12 @@ def cartogram():
                 if s != None:
                     current_loading_point = s.groups(1)[0]
                 
+                # We always include the loading progress, even if it hasn't changed.
+                # This makes life easier on the client side
                 yield '{{"loading_point": {}, "stderr_line": "{}"}},'.format(current_loading_point, line.decode())
         
         # We create a fake last entry because you can't have dangling commas in JSON
-        yield '{"loading_point":0}],"cartogram_data":'
+        yield '{"loading_point":0, "stderr_line": ""}],"cartogram_data":'
 
         cartogram_json = gen2dict.translate(io.StringIO(cartogram_gen_output.decode()), settings.CARTOGRAM_COLOR)        
 

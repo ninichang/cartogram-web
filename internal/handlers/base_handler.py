@@ -14,8 +14,33 @@ class BaseCartogramHandler:
         raise NotImplementedError("This function must be implemented.")
     
     def csv_to_area_string_and_colors(self, csvfile):
-        raise NotImplementedError("This function must be implemented.")    
+        raise NotImplementedError("This function must be implemented.")
 
+    
+    # This function takes a CSVReader and returns a tuple containing:
+    #   
+    #   1. The areas string
+    #   2. Color values for each region
+    #   3. Tooltip data for each region
+    #   
+    # The required input is as follows:
+    #
+    #   dict_reader: An instance of CSVReader
+    #   name_column: The name of the column that contains the region names
+    #   data_column: The name of the column that contains the user data
+    #   color_column: The name of the column that contains the color data
+    #   order:  An array contain the region names in the order they are found in the area data template. So, if your
+    #           area data template looks like:
+    #
+    #           1 {} RegionA
+    #           2 {} RegionB
+    #           3 {} RegionC
+    #           ...
+    #           
+    #           Then your array should look like ['RegionA','RegionB','RegionC',...]
+    #   result:     An array that is as long as the number of regions containing the default value (usually 0.0)
+    #   id_data:    A dictionary whose keys are region names and whose values are their corresponding IDs. For the above
+    #               example, the dictionary would look like: {'RegionA': '1', 'RegionB': '2', 'RegionC': '3', ...}
     def order_by_example(self, dict_reader, name_column, data_column, color_column, order, result, id_data):
 
         color_values = {}

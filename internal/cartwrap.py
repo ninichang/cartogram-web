@@ -14,6 +14,18 @@ def reader(pipe, pipe_name, queue):
     finally:
         queue.put(None)
 
+# This function invokes the C code to calculate a cartogram for a given gen and area input.
+# It returns a generator that yields its output on stdout and stderr in the format:
+#
+#   source, line
+# 
+# where source is a string (either 'stdout' or 'stderr'), and line is a string.
+#
+# It takes as input:
+#
+# area_data:            A string containing appropriately formated area data
+# gen_file:             A string containing the path to the appropriate .gen file
+# cartogram_executable: A string containg the path to the C code executable
 def generate_cartogram(area_data, gen_file, cartogram_executable):
 
     cartogram_process = subprocess.Popen([
@@ -39,6 +51,7 @@ def generate_cartogram(area_data, gen_file, cartogram_executable):
 
     #return io.StringIO(output.decode())
 
+# This function is not currently used.
 def generate_cartogram_set(maps, cartogram_executable, default_color):
 
     maximum_progress = 95.0

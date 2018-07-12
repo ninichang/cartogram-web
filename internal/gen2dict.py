@@ -5,6 +5,16 @@ import random
 import sys
 import json
 
+# This function turns .gen output from the C code into JSON plottable by D3. It returns a Python dictionary that can be
+# easily turned into json via json.dump or json.dumps. You may invoke this module as a script:
+# 
+# $ python gen2dict.py [input_gen_file] [output_json_file] [default_color]
+#
+# This function takes as input:
+#
+# in_fp:    A stream that contains the .gen file contents
+# color:    A default color in case color information cannot be added later. This color should be a hex color code
+#           (.e.g. "#aaaaaa") or a valid CSS color name (e.g. "red")
 def translate(in_fp, color):
 
     result = {'type': 'FeatureCollection', 'features': [], 'extrema': {'max_x': None, 'min_x': None, 'min_y': None, 'max_y': None}}
@@ -20,6 +30,9 @@ def translate(in_fp, color):
         if id == "END":
             break
         
+        # Each polygon receives a unique numerical ID, starting from 1.
+        # This will be the same for each map.
+        # This allows us to do animations when we switch between cartograms in the website.
         feature = {'type': 'Feature', 'id': id, 'properties': {
             'name': 'UNKNOWN',
             'color': color,
