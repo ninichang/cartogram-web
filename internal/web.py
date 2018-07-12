@@ -142,7 +142,8 @@ Message:
         try:
             with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as smtp:
 
-                smtp.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+                if settings.SMTP_AUTHENTICATION_REQUIRED:
+                    smtp.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
 
                 smtp.send_message(mime_message)
 
