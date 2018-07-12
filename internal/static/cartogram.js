@@ -67,9 +67,38 @@ function cartogram_init(c_u, cui_u, c_d)
             }
         },
         enter_loading_state: function() {
+            /* We set the height of the loading div to the height of the previously displayed blocks */
+            /* This makes transition to the loading state seem less jarring */
+
+            var loading_height = 0;
+
+            if(document.getElementById('cartogram').style.display !== "none")
+            {
+                loading_height += document.getElementById('cartogram').clientHeight;
+            }
+
+            if(document.getElementById('error').style.display !== "none")
+            {
+                loading_height += document.getElementById('error').clientHeight;
+            }
+
+            console.log(loading_height);
+
+            /* The loading div will be at least 100px tall */
+            if(loading_height > 100)
+            {
+                document.getElementById('loading').style.height = loading_height + "px";
+            }
+            else
+            {
+                document.getElementById('loading').style.height = "auto";
+            }
+
             document.getElementById('loading').style.display = 'block';
             document.getElementById('cartogram').style.display = 'none';
             document.getElementById('error').style.display = 'none';
+
+            document.getElementById('handler').disabled = true;
 
             document.getElementById('loading-progress-container').style.display = 'none';
 
@@ -91,6 +120,7 @@ function cartogram_init(c_u, cui_u, c_d)
         },
         exit_loading_state: function() {
             document.getElementById('loading').style.display = 'none';
+            document.getElementById('handler').disabled = false;
             this.in_loading_state = false;
         },
         serialize_post_variables: function(vars) {
@@ -600,6 +630,35 @@ function cartogram_init(c_u, cui_u, c_d)
 
             return false; // We don't want to submit the form
 
+        },
+        switch_cartogram_type: function(type) {
+
+            if(this.in_loading_state)
+                return;
+            
+            this.enter_loading_state();
+
+            this.tooltip_clear();
+            this.tooltip_initialize();
+
+            this.get_default_colors(type).then(function(colors){
+
+              window.cartogram.color_data = colors;
+
+              window.cartogram.draw_two_maps(window.cartogram.get_pregenerated_map(type, "original"), window.cartogram.get_pregenerated_map(type, "population"), "map-area", "cartogram-area", "Land Area", "Population").then(function(v){
+
+                window.cartogram.tooltip.push(v[0].tooltip);
+                window.cartogram.tooltip.push(v[1].tooltip);
+
+                window.cartogram.generate_svg_download_links('map-area', 'cartogram-area', 'map-download', 'cartogram-download', 'map', 'cartogram');
+
+                document.getElementById('template-link').href = window.cartogram.cartogram_data_dir+ "/" + type + "/template.csv";
+                
+                window.cartogram.exit_loading_state();
+                document.getElementById('cartogram').style.display = 'flex'; // Bootstrap rows use flexbox
+              }, window.cartogram.do_fatal_error); 
+
+            }, this.do_fatal_error);
         }
 
     };

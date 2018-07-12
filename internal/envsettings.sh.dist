@@ -15,3 +15,6 @@ export CARTOGRAM_SMTP_USER="user"
 export CARTOGRAM_SMTP_PASSWORD="password"
 export CARTOGRAM_SMTP_FROM_EMAIL="user@example.com"
 export CARTOGRAM_SMTP_DESTINATION="destination@example.net"
+
+export CARTOGRAM_GUNICORN_WORKERS=$(echo `cat /proc/cpuinfo | grep -c "processor.*:"` "*2 + 1" | bc)
+export CARTOGRAM_GUNICORN_OPTIONS="" #If you want to run Gunicorn in daemon mode (unnecessary with PM2, use -D)

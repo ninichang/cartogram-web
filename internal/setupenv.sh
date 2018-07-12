@@ -32,4 +32,6 @@ else
     deactivate
 fi
 
+echo "Gunicorn has been configured to run with $CARTOGRAM_GUNICORN_WORKERS workers with options '$CARTOGRAM_GUNICORN_OPTIONS'."
+
 echo "Done."
