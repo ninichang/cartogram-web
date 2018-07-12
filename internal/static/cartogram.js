@@ -98,6 +98,8 @@ function cartogram_init(c_u, cui_u, c_d)
             document.getElementById('cartogram').style.display = 'none';
             document.getElementById('error').style.display = 'none';
 
+            /* Disable interaction with the upload form */
+            document.getElementById('upload-button').disabled = true;
             document.getElementById('handler').disabled = true;
 
             document.getElementById('loading-progress-container').style.display = 'none';
@@ -120,6 +122,7 @@ function cartogram_init(c_u, cui_u, c_d)
         },
         exit_loading_state: function() {
             document.getElementById('loading').style.display = 'none';
+            document.getElementById('upload-button').disabled = false;
             document.getElementById('handler').disabled = false;
             this.in_loading_state = false;
         },
