@@ -74,6 +74,12 @@ def faq():
 
     return render_template('faq.html', page_active='faq')
 
+
+@app.route('/gridedit', methods=['GET'])
+def gridedit():
+
+    return render_template('gridedit.html')
+
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
 
