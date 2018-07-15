@@ -87,13 +87,58 @@ function gridedit_init()
             if(!this.grid_document_valid() || !this.cell_reference_valid(this.editing_cell))
                 return;
             
-            this.grid_document.set_value(this.editing_cell, document.getElementById('input-' + this.editing_cell[0] + '-' + this.editing_cell[1]).value);
+            var cell_type = this.get_cell_property(this.editing_cell, 'type', 'text');
+
+            if(cell_type === 'color')
+            {
+                this.grid_document.set_value(this.editing_cell, document.getElementById('color-selector').value);
+            }
+            else if(cell_type === 'number')
+            {
+                /* First check if a number is entered */
+
+                var cell_input =  document.getElementById('input-' + this.editing_cell[0] + '-' + this.editing_cell[1]).value;
+
+                if(Number.isNaN(Number.parseFloat(cell_input)))
+                {
+                    var cell = this.editing_cell.slice();
+                    this.editing_cell = null;
+
+                    this.begin_cell_edit(cell, true, cell_input);
+                    return;
+                }
+
+                var in_bounds = true;
+                var min = this.get_cell_property(this.editing_cell, 'min', null);
+                var max = this.get_cell_property(this.editing_cell, 'max', null);
+
+                if(min !== null && cell_input < min)
+                    in_bounds = false;
+                
+                if(max !== null && cell_input > max)
+                    in_bounds = false;
+                
+                if(!in_bounds)
+                {
+                    var cell = this.editing_cell.slice();
+                    this.editing_cell = null;
+
+                    this.begin_cell_edit(cell, true, cell_input);
+                    return;
+                }
+
+                this.grid_document.set_value(this.editing_cell, cell_input);
+            }
+            else
+            {
+                this.grid_document.set_value(this.editing_cell, document.getElementById('input-' + this.editing_cell[0] + '-' + this.editing_cell[1]).value);
+            }           
 
             this.editing_cell = null;
 
             this.draw_grid_document();
         },
-        begin_cell_edit: function(cell) {
+        begin_cell_edit: function(cell, error=false,value=null) {
 
             if(!this.grid_document_valid() || !this.cell_reference_valid(cell))
                 return;
@@ -102,37 +147,84 @@ function gridedit_init()
             {
                 this.end_cell_edit(this.editing_cell);
             }
-
             /* Cells are editable by default */
             if(!this.get_cell_property(cell, 'editable', true))
                 return;
+            
+            var cell_type = this.get_cell_property(cell, 'type', 'text');
+            var cell_value = value || this.grid_document.get_value(cell);
 
-            document.getElementById('cell-' + cell[0] + '-' + cell[1]).innerHTML = "";
-            document.getElementById('cell-' + cell[0] + '-' + cell[1]).classList.add('editing');
+            if(cell_type === 'color')
+            {
+                document.getElementById('color-selector').value = cell_value;
 
-            var cell_input = document.createElement('input');
-            cell_input.id = 'input-' + cell[0] + '-' + cell[1];
-            cell_input.type = 'text';
-            cell_input.value = this.grid_document.get_value(cell);
+                document.getElementById('color-selector').onchange = (function(c){
+                    return function(e){
+                        window.gridedit.end_cell_edit();
+                    };
+                }(cell));
 
-            /* End editing upon keying return */
+                document.getElementById('color-selector').click();
+            }
+            else
+            {
+                document.getElementById('cell-' + cell[0] + '-' + cell[1]).innerHTML = "";
+                document.getElementById('cell-' + cell[0] + '-' + cell[1]).style.backgroundColor = "#fff";
 
-            cell_input.onkeyup = (function(c){
-                return function(e){
-                    e.preventDefault();
+                var cell_input = document.createElement('input');
+                cell_input.id = 'input-' + cell[0] + '-' + cell[1];
+                cell_input.type = cell_type;
+                cell_input.value = cell_value;
+                cell_input.style.width = document.getElementById('cell-' + cell[0] + '-' + cell[1]).clientWidth + "px";
 
-                    if(e.keyCode === 13)
-                    {
-                        window.gridedit.end_cell_edit(c);
-                    }
+                /* For number inputs we need to allow people to enter floats, and include max and min (if they are defined) */
+                if(cell_type == "number")
+                {
+                    var step = this.get_cell_property(cell, 'step', '0.001');
+                    var min = this.get_cell_property(cell, 'min', null);
+                    var max = this.get_cell_property(cell, 'max', null);
+
+                    cell_input.step = step;
+
+                    if(min !== null)
+                        cell_input.min = min;
                     
-                };
-            }(cell));
+                    if(max !== null)
+                        cell_input.max = max;
+                }
 
-            document.getElementById('cell-' + cell[0] + '-' + cell[1]).appendChild(cell_input);
+                cell_input.onclick = function(e) {
+                    e.stopPropagation();
+                }
 
-            cell_input.focus();
-            cell_input.select();
+                
+                if(error)
+                    document.getElementById('cell-' + cell[0] + '-' + cell[1]).classList.add('editing-error');
+                else
+                    document.getElementById('cell-' + cell[0] + '-' + cell[1]).classList.add('editing');
+
+                /* End editing upon keying return */
+                cell_input.onkeyup = (function(c){
+                    return function(e){
+                        e.preventDefault();
+
+                        if(e.keyCode === 13)
+                        {
+                            window.gridedit.end_cell_edit(c);
+                        }
+                        
+                    };
+                }(cell));
+
+                document.getElementById('cell-' + cell[0] + '-' + cell[1]).appendChild(cell_input);
+
+                cell_input.focus();
+                cell_input.select();
+
+                cell_input.click();
+            }
+
+
 
             this.editing_cell = cell;
 
@@ -161,7 +253,20 @@ function gridedit_init()
 
                     var cell_text_contents = document.createElement('div');
                     cell_text_contents.className = "text-container";
-                    cell_text_contents.appendChild(document.createTextNode(cell_value));
+
+                    var cell_type = this.get_cell_property([col, row], 'type', 'text');
+
+                    if(cell_type === 'color')
+                    {
+                        cell_text_contents.style.backgroundColor = cell_value;
+                        col_td.style.backgroundColor = cell_value;
+                        
+                    }
+                    else
+                    {
+                        cell_text_contents.appendChild(document.createTextNode(cell_value));
+                    }
+                    
 
                     col_td.appendChild(cell_text_contents);
 
@@ -177,12 +282,30 @@ function gridedit_init()
                     if(this.get_cell_property([col, row], 'editable', true))
                     {
                         cell_text_contents.onclick = (function(c){
-                            return function(e){
-    
+                            return function(e){    
                                 e.stopPropagation();
+
+                                var stop_reedit = true;
+
+                                var c_t = window.gridedit.get_cell_property(c, 'type', 'text');
+
+                                /*  This is necessary because you can't actually detect when an HTML color input is
+                                    closed. Under normal circumstances, this means that if a user edits a color cell,
+                                    but doesn't select a different value, they cannot immediately edit the same cell
+                                    (the end cell edit process never engages, because the chang event doesn't fire).
+
+                                    To fix this, we implement this workaround that allows begin_cell_edit to be called
+                                    for color inputs even if the current cell is being edited.
+                                */
+
+                                if(c_t === 'color')
+                                    stop_reedit = false;
     
-                                if(e.target === this && window.gridedit.editing_cell === null || !window.gridedit.cells_equal(window.gridedit.editing_cell, c))
+                                if(e.target === this && (window.gridedit.editing_cell === null || (!stop_reedit || !window.gridedit.cells_equal(window.gridedit.editing_cell, c))))
+                                {
                                     window.gridedit.begin_cell_edit(c);
+                                }
+                                    
                             };
                         }([col, row]));
                     }
@@ -213,6 +336,8 @@ function gridedit_init()
 
             this.grid_document.edit_mask = [];
 
+            this.editing_cell = null;
+
             this.draw_grid_document();
 
         },
@@ -221,6 +346,8 @@ function gridedit_init()
             this.grid_document.height = doc.height;
             this.grid_document.contents = doc.contents.slice();
             this.grid_document.edit_mask = doc.edit_mask.slice();
+
+            this.editing_cell = null;
 
             this.draw_grid_document();
         }

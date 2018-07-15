@@ -57,6 +57,11 @@ body {
     text-align: center;
 }
 
+#grid-document td.editing-error, #grid-document th.editing-error {
+    border: 2px solid red;
+    text-align: center;
+}
+
 #grid-document td:first-child, #grid-document th:first-child {
     border-left: none;
 }
@@ -66,7 +71,7 @@ body {
 }
 
 #grid-document input {
-    width: 100%;
+    /*width: 100%;*/
     height: 100%;
     border: none;
     text-align: center;
@@ -79,6 +84,11 @@ body {
     display: inline-block;
 }
 
+#grid-document input[type="color"] {
+    /*width: 100%;*/
+    height: auto !important;
+}
+
 .text-container {
     display: block;
     min-height: 1em;
@@ -89,4 +99,8 @@ body {
 
 .not-editable {
     cursor: not-allowed;
+}
+
+#color-selector {
+    display: none;
 }
