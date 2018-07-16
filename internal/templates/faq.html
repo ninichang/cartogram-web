@@ -75,18 +75,31 @@
                     </div>
                 </div>
             </div>
-            <div class="card ">
+            <!--<div class="card ">
                 <div class="card-header">
                     <h4 class="card-header">
-                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseB">Why don’t the conventional maps and cartograms have scales?</a>
+                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseB">Why are the maps displayed without distance scales?</a>
                     </h4>
                 </div>
                 <div id="collapseB" class="panel-collapse collapse">
                     <div class="card-block">
-                            Scales are not present because they are not necessary. The conventional maps and cartograms generated on this website are carefully displayed so that they have the same total area. This means that you can gain insight from comparing them without needing a scale.
+                            Distance scales are not present because they are not necessary. The conventional maps and cartograms generated on this website are carefully displayed so that they have the same total area. This means that you can gain insight from comparing them without needing a disstance scale.
                     </div>
                 </div>
-            </div>
+            </div>-->
+
+            <div class="card ">
+                    <div class="card-header">
+                        <h4 class="card-header">
+                            <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseC">How can I download and edit the cartograms generated on this website?</a>
+                        </h4>
+                    </div>
+                    <div id="collapseC" class="panel-collapse collapse">
+                        <div class="card-block">
+                                Below each map or cartogram displayed on this website there is a download button. Clicking it will download an SVG image containing the map image. SVG files contain vector images, and can be edited and converted by Adobe Illustrator, or <a href="https://inkscape.org/" target="_blank">Inkscape</a>, a free, open source alternative. If you would simply like to convert your SVG map to a PNG image to use in a document or paper and don't have access to these programs, you can use <a href="https://svgtopng.com/" target="_blank">this website</a>.
+                        </div>
+                    </div>
+                </div>
 
             <div class="faqHeader">Cartogram Generation</div>
             <div class="card ">
@@ -110,7 +123,7 @@
                 </div>
                 <div id="collapseEleven" class="panel-collapse collapse">
                     <div class="card-block">
-                        This website uses the Fast Flow-based method developed by Dr. Michael Gastner. You can learn more about how this method works by reading <a href="http://www.pnas.org/content/early/2018/02/15/1712674115">the paper</a> he published in the journal PNAS.
+                        This website uses the Fast Flow-based method developed by Michael T. Gastner, Vivien Seguy, and Pratyush More. You can learn more about how this method works by reading <a href="http://www.pnas.org/content/early/2018/02/15/1712674115">the paper</a> they published in the journal PNAS.
                     </div>
                 </div>
             </div>
@@ -135,12 +148,46 @@
                 </div>
                 <div id="collapseSix" class="panel-collapse collapse">
                     <div class="card-block">
-                        When selecting data to make a cartogram, you should act as if you were making a pie chart. You should not use indices or per capita data, because these do not add in a meaningful way. Instead, you should use “total” categories that can be added, like
-                        <ul>
-                            <li>GDP</li>
-                            <li>Population</li>
-                            <li>Number of college graduates (as oppossed to percent of people with a university degree)</li>
-                        </ul>
+                        Cartograms are designed to visualize totals, not indices. In general, if it is appropriate to use a <a href="https://en.wikipedia.org/wiki/Mosaic_plot">mosiac plot</a> or pie chart to visualize a dataset, then it should also be appropriate to use a cartogram. You can refer to the examples of appropriate and innapropriate datasets for use with cartograms below for more guidance:
+                        <br/><br/>
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>
+                                    Appropriate
+                                </th>
+                                <th>
+                                    Innapropriate
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    Total GDP by region
+                                </td>
+                                <td>
+                                    Human Development Index
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Total population by region
+                                </td>
+                                <td>
+                                    Population density by region
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Number of college gradates by region
+                                </td>
+                                <td>
+                                    Percentage of population that are college graduates by region
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
                             
                     </div>
                 </div>
