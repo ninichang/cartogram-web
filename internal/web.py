@@ -74,6 +74,11 @@ def faq():
 
     return render_template('faq.html', page_active='faq')
 
+@app.route('/tutorial', methods=['GET'])
+def tutorial():
+
+    return render_template('tutorial.html', page_active='tutorial')
+
 
 @app.route('/gridedit', methods=['GET'])
 def gridedit():
