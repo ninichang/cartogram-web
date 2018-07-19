@@ -213,7 +213,8 @@ def cartogram_ui():
         json_response['error'] = "none"
         json_response['areas_string'] = cart_data[0]
         json_response['color_data'] = cart_data[1]
-        json_response['tooltip'] = cart_data[2]       
+        json_response['tooltip'] = cart_data[2]
+        json_response['grid_document'] = cart_data[3]
 
         cartogram_entry_key = get_random_string(32)
 

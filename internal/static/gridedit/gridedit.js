@@ -3,6 +3,7 @@ function gridedit_init()
     window.gridedit = {
 
         grid_document: {
+            name: 'Document',
             width: 0,
             height: 0,
             contents: null,
@@ -14,7 +15,40 @@ function gridedit_init()
             },
             edit_mask: []
         },
+        on_update: null,
+        allow_update: false,
         editing_cell: null,
+        set_allow_update: function(au) {
+            this.allow_update = au;
+
+            if(this.allow_update)
+            {
+                document.getElementById('update-button').classList.remove('button-disabled');
+            }
+            else
+            {
+                document.getElementById('update-button').classList.add('button-disabled');
+            }
+        },
+        update_button_click: function() {
+            if(this.allow_update)
+            {
+                if(this.editing_cell !== null)
+                {
+                    if(this.end_cell_edit() !== true)
+                        return;
+                }
+
+                if(this.on_update !== null)
+                    this.on_update({
+                        width: this.grid_document.width,
+                        height: this.grid_document.height,
+                        contents: this.grid_document.contents.slice(),
+                        edit_mask: this.grid_document.edit_mask,
+                        name: this.grid_document.name
+                    });
+            }
+        },
         grid_document_valid: function() {
             if(this.grid_document.width < 1 || this.grid_document.height < 1)
                 return false;
@@ -105,7 +139,7 @@ function gridedit_init()
                     this.editing_cell = null;
 
                     this.begin_cell_edit(cell, true, cell_input);
-                    return;
+                    return false;
                 }
 
                 var in_bounds = true;
@@ -124,7 +158,7 @@ function gridedit_init()
                     this.editing_cell = null;
 
                     this.begin_cell_edit(cell, true, cell_input);
-                    return;
+                    return false;
                 }
 
                 this.grid_document.set_value(this.editing_cell, cell_input);
@@ -137,6 +171,8 @@ function gridedit_init()
             this.editing_cell = null;
 
             this.draw_grid_document();
+
+            return true;
         },
         begin_cell_edit: function(cell, error=false,value=null) {
 
@@ -237,6 +273,8 @@ function gridedit_init()
             var table = document.getElementById('grid-document');
             table.innerHTML = "";
 
+            document.getElementById('document-name').innerText = this.grid_document.name;
+
             for(let row=0; row < this.grid_document.height; row++)
             {
                 var row_tr = document.createElement('tr');
@@ -335,6 +373,7 @@ function gridedit_init()
             this.grid_document.contents.fill("");
 
             this.grid_document.edit_mask = [];
+            this.grid_document.name = "Document";
 
             this.editing_cell = null;
 
@@ -346,6 +385,7 @@ function gridedit_init()
             this.grid_document.height = doc.height;
             this.grid_document.contents = doc.contents.slice();
             this.grid_document.edit_mask = doc.edit_mask.slice();
+            this.grid_document.name = doc.name;
 
             this.editing_cell = null;
 

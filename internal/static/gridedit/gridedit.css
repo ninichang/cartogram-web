@@ -104,3 +104,46 @@ body {
 #color-selector {
     display: none;
 }
+
+.button {
+    display: inline-block;
+    padding: 5px 15px;
+    color: #fff;
+    background: dodgerblue;
+    border: 1px solid #004d99;
+    cursor: default;
+    text-decoration: none;
+    font-size: 1rem;
+    margin-left: 5px;
+}
+
+.button:hover {
+    background: #66b3ff;
+    cursor: default;
+
+}
+
+.button:active {
+    background: #004d99;
+}
+
+.button-disabled {
+    color: #fff;
+    background: #777;
+    border: 1px solid #444;
+    cursor: not-allowed;
+}
+
+.button-disabled:hover {
+    color: #fff;
+    background: #777;
+    border: 1px solid #444;
+    cursor: not-allowed;
+}
+
+.button-disabled:active {
+    color: #fff;
+    background: #777;
+    border: 1px solid #444;
+    cursor: not-allowed;
+}

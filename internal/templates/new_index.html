@@ -16,7 +16,7 @@
     <script>
       window.onload = function() {
 
-            cartogram_init("{{cartogram_url}}", "{{cartogramui_url}}", "{{cartogram_data_dir}}");
+            cartogram_init("{{cartogram_url}}", "{{cartogramui_url}}", "{{cartogram_data_dir}}", "{{url_for('gridedit')}}");
 
             document.getElementById('handler').addEventListener('change', function(e){
 

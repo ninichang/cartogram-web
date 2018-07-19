@@ -1,3 +1,15 @@
+<style>
+    @media screen and (max-width: 1100px) {
+        #cartogram-row {
+            display: block;
+        }
+
+        #cartogram-row .col-md-4 {
+            margin: 0 auto;
+        }
+    }
+</style>
+
 <div class="container">
         <div class="row">
           <div class="col-sm-12">
@@ -41,6 +53,8 @@
                <!--</div>-->
                  <input type="button" class="btn btn-primary mb-2" value="Upload Data and Generate" onclick="clearFileInput(document.getElementById('csv'));document.getElementById('csv').click();" id="upload-button"/>
 
+                 <input type="button" class="btn btn-primary mb-2" value="Edit" id="edit-button" style="margin-left: 5px" onclick="window.cartogram.launch_gridedit();" disabled/>
+
              </form>
              <p id="non-fatal-error" class="text-danger font-weight-bold"></p>
 
@@ -79,8 +93,8 @@
 
      
 
-
-     <div class="row" id="cartogram" style="display: none">
+     <div id="cartogram" style="display: none">
+     <div class="row" id="cartogram-row">
        <div class="col-md-2">
              <h2>Output</h2>
           </div>
@@ -95,20 +109,7 @@
      </div>
        <p style="margin-top: 20px"><a class="btn btn-secondary" href="" download="" id="map-download">Download this Map</a></p>
 
-       <h4>Share on Social Media</h4>
-       <table border="0">
-         <tr>
-           <td><a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgo-cart.io"
-              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;"
-        target="_blank" title="Share on Facebook" class="social-link" id="facebook-share"><i class="fab fa-facebook-square"></i></a></td>
-           <td><a href="https://www.linkedin.com/shareArticle?url=https%3A%2F%2Fgo-cart.io&mini=true&title=Cartogram&summary=Create%20cartograms%20with%20go-cart.io&source=go-cart.io"
-              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=520,width=570');return false;"
-              target="_blank" title="Share on LinkedIn" class="social-link" id="linkedin-share"><i class="fab fa-linkedin"></i></a></td>
-           <td><a href="https://twitter.com/share?url=https%3A%2F%2Fgo-cart.io"
-              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;"
-        target="_blank" title="Share on Twitter" class="social-link" id="twitter-share"><i class="fab fa-twitter-square"></i></a></td>            
-         </tr>
-       </table>
+       
          <!--<p align="center"><img src="images/usa_map.png" width="300px"></p>-->
          <!--<p align="center"><img src="images/india_map_comp.png" width="300px"></p>-->
          <!--<p><a class="btn btn-secondary" href="#" role="button">Download this map &raquo;</a></p>-->
@@ -127,8 +128,25 @@
          
      </div>
        <p style="margin-top: 20px"><a class="btn btn-secondary" href="" download="" id="cartogram-download">Download this Cartogram</a></p>
+
+       <h4>Share on Social Media</h4>
+       <table border="0">
+         <tr>
+           <td><a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgo-cart.io"
+              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;"
+        target="_blank" title="Share on Facebook" class="social-link" id="facebook-share"><i class="fab fa-facebook-square"></i></a></td>
+           <td><a href="https://www.linkedin.com/shareArticle?url=https%3A%2F%2Fgo-cart.io&mini=true&title=Cartogram&summary=Create%20cartograms%20with%20go-cart.io&source=go-cart.io"
+              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=520,width=570');return false;"
+              target="_blank" title="Share on LinkedIn" class="social-link" id="linkedin-share"><i class="fab fa-linkedin"></i></a></td>
+           <td><a href="https://twitter.com/share?url=https%3A%2F%2Fgo-cart.io"
+              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;"
+        target="_blank" title="Share on Twitter" class="social-link" id="twitter-share"><i class="fab fa-twitter-square"></i></a></td>            
+         </tr>
+       </table>
+    </div>
        </div>
      </div>
      </div>
+     
 
      <span id="map1-switch"></span>

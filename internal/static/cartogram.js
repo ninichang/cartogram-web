@@ -7,7 +7,7 @@ function clearFileInput(ctrl) {
     }
   }
 
-function cartogram_init(c_u, cui_u, c_d)
+function cartogram_init(c_u, cui_u, c_d, g_u)
 {
     window.cartogram = {
 
@@ -15,6 +15,7 @@ function cartogram_init(c_u, cui_u, c_d)
         cartogram_url: c_u,
         cartogramui_url: cui_u,
         cartogram_data_dir: c_d,
+        gridedit_url: g_u,
         color_data: null,
         map_alternates: {
             map1: null,
@@ -23,9 +24,133 @@ function cartogram_init(c_u, cui_u, c_d)
             map_selected: '',
             maps_possible: []
         },
+        grid_document: null,
+        gridedit_window: null,
         tooltip: new Array(0),
         loading_state: null,
         fatal_error_extended_info: null,
+        launch_gridedit: function() {
+
+            if(this.grid_document === null || this.in_loading_state)
+                return;
+            
+            if(this.gridedit_window === null || this.gridedit_window.closed)
+            {
+                this.gridedit_window = window.open(this.gridedit_url, "gridedit_" + new Date().getTime(), 'width=550,height=650,resizable,scrollbars');
+
+                this.gridedit_window.addEventListener("load", (function(gd){
+
+                    return function(e) {
+                        window.cartogram.gridedit_window.gridedit_init();
+
+                        window.cartogram.gridedit_window.gridedit.on_update = function(gd) {
+
+                            window.cartogram.on_gridedit_update(gd);
+
+                        };
+
+                        window.cartogram.gridedit_window.gridedit.set_allow_update(!this.in_loading_state);
+
+                        window.cartogram.gridedit_window.gridedit.load_document(gd);
+                    };
+
+                }(this.grid_document)));
+            }
+            else
+            {
+                this.gridedit_window.gridedit.load_document(this.grid_document);
+                this.gridedit_window.focus();
+            }           
+
+        },
+        edit_button_enabled: function() {
+            return (this.grid_document === null);
+        },
+        update_grid_document: function(new_gd) {
+
+            this.grid_document = new_gd;
+
+            if(this.grid_document !== null)
+            {
+                if(!this.in_loading_state)
+                    document.getElementById('edit-button').disabled = false;
+
+                if(this.gridedit_window !== null && !this.gridedit_window.closed)
+                    this.gridedit_window.gridedit.load_document(this.grid_document);
+            }
+            else
+            {
+                document.getElementById('edit-button').disabled = true;
+            }
+
+        },
+        grid_document_to_csv: function(gd){
+
+            var csv = "";
+
+            for(let row = 0; row < gd.height; row++)
+            {
+                for(let col = 0; col < gd.width; col++)
+                {
+                    /* We use Excel style CSV escaping */
+                    csv += '"' + gd.contents[(row * gd.width) + col].replace(/"/gm, '""') + '"';
+
+                    if(col < (gd.width - 1))
+                    {
+                        csv += ",";
+                    }
+                }
+
+                if(row < (gd.height - 1))
+                {
+                    csv += "\n";
+                }
+            }
+
+            return csv;
+
+        },
+        generate_mime_boundary: function() {
+
+            var text = "---------";
+            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+            for (var i = 0; i < 25; i++)
+                text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+            return text;
+
+        },
+        gen_cartogramui_req_body_from_grid_document: function(handler, gd)
+        {
+
+            var mime_boundary = this.generate_mime_boundary();
+            var csv = this.grid_document_to_csv(gd);
+
+            while(true)
+            {
+                var search_string = csv + "csv" + "handler" + handler;
+                if(search_string.search(mime_boundary) === -1)
+                    break;
+                
+                mime_boundary = this.generate_mime_boundary();
+            }
+
+            var req_body = "";
+
+            req_body += "--" + mime_boundary + "\n";
+            req_body += 'Content-Disposition: form-data; name="handler"\n\n'
+            req_body += handler + "\n";
+
+            req_body += "--" + mime_boundary + "\n";
+            req_body += 'Content-Disposition: form-data; name="csv"; filename="data.csv"\n';
+            req_body += 'Content-Type: text/csv\n\n';
+            req_body += csv + "\n";
+            req_body += "--" + mime_boundary + "--";
+
+            return [mime_boundary, req_body];
+
+        },
         tooltip_clear: function() {
             document.getElementById('tooltip').innerHTML = "<b>Hover over map regions to see more information.</b>";
         },
@@ -100,7 +225,14 @@ function cartogram_init(c_u, cui_u, c_d)
 
             /* Disable interaction with the upload form */
             document.getElementById('upload-button').disabled = true;
+            document.getElementById('edit-button').disabled = true;
             document.getElementById('handler').disabled = true;
+
+            /* If GridEdit is open, disable updating */
+            if(this.gridedit_window !== null && !this.gridedit_window.closed && typeof(this.gridedit_window.gridedit) === "object")
+            {
+                this.gridedit_window.gridedit.set_allow_update(false);
+            }
 
             document.getElementById('loading-progress-container').style.display = 'none';
 
@@ -123,7 +255,15 @@ function cartogram_init(c_u, cui_u, c_d)
         exit_loading_state: function() {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('upload-button').disabled = false;
+            document.getElementById('edit-button').disabled = this.edit_button_enabled();
             document.getElementById('handler').disabled = false;
+
+            /* If GridEdit is open, enable updating */
+            if(this.gridedit_window !== null && !this.gridedit_window.closed && typeof(this.gridedit_window.gridedit) === "object")
+            {
+                this.gridedit_window.gridedit.set_allow_update(true);
+            }
+
             this.in_loading_state = false;
         },
         serialize_post_variables: function(vars) {
@@ -312,7 +452,7 @@ function cartogram_init(c_u, cui_u, c_d)
             });
 
         },
-        http_post: function(url, form_data) {
+        http_post: function(url, form_data, headers={}) {
 
             return new Promise(function(resolve, reject){
 
@@ -343,6 +483,11 @@ function cartogram_init(c_u, cui_u, c_d)
                 };
 
                 xhttp.open("POST", url, true);
+
+                Object.keys(headers).forEach(function(key, index) {
+                    xhttp.setRequestHeader(key, headers[key]);
+                });
+
                 xhttp.send(form_data);
 
             });
@@ -353,6 +498,9 @@ function cartogram_init(c_u, cui_u, c_d)
         },
         get_default_colors: function(handler) {
             return this.http_get(this.cartogram_data_dir + "/" + handler + "/colors.json");
+        },
+        get_grid_document_template: function(handler) {
+            return this.http_get(this.cartogram_data_dir + "/" + handler + "/griddocument.json");
         },
         switch_displayed_map: function(map_container, new_map_name){
 
@@ -574,7 +722,14 @@ function cartogram_init(c_u, cui_u, c_d)
             });
 
         },
-        request_and_draw_cartogram: function(){
+        on_gridedit_update: function(gd)
+        {
+            if(this.in_loading_state)
+                return;
+            
+            this.request_and_draw_cartogram(gd, null, false);
+        },
+        request_and_draw_cartogram: function(gd=null,handler=null,update_grid_document=true){
 
             if(this.in_loading_state)
                 return false;
@@ -583,25 +738,47 @@ function cartogram_init(c_u, cui_u, c_d)
 
             /* Do some validation */
 
-            if(document.getElementById('csv').files.length < 1)
+            if(gd === null)
             {
-                this.do_nonfatal_error('You must upload CSV data.');
-                return false;
+                if(document.getElementById('csv').files.length < 1)
+                {
+                    this.do_nonfatal_error('You must upload CSV data.');
+                    return false;
+                }
             }
+            
 
             this.tooltip_clear();
             this.tooltip_initialize();
             this.enter_loading_state();
             this.show_progress_bar();
-            
-            var handler = document.getElementById('handler').value;
 
-            var form_data = new FormData();
+            if(handler === null)
+            {
+                handler = document.getElementById('handler').value;
+            }
 
-            form_data.append("handler", handler);
-            form_data.append("csv", document.getElementById('csv').files[0]);
+            var cartogramui_promise = null;
             
-            this.http_post(this.cartogramui_url, form_data).then(function(response){
+            if(gd === null)
+            {
+                var form_data = new FormData();
+
+                form_data.append("handler", handler);
+                form_data.append("csv", document.getElementById('csv').files[0]);
+
+                cartogramui_promise = this.http_post(this.cartogramui_url, form_data);
+            }
+            else
+            {
+                var cartogramui_req_body = this.gen_cartogramui_req_body_from_grid_document(handler, gd);
+
+                cartogramui_promise = this.http_post(this.cartogramui_url, cartogramui_req_body[1], {
+                    'Content-Type': 'multipart/form-data; boundary=' + cartogramui_req_body[0]
+                });
+            }            
+            
+            cartogramui_promise.then(function(response){
 
                 if(response.error == "none")
                 {
@@ -616,16 +793,19 @@ function cartogram_init(c_u, cui_u, c_d)
                         window.cartogram.generate_svg_download_links('map-area', 'cartogram-area', 'map-download', 'cartogram-download', 'map', 'cartogram');
 
                         window.cartogram.generate_social_media_links("https://go-cart.io/cart/" + v[1].unique_sharing_key);
+
+                        if(update_grid_document)
+                            window.cartogram.update_grid_document(response.grid_document);
                         
                         window.cartogram.exit_loading_state();
-                        document.getElementById('cartogram').style.display = "flex"; //Bootstrap rows use flexbox
+                        document.getElementById('cartogram').style.display = "block"; //Bootstrap rows use blockbox
 
                     }, window.cartogram.do_fatal_error);
                 }
                 else
                 {
                     window.cartogram.exit_loading_state();
-                    document.getElementById('cartogram').style.display = "flex"; //Bootstrap rows use flexbox
+                    document.getElementById('cartogram').style.display = "block"; //Bootstrap rows use blockbox
                     window.cartogram.do_nonfatal_error(response.error);
                 }
 
@@ -644,9 +824,10 @@ function cartogram_init(c_u, cui_u, c_d)
             this.tooltip_clear();
             this.tooltip_initialize();
 
-            this.get_default_colors(type).then(function(colors){
+            Promise.all([this.get_default_colors(type), this.get_grid_document_template(type)]).then(function(values){
 
-              window.cartogram.color_data = colors;
+              window.cartogram.color_data = values[0];
+              
 
               window.cartogram.draw_two_maps(window.cartogram.get_pregenerated_map(type, "original"), window.cartogram.get_pregenerated_map(type, "population"), "map-area", "cartogram-area", "Land Area", "Population").then(function(v){
 
@@ -656,13 +837,22 @@ function cartogram_init(c_u, cui_u, c_d)
                 window.cartogram.generate_svg_download_links('map-area', 'cartogram-area', 'map-download', 'cartogram-download', 'map', 'cartogram');
 
                 document.getElementById('template-link').href = window.cartogram.cartogram_data_dir+ "/" + type + "/template.csv";
+
+                window.cartogram.update_grid_document(values[1]);
                 
                 window.cartogram.exit_loading_state();
-                document.getElementById('cartogram').style.display = 'flex'; // Bootstrap rows use flexbox
+                document.getElementById('cartogram').style.display = 'block'; // Bootstrap rows use blockbox
               }, window.cartogram.do_fatal_error); 
 
             }, this.do_fatal_error);
         }
 
     };
+
+    window.onbeforeunload = function() {
+        if(window.cartogram.gridedit_window !== null && !window.cartogram.gridedit_window.closed)
+        {
+            window.cartogram.gridedit_window.close();
+        }
+    }
 }

@@ -19,7 +19,7 @@
 
     window.onload = function() {
 
-            cartogram_init("{{cartogram_url}}", "{{cartogramui_url}}", "{{cartogram_data_dir}}");
+            cartogram_init("{{cartogram_url}}", "{{cartogramui_url}}", "{{cartogram_data_dir}}", "{{url_for('gridedit')}}");
 
             document.getElementById('handler').addEventListener('change', function(e){
 
@@ -40,6 +40,11 @@
                 window.cartogram.generate_svg_download_links('map-area', 'cartogram-area', 'map-download', 'cartogram-download', 'map', 'cartogram');
 
                 window.cartogram.generate_social_media_links("https://go-cart.io/cart/" + v[1].unique_sharing_key);
+
+                if(typeof(cartogramui_data.grid_document) === "object")
+                {
+                    window.cartogram.update_grid_document(cartogramui_data.grid_document);
+                }
                 
                 window.cartogram.exit_loading_state();
                 document.getElementById('cartogram').style.display = 'flex'; // Bootstrap rows use flexbox
