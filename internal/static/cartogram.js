@@ -171,6 +171,90 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
             }
 
         },
+        draw_bar_chart_from_tooltip(container, tooltip) {
+
+            var margin = {top: 5, right: 5, bottom: 5, left: 5},
+                width = 800 - margin.left - margin.right,
+                height = 400 - margin.top - margin.bottom;
+            
+            // ranges
+            var x = d3.scale.ordinal().rangeRoundBands([0, width], .05);
+
+            var y = d3.scale.linear().range([height, 0]);
+
+            // axes
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom")
+
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10);
+            
+            // SVG element
+            var svg = d3.select("#" + container).append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", 
+                "translate(" + margin.left + "," + margin.top + ")");
+
+            // Data formatting
+            var data = new Array();
+
+            Object.keys(tooltip.data).forEach(function(key, index){
+
+                data.push(tooltip.data[key]);
+
+            });
+            
+            // scale the range of the data
+            x.domain(data.map(function(d) { return d.name; }));
+            y.domain([0, d3.max(data, function(d) { return d.value; }) + 5]);
+
+            // add axes
+            svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", "-.55em")
+            .attr("transform", "rotate(-90)" );
+
+            svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 5)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("User Data");
+
+            // add the bar chart
+            svg.selectAll("bar")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", function(d) { return x(d.name); })
+            .attr("width", x.rangeBand())
+            .attr("y", function(d) { return y(d.value); })
+            .attr("height", function(d) { return height - y(d.value); });
+
+            /*svg.selectAll(".text")        
+            .data(data)
+            .enter()
+            .append("text")
+            .attr("class","label")
+            .attr("x", (function(d) { return x(d.name); }  ))
+            .attr("y", function(d) { return y(d.value) - 10; })
+            .text(function(d) { return d.value; });*/
+
+        },
         do_nonfatal_error: function(message) {
             document.getElementById('non-fatal-error').innerHTML = message;
         },
@@ -416,7 +500,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
             });
 
         },
-        http_get: function(url) {
+        http_get: function(url, timeout=15000) {
 
             return new Promise(function(resolve, reject){
 
@@ -446,13 +530,18 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                     }
                 };
 
+                xhttp.ontimeout = function(e) {
+                    reject('The request has timed out.');
+                }
+
                 xhttp.open("GET", url, true);
+                xhttp.timeout = timeout;
                 xhttp.send();
 
             });
 
         },
-        http_post: function(url, form_data, headers={}) {
+        http_post: function(url, form_data, headers={}, timeout=15000) {
 
             return new Promise(function(resolve, reject){
 
@@ -482,7 +571,12 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                     }
                 };
 
+                xhttp.ontimeout = function(e) {
+                    reject('The request has timed out.');
+                }
+
                 xhttp.open("POST", url, true);
+                xhttp.timeout = timeout;
 
                 Object.keys(headers).forEach(function(key, index) {
                     xhttp.setRequestHeader(key, headers[key]);
@@ -784,7 +878,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                 {
                     window.cartogram.color_data = response.color_data;
 
-                    window.cartogram.draw_three_maps(window.cartogram.get_pregenerated_map(handler, "original"), window.cartogram.get_generated_cartogram(response.areas_string, handler, response.unique_sharing_key), window.cartogram.get_pregenerated_map(handler, "population"), "map-area", "cartogram-area", "Land Area", "User Data", "Population").then(function(v){
+                    window.cartogram.draw_three_maps(window.cartogram.get_pregenerated_map(handler, "original"), window.cartogram.get_generated_cartogram(response.areas_string, handler, response.unique_sharing_key), window.cartogram.get_pregenerated_map(handler, "population"), "map-area", "cartogram-area", "Land Area", response.tooltip.label, "Population").then(function(v){
 
                         window.cartogram.tooltip.push(v[0].tooltip);
                         window.cartogram.tooltip.push(v[2].tooltip);
@@ -800,7 +894,12 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                         window.cartogram.exit_loading_state();
                         document.getElementById('cartogram').style.display = "block"; //Bootstrap rows use blockbox
 
-                    }, window.cartogram.do_fatal_error);
+                    }, function(e){
+                        window.cartogram.do_fatal_error(e);
+
+                        window.cartogram.draw_bar_chart_from_tooltip('barchart', response.tooltip);
+                        document.getElementById('barchart-container').style.display = "block";
+                    });
                 }
                 else
                 {

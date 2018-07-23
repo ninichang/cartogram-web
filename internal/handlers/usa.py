@@ -74,7 +74,7 @@ class CartogramHandler(handlers.base_handler.BaseCartogramHandler):
 
     def csv_to_area_string_and_colors(self, csvfile):
 
-        return self.order_by_example(csv.DictReader(csvfile), "State", "Data", "Population", "Colour", [
+        return self.order_by_example(csv.reader(csvfile), "State", 0, 1, 2, 3, [
             'Alabama', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware',
             'District of Columbia', 'Florida', 'Georgia', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
             'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan',

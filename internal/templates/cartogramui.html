@@ -8,6 +8,34 @@
             margin: 0 auto;
         }
     }
+
+    .bar{
+        fill: steelblue;
+    }
+
+    .bar:hover{
+        fill: brown;
+    }
+
+    .axis {
+    font: 11px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+    }
+
+    #barchart svg {
+        overflow: visible !important;
+    }
+
+    #barchart text.label {
+        font-size: .8rem;
+        letter-spacing: -0.01rem;
+    }
 </style>
 
 <div class="container">
@@ -77,8 +105,15 @@
                </div>
              </div>
 
+             <div id="barchart-container" style="display: none">
+                 <p>Your cartogram was unable to be generated due to an error. You may make use of this barchart instead, or refresh the page and try again.</p>
+
+                 <div id="barchart" style="height: 600px"></div>
+             </div>
+
              <div id="error" style="display: none">
                    <p style="font-weight: bold">Error: <span style="font-weight: normal" id="error-message"></span></p>
+                   <p>To continue, please refresh this page.</p>
 
                    <div id="error-extended" style="display: none">
                      <p><b>Additional Information: </b> When reporting this error, please include the information below.</p>
@@ -90,7 +125,6 @@
            </div>
            </div>
         </div>
-
      
 
      <div id="cartogram" style="display: none">
