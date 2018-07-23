@@ -31,7 +31,7 @@
 
             window.cartogram.color_data = cartogramui_data.color_data;
 
-            window.cartogram.draw_three_maps(window.cartogram.get_pregenerated_map("{{default_cartogram_handler}}", "original"), cartogram_data, window.cartogram.get_pregenerated_map("{{default_cartogram_handler}}", "population"), "map-area", "cartogram-area", "Land Area", "User Data", "Population").then(function(v){
+            window.cartogram.draw_three_maps(window.cartogram.get_pregenerated_map("{{default_cartogram_handler}}", "original"), cartogram_data, window.cartogram.get_pregenerated_map("{{default_cartogram_handler}}", "population"), "map-area", "cartogram-area", "Land Area", cartogramui_data.tooltip.label, "Population").then(function(v){
 
                 window.cartogram.tooltip.push(v[0].tooltip);
                 window.cartogram.tooltip.push(v[2].tooltip);
