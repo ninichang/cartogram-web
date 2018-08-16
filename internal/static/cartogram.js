@@ -398,7 +398,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
             document.getElementById('twitter-share').href = "https://twitter.com/share?url=" + window.encodeURIComponent(url);
 
         },
-        draw_d3_graphic: function(this_map, maps, data, element_id, width, height, scale_x, scale_y) {
+        draw_d3_graphic: function(this_map, maps, data, element_id, width, height, scale_x, scale_y, labels=null) {
 
             var a = data.extrema.min_x;
 
@@ -440,6 +440,35 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
               .on('mouseout', function(d, i) {
                              window.cartogram.highlight_by_id(maps, d.id, 1);
                               });
+            
+            if(labels != null)
+            {
+                /* First draw the text */
+
+                var text = canvas.selectAll("text")
+                                    .data(labels.labels)
+                                    .enter()
+                                    .append("text");
+                
+                var textLabels = text.attr('x', function(d) { return d.x; })
+                                    .attr('y', function(d) { return d.y; })
+                                    .attr('font-family', 'sans-serif')
+                                    .attr('font-size', '7.5px')
+                                    .attr('fill', '#000')
+                                    .text(function(d) { return d.text; });
+                
+                var lines = canvas.selectAll("line")
+                                    .data(labels.lines)
+                                    .enter()
+                                    .append("line");
+                
+                var labelLines = lines.attr('x1', function(d) { return d.x1; })
+                                    .attr('x2', function(d) { return d.x2; })
+                                    .attr('y1', function(d) { return d.y1; })
+                                    .attr('y2', function(d) { return d.y2; })
+                                    .attr('stroke-width', 1)
+                                    .attr('stroke', '#000');
+            }
             
             return polygon_paths;
         },
@@ -596,6 +625,9 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
         get_grid_document_template: function(handler) {
             return this.http_get(this.cartogram_data_dir + "/" + handler + "/griddocument.json");
         },
+        get_labels: function(handler) {
+            return this.http_get(this.cartogram_data_dir + "/" + handler + "/labels.json");
+        },
         switch_displayed_map: function(map_container, new_map_name){
 
             if(this.in_loading_state)
@@ -670,7 +702,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
             return button;
 
         },
-        draw_three_maps: function(map1, map2, map3, map1_container, map2_3_container, map1_name, map2_name, map3_name){
+        draw_three_maps: function(map1, map2, map3, map1_container, map2_3_container, map1_name, map2_name, map3_name, map1_labels=null){
 
             return new Promise(function(resolve, reject){
 
@@ -707,7 +739,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
 
                 });
                 
-                window.cartogram.draw_d3_graphic("map1", ['map1', 'map2'], values[0], "#" + map1_container, map_width, map_height, values[0].scale_x, values[0].scale_y);
+                window.cartogram.draw_d3_graphic("map1", ['map1', 'map2'], values[0], "#" + map1_container, map_width, map_height, values[0].scale_x, values[0].scale_y, map1_labels);
                 
                 window.cartogram.map_alternates.map2 = window.cartogram.draw_d3_graphic("map2", ['map1', 'map2'], values[1], "#" + map2_3_container, map_width, map_height, values[1].scale_x, values[1].scale_y);
 
@@ -754,7 +786,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
             
 
         },
-        draw_two_maps: function(map1, map2, map1_container, map2_container, map1_name, map2_name) {
+        draw_two_maps: function(map1, map2, map1_container, map2_container, map1_name, map2_name, map1_labels=null) {
 
             this.tooltip_clear();
 
@@ -796,7 +828,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
 
                 });
 
-                window.cartogram.map_alternates.map1 = window.cartogram.draw_d3_graphic("map1", ['map2', 'map1'], values[0], "#" + map1_container, map_width, map_height, values[0].scale_x, values[0].scale_y);
+                window.cartogram.map_alternates.map1 = window.cartogram.draw_d3_graphic("map1", ['map2', 'map1'], values[0], "#" + map1_container, map_width, map_height, values[0].scale_x, values[0].scale_y, map1_labels);
 
                 window.cartogram.map_alternates.map2 = window.cartogram.draw_d3_graphic("map2", ['map2', 'map1'], values[1], "#" + map2_container, map_width, map_height, values[1].scale_x, values[1].scale_y);
 
@@ -872,24 +904,24 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                 });
             }            
             
-            cartogramui_promise.then(function(response){
+            Promise.all([cartogramui_promise, this.get_labels(handler)]).then(function(responses){
 
-                if(response.error == "none")
+                if(responses[0].error == "none")
                 {
-                    window.cartogram.color_data = response.color_data;
+                    window.cartogram.color_data = responses[0].color_data;
 
-                    window.cartogram.draw_three_maps(window.cartogram.get_pregenerated_map(handler, "original"), window.cartogram.get_generated_cartogram(response.areas_string, handler, response.unique_sharing_key), window.cartogram.get_pregenerated_map(handler, "population"), "map-area", "cartogram-area", "Land Area", response.tooltip.label, "Population").then(function(v){
+                    window.cartogram.draw_three_maps(window.cartogram.get_pregenerated_map(handler, "original"), window.cartogram.get_generated_cartogram(responses[0].areas_string, handler, responses[0].unique_sharing_key), window.cartogram.get_pregenerated_map(handler, "population"), "map-area", "cartogram-area", "Land Area", responses[0].tooltip.label, "Population", responses[1]).then(function(v){
 
                         window.cartogram.tooltip.push(v[0].tooltip);
                         window.cartogram.tooltip.push(v[2].tooltip);
-                        window.cartogram.tooltip.push(response.tooltip);
+                        window.cartogram.tooltip.push(responses[0].tooltip);
 
                         window.cartogram.generate_svg_download_links('map-area', 'cartogram-area', 'map-download', 'cartogram-download', 'map', 'cartogram');
 
                         window.cartogram.generate_social_media_links("https://go-cart.io/cart/" + v[1].unique_sharing_key);
 
                         if(update_grid_document)
-                            window.cartogram.update_grid_document(response.grid_document);
+                            window.cartogram.update_grid_document(responses[0].grid_document);
                         
                         window.cartogram.exit_loading_state();
                         document.getElementById('cartogram').style.display = "block"; //Bootstrap rows use blockbox
@@ -897,7 +929,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                     }, function(e){
                         window.cartogram.do_fatal_error(e);
 
-                        window.cartogram.draw_bar_chart_from_tooltip('barchart', response.tooltip);
+                        window.cartogram.draw_bar_chart_from_tooltip('barchart', responses[0].tooltip);
                         document.getElementById('barchart-container').style.display = "block";
                     });
                 }
@@ -905,7 +937,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                 {
                     window.cartogram.exit_loading_state();
                     document.getElementById('cartogram').style.display = "block"; //Bootstrap rows use blockbox
-                    window.cartogram.do_nonfatal_error(response.error);
+                    window.cartogram.do_nonfatal_error(responses[0].error);
                 }
 
             }, this.do_fatal_error);
@@ -923,12 +955,12 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
             this.tooltip_clear();
             this.tooltip_initialize();
 
-            Promise.all([this.get_default_colors(type), this.get_grid_document_template(type)]).then(function(values){
+            Promise.all([this.get_default_colors(type), this.get_grid_document_template(type), this.get_labels(type)]).then(function(values){
 
               window.cartogram.color_data = values[0];
               
 
-              window.cartogram.draw_two_maps(window.cartogram.get_pregenerated_map(type, "original"), window.cartogram.get_pregenerated_map(type, "population"), "map-area", "cartogram-area", "Land Area", "Population").then(function(v){
+              window.cartogram.draw_two_maps(window.cartogram.get_pregenerated_map(type, "original"), window.cartogram.get_pregenerated_map(type, "population"), "map-area", "cartogram-area", "Land Area", "Population", values[2]).then(function(v){
 
                 window.cartogram.tooltip.push(v[0].tooltip);
                 window.cartogram.tooltip.push(v[1].tooltip);
