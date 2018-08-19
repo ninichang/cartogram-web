@@ -209,6 +209,18 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                 data.push(tooltip.data[key]);
 
             });
+
+            /* Display in alphabetical order */
+            data.sort(function(a,b){
+
+                if(a.name<b.name)
+                    return -1;
+                else if(a.name>b.name)
+                    return 1;
+                else
+                    return 0;
+
+            });
             
             // scale the range of the data
             x.domain(data.map(function(d) { return d.name; }));
