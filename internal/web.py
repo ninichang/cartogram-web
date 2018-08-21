@@ -74,6 +74,11 @@ def faq():
 
     return render_template('faq.html', page_active='faq')
 
+@app.route('/anim', methods=['GET'])
+def anim():
+
+    return render_template('anim.html', page_active='anim')
+
 @app.route('/tutorial', methods=['GET'])
 def tutorial():
 

@@ -1,0 +1,28 @@
+{
+    "frames": [
+        {
+            "label":"1960",
+            "file":"1960.json"
+        },
+        {
+            "label":"1970",
+            "file":"1970.json"
+        },
+        {
+            "label":"1980",
+            "file":"1980.json"
+        },
+        {
+            "label":"1990",
+            "file":"1990.json"
+        },
+        {
+            "label":"2000",
+            "file":"2000.json"
+        },
+        {
+            "label":"2010",
+            "file":"2010.json"
+        }
+    ]
+}
