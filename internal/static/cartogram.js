@@ -24,6 +24,11 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
             map_selected: '',
             maps_possible: []
         },
+        map_config: {},
+        scaling_factor: 1,
+        enable_highlight: true,
+        enable_tooltip: true,
+        animation_duration: 1000,
         grid_document: null,
         gridedit_window: null,
         tooltip: new Array(0),
@@ -152,14 +157,17 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
 
         },
         tooltip_clear: function() {
-            document.getElementById('tooltip').innerHTML = "<b>Hover over map regions to see more information.</b>";
+            if(this.enable_tooltip)
+                document.getElementById('tooltip').innerHTML = "<b>Hover over map regions to see more information.</b>";
+            else
+                document.getElementById('tooltip').innerHTML = "&nbsp;";
         },
         tooltip_initialize: function() {
             this.tooltip = new Array(0);
         },
         tooltip_show: function(id) {
 
-            if(this.tooltip.length > 0)
+            if(this.tooltip.length > 0 && this.enable_tooltip)
             {
                 document.getElementById('tooltip').innerHTML = "<b>" + this.tooltip[0].data["id_" + id].name + "</b>";
 
@@ -377,6 +385,12 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
             return post_string;
 
         },
+        /* From Stack Overflow: https://stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors
+        */
+        shadeColor2: function(color, percent) {   
+            var f=parseInt(color.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
+            return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
+        },
         highlight_by_id: function(maps, id, value) {
 
             maps.forEach(function(v){
@@ -385,10 +399,12 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
 
                 for(i = 0; i < elements.length; i++)
                 {
-                    elements[i].setAttribute('fill-opacity', value);
+                    //elements[i].setAttribute('fill-opacity', value);
+                    elements[i].setAttribute('fill', this.shadeColor2(this.color_data['id_' + id], value));
+                    //elements[i].setAttribute('fill', this.shadeColor2(elements[i].getAttribute('fill'), value));
                 }
 
-            });
+            }, this);
 
         },
         generate_svg_download_links: function(map1_container, map2_container, map1_link, map2_link, map1_name, map2_name)
@@ -410,6 +426,11 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
             document.getElementById('twitter-share').href = "https://twitter.com/share?url=" + window.encodeURIComponent(url);
 
         },
+        scale_labels: function(map, labels) {
+            labels.scale_x =  this.scaling_factor * (map.scaled_width/(map.width * labels.scale_x));
+            labels.scale_y = this.scaling_factor * (map.scaled_height/(map.height * labels.scale_y));
+
+        },
         draw_d3_graphic: function(this_map, maps, data, element_id, width, height, scale_x, scale_y, labels=null) {
 
             var a = data.extrema.min_x;
@@ -417,16 +438,41 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
           	var b = data.extrema.max_y;
 
             var lineFunction = d3.svg.line()
-                                     .x(function(d) { return scale_x * (-1*a + d[0]) })
-                                     .y(function(d) { return scale_y * (b - d[1]) })
+                                     .x(function(d) { return window.cartogram.scaling_factor * (scale_x * (-1*a + d[0])) })
+                                     .y(function(d) { return window.cartogram.scaling_factor * (scale_y * (b - d[1])) })
                                      .interpolate("linear");
                                      
             var canvas = d3.select(element_id).append("svg")
-            .attr("width", width)
-            .attr("height", height);
+            .attr("width", window.cartogram.scaling_factor*width)
+            .attr("height", window.cartogram.scaling_factor*height);
+
+            /* Exclude polygons that we're not supposed to draw */
+
+            var processed_features = [];
+
+            data.features.forEach(function(feature, id){
+
+                if(!this.map_config.dont_draw.includes(feature.properties.polygon_id) && !this.map_config.elevate.includes(feature.properties.polygon_id))
+                    processed_features.push(feature);
+
+            }, this);
+
+            /* Items which are elevated are drawn at the end */
+            this.map_config.elevate.forEach(function(polygon_id){
+
+                for(let i = 0; i < data.features.length; i++)
+                {
+                    if(data.features[i].properties.polygon_id == polygon_id)
+                    {
+                        processed_features.push(data.features[i]);
+                        break;
+                    }
+                }
+
+            }, this);
 
             var group = canvas.selectAll()
-              .data(data.features)
+              .data(processed_features)
               .enter()
               .append("path")
             
@@ -443,14 +489,17 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
               .attr("fill", function(d) {return d.properties.color})
               .attr("stroke", "#000")
               .attr("stroke-width", "0.5")
-              .on('mouseover', function(d, i) {
-                             window.cartogram.highlight_by_id(maps, d.id, 0.6);
+              .on('mouseenter', function(d, i) {
 
-                             window.cartogram.tooltip_show(d.id);
+                             if(window.cartogram.enable_highlight)
+                                window.cartogram.highlight_by_id(maps, d.id, 0.4);
+                             if(window.cartogram.enable_tooltip)
+                                window.cartogram.tooltip_show(d.id);
 
                              })
-              .on('mouseout', function(d, i) {
-                             window.cartogram.highlight_by_id(maps, d.id, 1);
+              .on('mouseleave', function(d, i) {
+                             if(window.cartogram.enable_highlight)
+                                window.cartogram.highlight_by_id(maps, d.id, 0);
                               });
             
             if(labels != null)
@@ -462,10 +511,10 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                                     .enter()
                                     .append("text");
                 
-                var textLabels = text.attr('x', function(d) { return d.x; })
-                                    .attr('y', function(d) { return d.y; })
+                var textLabels = text.attr('x', function(d) { return labels.scale_x*d.x; })
+                                    .attr('y', function(d) { return labels.scale_y*d.y; })
                                     .attr('font-family', 'sans-serif')
-                                    .attr('font-size', '7.5px')
+                                    .attr('font-size', '8.5px')
                                     .attr('fill', '#000')
                                     .text(function(d) { return d.text; });
                 
@@ -474,10 +523,10 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                                     .enter()
                                     .append("line");
                 
-                var labelLines = lines.attr('x1', function(d) { return d.x1; })
-                                    .attr('x2', function(d) { return d.x2; })
-                                    .attr('y1', function(d) { return d.y1; })
-                                    .attr('y2', function(d) { return d.y2; })
+                var labelLines = lines.attr('x1', function(d) { return  labels.scale_x*d.x1; })
+                                    .attr('x2', function(d) { return  labels.scale_x*d.x2; })
+                                    .attr('y1', function(d) { return labels.scale_y*d.y1; })
+                                    .attr('y2', function(d) { return labels.scale_y*d.y2; })
                                     .attr('stroke-width', 1)
                                     .attr('stroke', '#000');
             }
@@ -640,6 +689,9 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
         get_labels: function(handler) {
             return this.http_get(this.cartogram_data_dir + "/" + handler + "/labels.json");
         },
+        get_config: function(handler) {
+            return this.http_get(this.cartogram_data_dir + "/" + handler + "/config.json");
+        },
         switch_displayed_map: function(map_container, new_map_name){
 
             if(this.in_loading_state)
@@ -663,15 +715,25 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
 
                     if(new_path != null)
                     {
-                        d3.select('#path-' + map_container + '-' + v.id)
-                        .attr('d', v.path)
-                        .transition()
-                        .ease(d3.easeCubic)
-                        .duration(1000)
-                        .attr('d', new_path);
+                        if(this.animation_duration > 0)
+                        {
+                            d3.select('#path-' + map_container + '-' + v.id)
+                            .attr('d', v.path)
+                            .transition()
+                            .ease(d3.easeCubic)
+                            .duration(this.animation_duration)
+                            .attr('d', new_path);
+                        }
+                        else
+                        {
+                            /* Having a 0 ms duration for the transition causes problems */
+                            d3.select('#path-' + map_container + '-' + v.id)
+                            .attr('d', new_path);
+                        }
+                        
                     }
 
-                });
+            }, this);
 
             this.map_alternates.map_selected = new_map_name;
 
@@ -690,7 +752,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
 
             });
 
-            window.setTimeout(function(){window.cartogram.generate_svg_download_links('map-area', 'cartogram-area', 'map-download', 'cartogram-download', 'map', 'cartogram');}, 1100);
+            window.setTimeout(function(){window.cartogram.generate_svg_download_links('map-area', 'cartogram-area', 'map-download', 'cartogram-download', 'map', 'cartogram');}, this.animation_duration + 100);
 
             this.in_loading_state = false;
 
@@ -746,23 +808,32 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
 
                 values.forEach(function(value, index){
 
+                    values[index].width = values[index].extrema.max_x-values[index].extrema.min_x;
+                    values[index].height = values[index].extrema.max_y-values[index].extrema.min_y;
+                    values[index].scaled_width = map_width;
+                    values[index].scaled_height = map_height;
                     values[index].scale_x = map_width/(values[index].extrema.max_x-values[index].extrema.min_x);
                     values[index].scale_y = map_height/(values[index].extrema.max_y-values[index].extrema.min_y);
 
                 });
+
+                if(map1_labels !== null)
+                {
+                    window.cartogram.scale_labels(values[0], map1_labels);
+                }
                 
                 window.cartogram.draw_d3_graphic("map1", ['map1', 'map2'], values[0], "#" + map1_container, map_width, map_height, values[0].scale_x, values[0].scale_y, map1_labels);
                 
                 window.cartogram.map_alternates.map2 = window.cartogram.draw_d3_graphic("map2", ['map1', 'map2'], values[1], "#" + map2_3_container, map_width, map_height, values[1].scale_x, values[1].scale_y);
 
                 var lineFunction_map1 = d3.svg.line()
-                    .x(function(d) { return values[0].scale_x * (-1*(values[0].extrema.min_x) + d[0]) })
-                    .y(function(d) { return values[0].scale_y * ((values[0].extrema.max_y) - d[1]) })
+                    .x(function(d) { return window.cartogram.scaling_factor * (values[0].scale_x * (-1*(values[0].extrema.min_x) + d[0])) })
+                    .y(function(d) { return window.cartogram.scaling_factor * (values[0].scale_y * ((values[0].extrema.max_y) - d[1])) })
                     .interpolate("linear");
                 
                 var lineFunction_map3 = d3.svg.line()
-                    .x(function(d) { return values[2].scale_x * (-1*(values[2].extrema.min_x) + d[0]) })
-                    .y(function(d) { return values[2].scale_y * ((values[2].extrema.max_y) - d[1]) })
+                    .x(function(d) { return window.cartogram.scaling_factor * (values[2].scale_x * (-1*(values[2].extrema.min_x) + d[0])) })
+                    .y(function(d) { return window.cartogram.scaling_factor * (values[2].scale_y * ((values[2].extrema.max_y) - d[1])) })
                     .interpolate("linear");
 
                 window.cartogram.map_alternates.map1 = new Array();
@@ -828,6 +899,8 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
 
                 });
 
+
+
                 /* Now we want to make sure that both maps are displayed with an equal area. */
 
                 var map_width = Math.max((values[0].extrema.max_x-values[0].extrema.min_x), (values[1].extrema.max_x-values[1].extrema.min_x));
@@ -835,10 +908,19 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
 
                 values.forEach(function(value, index){
 
+                    values[index].width = values[index].extrema.max_x-values[index].extrema.min_x;
+                    values[index].height = values[index].extrema.max_y-values[index].extrema.min_y;
+                    values[index].scaled_width = map_width;
+                    values[index].scaled_height = map_height;
                     values[index].scale_x = map_width/(values[index].extrema.max_x-values[index].extrema.min_x);
                     values[index].scale_y = map_height/(values[index].extrema.max_y-values[index].extrema.min_y);
 
                 });
+
+                if(map1_labels !== null)
+                {
+                    window.cartogram.scale_labels(values[0], map1_labels);
+                }
 
                 window.cartogram.map_alternates.map1 = window.cartogram.draw_d3_graphic("map1", ['map2', 'map1'], values[0], "#" + map1_container, map_width, map_height, values[0].scale_x, values[0].scale_y, map1_labels);
 
@@ -957,7 +1039,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
             return false; // We don't want to submit the form
 
         },
-        switch_cartogram_type: function(type) {
+        switch_cartogram_type: function(type, colors=null) {
 
             if(this.in_loading_state)
                 return;
@@ -967,9 +1049,13 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
             this.tooltip_clear();
             this.tooltip_initialize();
 
-            Promise.all([this.get_default_colors(type), this.get_grid_document_template(type), this.get_labels(type)]).then(function(values){
+            if(colors === null)
+                colors = this.get_default_colors(type);
+
+            Promise.all([colors, this.get_grid_document_template(type), this.get_labels(type), this.get_config(type)]).then(function(values){
 
               window.cartogram.color_data = values[0];
+              window.cartogram.map_config = values[3];
               
 
               window.cartogram.draw_two_maps(window.cartogram.get_pregenerated_map(type, "original"), window.cartogram.get_pregenerated_map(type, "population"), "map-area", "cartogram-area", "Land Area", "Population", values[2]).then(function(v){

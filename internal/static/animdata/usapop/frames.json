@@ -24,5 +24,6 @@
             "label":"2010",
             "file":"2010.json"
         }
-    ]
+    ],
+    "time_series_label": "Year"
 }

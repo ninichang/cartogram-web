@@ -1,6 +1,6 @@
 import cartwrap, gen2dict
 import settings
-from handlers import usa, india, china
+from handlers import usa, india, china, germany, brazil, brazil_combined
 
 import json
 import csv
@@ -9,6 +9,7 @@ import re
 import io
 import string
 import random
+import base64
 import datetime
 from flask import Flask, request, session, Response, flash, redirect, render_template, url_for
 from flask_sqlalchemy import SQLAlchemy
@@ -39,7 +40,10 @@ db = SQLAlchemy(app)
 cartogram_handlers = {
     'usa': usa.CartogramHandler(),
     'india': india.CartogramHandler(),
-    'china': china.CartogramHandler()
+    'china': china.CartogramHandler(),
+    'germany': germany.CartogramHandler(),
+    'brazil': brazil.CartogramHandler(),
+    'brazil-combined': brazil_combined.CartogramHandler()
 }
 
 default_cartogram_handler = "usa"
@@ -74,10 +78,52 @@ def faq():
 
     return render_template('faq.html', page_active='faq')
 
-@app.route('/anim', methods=['GET'])
-def anim():
+@app.route('/anim/<animation_name>', methods=['GET'])
+def anim(animation_name):
 
-    return render_template('anim.html', page_active='anim')
+    next_url = request.args.get('next', '')
+    display_next = len(next_url.strip()) > 0
+
+    previous_url = request.args.get('prev', '')
+    display_previous = len(previous_url.strip()) > 0
+
+    question_no = request.args.get('hrq', '')
+    display_question_no = len(question_no.strip()) > 0
+
+    deactivate_list = request.args.get('deactivate', '')
+
+    return render_template('anim.html', page_active='anim', animation_name=animation_name, display_next=display_next,next_url=next_url, display_question_no=display_question_no, question_no=question_no, deactivate_list=deactivate_list, previous_url=previous_url, display_previous=display_previous)
+
+@app.route('/3maps', methods=['GET'])
+def threemaps():
+
+    cartogram_handlers_select = [{'id': key, 'display_name': handler.get_name()} for key, handler in cartogram_handlers.items()]
+
+    next_url = request.args.get('next', '')
+    display_next = len(next_url.strip()) > 0
+
+    previous_url = request.args.get('prev', '')
+    display_previous = len(previous_url.strip()) > 0
+
+    question_no = request.args.get('hrq', '')
+    display_question_no = len(question_no.strip()) > 0
+
+    deactivate_list = request.args.get('deactivate', '')
+
+    handler = request.args.get('handler', '')
+
+    maps = request.args.get('maps', '')
+    maps = base64.b64decode(maps).decode("utf-8")
+
+    return render_template('3maps.html', page_active='3maps', cartogram_url=url_for('cartogram'), cartogramui_url=url_for('cartogram_ui'), cartogram_data_dir=url_for('static', filename='cartdata'), cartogram_handlers=cartogram_handlers_select, default_cartogram_handler=default_cartogram_handler, display_next=display_next,next_url=next_url, display_question_no=display_question_no, question_no=question_no, deactivate_list=deactivate_list, maps=maps, handler=handler, previous_url=previous_url, display_previous=display_previous)
+
+@app.route('/survey/<survey_name>', defaults={'survey_question': '0'})
+@app.route('/survey/<survey_name>/<survey_question>', methods=['GET'])
+def survey(survey_name, survey_question):
+
+    cartogram_handlers_select = [{'id': key, 'display_name': handler.get_name()} for key, handler in cartogram_handlers.items()]
+
+    return render_template('survey.html', page_active='survey', cartogram_url=url_for('cartogram'), cartogramui_url=url_for('cartogram_ui'), cartogram_data_dir=url_for('static', filename='cartdata'), cartogram_handlers=cartogram_handlers_select, default_cartogram_handler=default_cartogram_handler, survey_name=survey_name,survey_question=int(survey_question))
 
 @app.route('/tutorial', methods=['GET'])
 def tutorial():

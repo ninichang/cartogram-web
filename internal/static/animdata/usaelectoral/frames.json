@@ -1,0 +1,25 @@
+{
+    "frames": [
+        {
+            "label":"1992",
+            "file":"1992.json",
+            "cartogramui":"1992_cartogramui.json"
+        },
+        {
+            "label":"1996",
+            "file":"1996.json",
+            "cartogramui":"1996_cartogramui.json"
+        },
+        {
+            "label":"2000",
+            "file":"2000.json",
+            "cartogramui":"2000_cartogramui.json"
+        },
+        {
+            "label":"2012",
+            "file":"2012.json",
+            "cartogramui":"2012_cartogramui.json"
+        }
+    ],
+    "time_series_label": "Year"
+}

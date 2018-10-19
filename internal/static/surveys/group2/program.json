@@ -1,0 +1,114 @@
+{
+    "questions": [
+        {
+            "type":"population",
+            "map":"usa",
+            "interactive": {
+                "deactivate": [
+                    "tooltip",
+                    "highlight",
+                    "animation"
+                ]
+            }
+        },
+        {
+            "type":"3maps",
+            "map":"usa",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"usa_electoral"},
+                     {"type":"pregen","name":"population"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                    "tooltip",
+                    "highlight"
+                ]
+            }
+        },
+        {
+            "type":"3maps",
+            "map":"germany",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"germany_gdp"},
+                     {"type":"pregen","name":"population"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"3maps",
+            "map":"brazil-combined",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"brazil_combined_cow"},
+                     {"type":"pregen","name":"population"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"3maps",
+            "map":"brazil",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"brazil_gdp"},
+                     {"type":"pregen","name":"population"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"3maps",
+            "map":"china",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"china_gdp"},
+                     {"type":"pregen","name":"population"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"animation",
+            "name":"usapop",
+            "interactive":{
+                "deactivate":[
+                ]
+            }
+        },
+        {
+            "type":"cartogram",
+            "map":"usa",
+            "data":"usa_croptotal2012",
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"cartogram",
+            "map":"usa",
+            "data":"usa_croptotal2012",
+            "interactive": {
+                "deactivate": [
+                    "animation",
+                    "tooltip"
+                ]
+            }
+        },
+        {
+            "type":"animation",
+            "name":"usaelectoral",
+            "interactive":{
+                "deactivate":[
+                    "controls"
+                ]
+            }
+        }
+    ]
+}

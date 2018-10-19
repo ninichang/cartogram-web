@@ -23,6 +23,7 @@ def translate(in_fp, color):
     while True:
 
         id = in_fp.readline()
+        
 
         if id[-1] == "\n":
             id = id[:-1]

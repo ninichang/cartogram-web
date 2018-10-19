@@ -1,0 +1,88 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+
+<div class="container-fluid" style="margin-top: 75px" id="screenshot">
+    {% if display_question_no %}
+    <h4>Question {{question_no}}</h4>
+    <p id="interactivity-message"></p>
+    <hr/>
+    {% endif %}
+    <div id="loading">
+        Loading...
+
+        <div class="row" id="loading-progress-container" style="display: none">
+        <div class="col-sm-12 col-md-6">
+            <div class="progress">
+            <div class="progress-bar" role="progressbar" id="loading-progress"></div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <div id="fatal-error" style="display: none">
+        <p><b>Error: </b> <span id="fatal-error-message"></span></p>
+        <p>Please refresh the page to continue.</p>
+    </div>
+
+    <div id="cartogram" style="display: none">
+    <div class="row">
+        <div class="col-md-4">
+            <div style="height: 110px">
+                <p id="tooltip">&nbsp;</p>
+            </div>
+            <h5 id="map1-name"></h5>
+            <div id="map1"></div>
+
+            {% if display_previous %}
+                            <p><a class="btn btn-primary" href="{{previous_url}}" id="prev-button">« Previous</a></p>
+
+            {% endif %}
+            
+        </div>
+        <div class="col-md-4">
+                <div style="height: 110px">
+                    <p>&nbsp;</p>
+                </div>
+                <h5 id="map2-name"></h5>
+                <div id="map2"></div>
+                
+        </div>
+        <div class="col-md-4">
+                <div style="height: 110px">
+                     <p>&nbsp;</p>
+                </div>
+                <h5 id="map3-name"></h5>
+                <div id="map3"></div>
+                
+                {% if display_next %}
+                            <p><a style="float: right" class="btn btn-primary" href="{{next_url}}" id="next-button">Next »</a></p>
+
+                {% endif %}
+
+        </div>
+
+        
+    </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block javascript %}
+
+<script src="{{ url_for('static', filename='oboe-browser.js') }}"></script>
+    <script src="{{ url_for('static', filename='cartogram.js') }}"></script>
+    <script src="{{ url_for('static', filename='3maps.js') }}"></script>
+
+    <script>
+      window.onload = function() {
+
+        cartogram_init("{{cartogram_url}}", "{{cartogramui_url}}", "{{cartogram_data_dir}}", "{{url_for('gridedit')}}");
+
+        draw_3maps("/static/surveys/data", "{{handler}}", {{maps|safe}}, "{{deactivate_list}}");
+        };
+    </script>
+
+{% endblock javascript %}

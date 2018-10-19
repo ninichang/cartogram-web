@@ -1,0 +1,192 @@
+<style>
+    @media screen and (max-width: 1100px) {
+        #cartogram-row {
+            display: block;
+        }
+
+        #cartogram-row .col-md-4 {
+            margin: 0 auto;
+        }
+    }
+
+    .bar{
+        fill: steelblue;
+    }
+
+    .bar:hover{
+        fill: brown;
+    }
+
+    .axis {
+    font: 11px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+    }
+
+    #barchart svg {
+        overflow: visible !important;
+    }
+
+    #barchart text.label {
+        font-size: .8rem;
+        letter-spacing: -0.01rem;
+    }
+</style>
+
+<div class="container" style="display: none">
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+         <strong>Warning: </strong> This site is currently under heavy development. Certain features may not work properly.
+         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+           <span aria-hidden="true">&times;</span>
+         </button>
+       </div>
+          </div>
+        </div>
+</div>
+
+<div class="container-fluid" style="margin-top: 100px" id="screenshot">
+
+        
+        
+        <div class = "row">
+          <div class="col-md-2">
+             <h2 id="input-head"></h2>
+          </div>
+           <div class="col-md-10">
+           <div class="row" style="display: none">
+           <div class = "col-md-4">
+               <a class="btn btn-secondary" href="/tutorial" target="_blank" role="button">Tutorial</a>
+             <a class="btn btn-secondary" href="{{cartogram_data_dir}}/{{default_cartogram_handler}}/template.csv" role="button" id="template-link">Download CSV template &raquo;</a>
+           </div>
+           <div class = "col-md-6">
+             <form action="#" method="POST" enctype="multipart/form-data" class="form-inline" onsubmit="return window.cartogram.request_and_draw_cartogram();" id="cartogram-form">
+               <div class="input-group mb-2 mr-sm-2">
+                 <label for="handler">Map:&nbsp;&nbsp;</label>
+                 <select class="form-control" id="handler">
+                   {% for handler in cartogram_handlers %}
+                   <option value="{{handler.id}}" {% if handler.id == default_cartogram_handler %}selected{% endif %}>{{handler.display_name}}</option>
+                   {% endfor %}
+                 </select>
+               </div>
+               <!--<div class="input-group mb-2 mr-sm-2">-->
+                 <!--<label for="csv">Choose CSV File:&nbsp;&nbsp;</label>-->
+                 <input type="file" name="csv" id="csv" class="form-control-file" accept="text/csv,.csv" style="display: none" onchange="if(this.value != null) { window.cartogram.request_and_draw_cartogram(); }"/>
+               <!--</div>-->
+                 <input type="button" class="btn btn-primary mb-2" value="Upload Data and Generate" onclick="clearFileInput(document.getElementById('csv'));document.getElementById('csv').click();" id="upload-button"/>
+
+                 <input type="button" class="btn btn-primary mb-2" value="Edit" id="edit-button" style="margin-left: 5px" onclick="window.cartogram.launch_gridedit();" disabled/>
+
+             </form>
+             <p id="non-fatal-error" class="text-danger font-weight-bold"></p>
+
+             
+           </div>
+           </div> <!-- /row -->
+
+
+           <div class="row">
+             <div class="col-md-12">
+               <div id="loading">
+               <p style="font-weight: bold">Loading...</p>
+
+               <div class="row" id="loading-progress-container" style="display: none">
+                 <div class="col-sm-12 col-md-6">
+                   <div class="progress">
+                     <div class="progress-bar" role="progressbar" id="loading-progress"></div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+
+             <div id="barchart-container" style="display: none">
+                 <p>Your cartogram was unable to be generated due to an error. You may make use of this barchart instead, or refresh the page and try again.</p>
+
+                 <div id="barchart" style="height: 600px"></div>
+             </div>
+
+             <div id="error" style="display: none">
+                   <p style="font-weight: bold">Error: <span style="font-weight: normal" id="error-message"></span></p>
+                   <p>To continue, please refresh this page.</p>
+
+                   <div id="error-extended" style="display: none">
+                     <p><b>Additional Information: </b> When reporting this error, please include the information below.</p>
+
+                     <pre id="error-extended-content"></pre>
+                   </div>
+             </div>
+             </div>
+           </div>
+           </div>
+        </div>
+     
+
+     <div id="cartogram" style="display: none">
+       <h4>Question <span id="question-no"></span></h4>
+       <p id="interactivity-message"></p>
+       <hr/>
+     <div class="row" id="cartogram-row" style="width: 100% !important">
+       <div class="col-md-6">
+         <!--<p><a class="btn btn-secondary" href="#" role="button">Download this map &raquo;</a></p>-->
+         <div style="height: 110px">
+           <p id="tooltip">&nbsp;</p>
+         </div>
+         <div id = "map-area">
+         <!--<p align="center"><img src="images/usa_ffb.png" width="300px"></p>-->
+         <!-- <p align="center"><img src="images/india_ffb_comp.png" width="300px"></p> -->
+     </div>
+       <p style="margin-top: 20px"><a class="btn btn-secondary" href="" download="" id="map-download" style="display: none">Download this Map</a></p>
+
+       
+         <!--<p align="center"><img src="images/usa_map.png" width="300px"></p>-->
+         <!--<p align="center"><img src="images/india_map_comp.png" width="300px"></p>-->
+         <!--<p><a class="btn btn-secondary" href="#" role="button">Download this map &raquo;</a></p>-->
+      </div>
+       <div class="col-md-6" id="cartogram-container">
+         <!--<p><a class="btn btn-secondary" href="#" role="button">Download this cartogram &raquo;</a></p>-->
+         <div style="height: 110px">
+           <div id="map2-switch">
+           <div class="btn-group" id="map2-switch-buttons">
+           </div>
+           </div><p>&nbsp;</p>
+         </div>
+         <div id = "cartogram-area">
+         <!--<p align="center"><img src="images/usa_ffb.png" width="300px"></p>-->
+         <!-- <p align="center"><img src="images/india_ffb_comp.png" width="300px"></p> -->
+         
+     </div>
+       <p style="margin-top: 20px"><a class="btn btn-secondary" href="" download="" id="cartogram-download" style="display: none">Download this Cartogram</a></p>
+
+       <h4 style="display: none">Share on Social Media</h4>
+       <table border="0" style="display: none">
+         <tr>
+           <td><a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgo-cart.io"
+              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;"
+        target="_blank" title="Share on Facebook" class="social-link" id="facebook-share"><i class="fab fa-facebook-square"></i></a></td>
+           <td><a href="https://www.linkedin.com/shareArticle?url=https%3A%2F%2Fgo-cart.io&mini=true&title=Cartogram&summary=Create%20cartograms%20with%20go-cart.io&source=go-cart.io"
+              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=520,width=570');return false;"
+              target="_blank" title="Share on LinkedIn" class="social-link" id="linkedin-share"><i class="fab fa-linkedin"></i></a></td>
+           <td><a href="https://twitter.com/share?url=https%3A%2F%2Fgo-cart.io"
+              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;"
+        target="_blank" title="Share on Twitter" class="social-link" id="twitter-share"><i class="fab fa-twitter-square"></i></a></td>            
+         </tr>
+       </table>
+    </div>
+       </div>
+     </div>
+
+     <div>
+       <button style="float: left" class="btn btn-primary" id="prev-button">« Previous</button>
+       <button style="float: right" class="btn btn-primary" id="next-button">Next »</button>
+       <br/><br/>
+     </div>
+     </div>
+     
+
+     <span id="map1-switch"></span>

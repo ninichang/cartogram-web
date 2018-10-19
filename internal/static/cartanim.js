@@ -1,4 +1,4 @@
-function cartanim_init(a_d) {
+function cartanim_init(a_d, d) {
 
     window.cartanim = {
         animdir: a_d,
@@ -8,10 +8,14 @@ function cartanim_init(a_d) {
         conventional_map: null,
         colors: null,
         labels: null,
+        map_config: null,
+        time_series_label: '',
+        deactivations: d.split(","),
         map_width: 0,
         map_height: 0,
         frame_hold_time: 2,
         frame_transition_time: 1,
+        scaling_factor: 1.7,
         paused: true,
         current_interval: null,
         enter_loading_state: function() {
@@ -81,10 +85,27 @@ function cartanim_init(a_d) {
 
                 window.cartanim.http_get(window.cartanim.animdir + "/" + animation + "/" + frame.file).then(function(d){
 
-                    resolve({
-                        'label': frame.label,
-                        'cartogram': d
-                    });
+                    if(frame.hasOwnProperty('cartogramui'))
+                    {
+                        window.cartanim.http_get(window.cartanim.animdir + "/" + animation + "/" + frame.cartogramui).then(function(cui){
+
+                            resolve({
+                                'label': frame.label,
+                                'cartogram': d,
+                                'cartogramui': cui
+                            })
+
+                        }, reject);
+                    }
+                    else
+                    {
+                        resolve({
+                            'label': frame.label,
+                            'cartogram': d
+                        });
+                    }
+
+
 
                 }, reject);
 
@@ -98,13 +119,15 @@ function cartanim_init(a_d) {
                 var conventional_map = window.cartanim.http_get(window.cartanim.animdir + "/" + animation + "/conventional.json");
                 var labels = window.cartanim.http_get(window.cartanim.animdir + "/" + animation + "/labels.json");
                 var colors = window.cartanim.http_get(window.cartanim.animdir + "/" + animation + "/colors.json");
+                var config = window.cartanim.http_get(window.cartanim.animdir + "/" + animation + "/config.json");
 
-                Promise.all([conventional_map, colors, labels]).then(function(values){
+                Promise.all([conventional_map, colors, labels, config]).then(function(values){
 
                     resolve({
                         'conventional_map': values[0],
                         'colors': values[1],
-                        'labels': values[2]
+                        'labels': values[2],
+                        'config': values[3]
                     });
 
                 }, reject);
@@ -143,6 +166,10 @@ function cartanim_init(a_d) {
 
             maps.forEach(function(value, index){
 
+                maps[index].width = maps[index].extrema.max_x-maps[index].extrema.min_x;
+                maps[index].height = maps[index].extrema.max_y-maps[index].extrema.min_y;
+                maps[index].scaled_width = this.map_width;
+                maps[index].scaled_height = this.map_height;
                 maps[index].scale_x = this.map_width/(maps[index].extrema.max_x-maps[index].extrema.min_x);
                 maps[index].scale_y = this.map_height/(maps[index].extrema.max_y-maps[index].extrema.min_y);
 
@@ -151,7 +178,7 @@ function cartanim_init(a_d) {
         },
         scale_labels: function() {
 
-            var label_points_x = [];
+            /*var label_points_x = [];
             var label_points_y = [];
 
             this.labels.labels.forEach(function(label){
@@ -169,7 +196,7 @@ function cartanim_init(a_d) {
             });
 
             var labels_width = label_points_x.reduce(function(a,b){ return Math.max(a,b); }) - label_points_x.reduce(function(a,b){ return Math.min(a,b); });
-            var labels_height = label_points_y.reduce(function(a,b){ return Math.max(a,b); }) - label_points_y.reduce(function(a,b){ return Math.min(a,b); });
+            var labels_height = label_points_y.reduce(function(a,b){ return Math.max(a,b); }) - label_points_y.reduce(function(a,b){ return Math.min(a,b); });*/
 
             /*this.labels.extrema = {
                 'max_x': label_points_x.reduce(function(a,b){ return Math.max(a,b); }),
@@ -178,8 +205,8 @@ function cartanim_init(a_d) {
                 'min_y': label_points_y.reduce(function(a,b){ return Math.min(a,b); })
             };*/
 
-            this.labels.scale_x = Math.sqrt(this.conventional_map.scale_x * (labels_width/(this.conventional_map.extrema.max_x - this.conventional_map.extrema.min_x)));
-            this.labels.scale_y = Math.sqrt(this.conventional_map.scale_y * (labels_height/(this.conventional_map.extrema.max_y - this.conventional_map.extrema.min_y)));
+            this.labels.scale_x = this.scaling_factor * (this.conventional_map.scaled_width/(this.conventional_map.width * this.labels.scale_x));
+            this.labels.scale_y = this.scaling_factor * (this.conventional_map.scaled_height/(this.conventional_map.height * this.labels.scale_y));
 
         },
         frame_line_functions: function(data){
@@ -189,8 +216,8 @@ function cartanim_init(a_d) {
           	var b = data.extrema.max_y;
 
             var lineFunction = d3.svg.line()
-                                     .x(function(d) { return data.scale_x * (-1*a + d[0]) })
-                                     .y(function(d) { return data.scale_y * (b - d[1]) })
+                                     .x(function(d) { return window.cartanim.scaling_factor * data.scale_x * (-1*a + d[0]) })
+                                     .y(function(d) { return window.cartanim.scaling_factor * data.scale_y * (b - d[1]) })
                                      .interpolate("linear");
             
             var lfs = [];
@@ -204,11 +231,11 @@ function cartanim_init(a_d) {
             return lfs;
 
         },
-        frame_fill_color: function(data){
+        frame_fill_color: function(data, colors){
 
             data.features.forEach(function(v, i){
 
-                data.features[i].properties.color = window.cartanim.colors['id_' + data.features[i].id];
+                data.features[i].properties.color = colors['id_' + data.features[i].id];
 
             });
 
@@ -222,16 +249,39 @@ function cartanim_init(a_d) {
           	var b = data.extrema.max_y;
 
             var lineFunction = d3.svg.line()
-                                     .x(function(d) { return data.scale_x * (-1*a + d[0]) })
-                                     .y(function(d) { return data.scale_y * (b - d[1]) })
+                                     .x(function(d) { return window.cartanim.scaling_factor * data.scale_x * (-1*a + d[0]) })
+                                     .y(function(d) { return window.cartanim.scaling_factor * data.scale_y * (b - d[1]) })
                                      .interpolate("linear");
                                      
             var canvas = d3.select("#" + element_id).append("svg")
-            .attr("width", this.map_width)
-            .attr("height", this.map_height);
+            .attr("width", this.map_width*this.scaling_factor)
+            .attr("height", this.map_height*this.scaling_factor);
+
+            var processed_features = [];
+
+            data.features.forEach(function(feature, id){
+
+                if(!this.map_config.dont_draw.includes(feature.properties.polygon_id) && !this.map_config.elevate.includes(feature.properties.polygon_id))
+                    processed_features.push(feature);
+
+            }, this);
+
+            /* Items which are elevated are drawn at the end */
+            this.map_config.elevate.forEach(function(polygon_id){
+
+                for(let i = 0; i < data.features.length; i++)
+                {
+                    if(data.features[i].properties.polygon_id == polygon_id)
+                    {
+                        processed_features.push(data.features[i]);
+                        break;
+                    }
+                }
+
+            }, this);
 
             var group = canvas.selectAll()
-              .data(data.features)
+              .data(processed_features)
               .enter()
               .append("path")
             
@@ -272,7 +322,7 @@ function cartanim_init(a_d) {
                 var textLabels = text.attr('x', function(d) { return labels.scale_x * d.x; })
                                     .attr('y', function(d) { return labels.scale_y * d.y; })
                                     .attr('font-family', 'sans-serif')
-                                    .attr('font-size', '7.5px')
+                                    .attr('font-size', '8.5px')
                                     .attr('fill', '#000')
                                     .text(function(d) { return d.text; });
                 
@@ -318,10 +368,39 @@ function cartanim_init(a_d) {
 
             }, this);
 
+            /* Change the colors after the path has been updated */
+            setTimeout((function(f){
+
+                return function() {
+
+                    var new_colors = window.cartanim.frames[f].hasOwnProperty('cartogramui') ? window.cartanim.frames[f].cartogramui.color_data : window.cartanim.colors;
+
+                    window.cartanim.frames[f].cartogram.features.forEach(function(feature){
+
+
+                        var frame_elements = document.getElementsByClassName('path-frame-' + feature.id);
+
+                        for(let i = 0; i < frame_elements.length; i++)
+                        {
+                            frame_elements[i].setAttribute('fill', new_colors['id_' + feature.id]);
+                        }
+
+                        var conv_elements = document.getElementsByClassName('path-conventional-' + feature.id);
+
+                        for(let i = 0; i < conv_elements.length; i++)
+                        {
+                            conv_elements[i].setAttribute('fill', new_colors['id_' + feature.id]);
+                        }
+
+                    });
+                }
+
+            }(new_frame)), 0);
+
             setTimeout((function(f){
                 
                 return function(){
-                    document.getElementById('frame-label').innerText = window.cartanim.frames[f].label;
+                    document.getElementById('frame-label').innerText = window.cartanim.time_series_label + ': ' + window.cartanim.frames[f].label;
 
                     window.cartanim.frames.forEach(function(frame, i){
 
@@ -333,7 +412,7 @@ function cartanim_init(a_d) {
                     });
                 };
 
-            }(new_frame)), 1000);
+            }(new_frame)), 0);
             
             
         },
@@ -354,7 +433,7 @@ function cartanim_init(a_d) {
         {
             this.current_interval = setInterval(function(){
                 window.cartanim.next_frame();
-            }, 3000);
+            }, 2500);
         },
         toggle_play: function()
         {
@@ -411,6 +490,44 @@ function cartanim_init(a_d) {
             });
 
         },
+        interactivity_message: function(){
+
+            var all_features = [
+                {'name': 'controls', 'description': 'playback controls'}
+            ]
+            var enabled_feautures = [];
+
+            all_features.forEach(function(feature){
+
+                if(!this.deactivations.includes(feature.name))
+                    enabled_feautures.push(feature.description);
+
+            }, this);
+
+            if(enabled_feautures.length == 0)
+                return "You have access to no interactive features.";
+            
+            if(enabled_feautures.length == 1)
+                return "You have access to the " + enabled_feautures[0] + " feature.";
+            
+            var msg = "You have access to the ";
+
+            for(let i = 0; i < enabled_feautures.length; i++)
+            {
+                if(i == (enabled_feautures.length - 1))
+                    msg += " and";
+                
+                msg += " " + enabled_feautures[i];
+
+                if(i != (enabled_feautures.length - 1) && enabled_feautures.length != 2)
+                    msg += ",";     
+            }
+
+            msg += " features.";
+
+            return msg;
+
+        },
         load_animation: function(animation) {
 
             if(this.in_loading_state)
@@ -430,6 +547,8 @@ function cartanim_init(a_d) {
 
                 var frame_promises = [];
 
+                window.cartanim.time_series_label = frames.time_series_label;
+
                 frames.frames.forEach(function(frame){
 
                     frame_promises.push(window.cartanim.load_animation_frame(animation, frame));
@@ -441,6 +560,7 @@ function cartanim_init(a_d) {
                     window.cartanim.conventional_map = values[0].conventional_map;
                     window.cartanim.colors = values[0].colors;
                     window.cartanim.labels = values[0].labels;
+                    window.cartanim.map_config = values[0].config;
 
                     values[1].forEach(function(frame){
 
@@ -451,11 +571,15 @@ function cartanim_init(a_d) {
                     window.cartanim.scale_maps();
                     window.cartanim.scale_labels();
 
-                    window.cartanim.frame_fill_color(window.cartanim.conventional_map);
+                    var first_color = window.cartanim.frames[0].hasOwnProperty('cartogramui') ? window.cartanim.frames[0].cartogramui.color_data : window.cartanim.colors;
+
+                    window.cartanim.frame_fill_color(window.cartanim.conventional_map, first_color);
 
                     window.cartanim.frames.forEach(function(frame){
 
-                        window.cartanim.frame_fill_color(frame.cartogram);
+                        var colors = frame.hasOwnProperty('cartogramui') ? frame.cartogramui.color_data : window.cartanim.colors;
+
+                        window.cartanim.frame_fill_color(frame.cartogram, colors);
 
                     });
 
@@ -472,11 +596,14 @@ function cartanim_init(a_d) {
 
                     window.cartanim.frames[0].cartogram.d3lf = window.cartanim.draw_d3_graphic('frame', window.cartanim.frames[0].cartogram, 'frame-map', null);
 
-                    document.getElementById('frame-label').innerText = window.cartanim.frames[0].label;
+                    document.getElementById('frame-label').innerText = window.cartanim.time_series_label + ': ' + window.cartanim.frames[0].label;
 
                     window.cartanim.populate_frame_controls();
 
+                    document.getElementById('controls').style.display = window.cartanim.deactivations.includes("controls") ? "none" : "block";
+
                     window.cartanim.exit_loading_state();
+                    document.getElementById('interactivity-message').innerText = window.cartanim.interactivity_message();
                     document.getElementById('player').style.display = "block";
 
                 }, window.cartanim.do_fatal_error);
@@ -484,5 +611,29 @@ function cartanim_init(a_d) {
             });
         }
     }
+
+    window.onblur = (function(){
+        return function(){
+
+            if(window.cartanim.current_interval != null)
+            {
+                clearInterval(window.cartanim.current_interval);
+                window.cartanim.current_interval = null;
+            }
+                
+
+        };
+    }());
+
+    window.onfocus = (function(){
+
+        return function(){
+
+            if(!window.cartanim.paused && window.cartanim.current_interval == null)
+                window.cartanim.play_animation();
+
+        };
+
+    }());
 
 }
