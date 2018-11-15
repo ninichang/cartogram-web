@@ -1,6 +1,184 @@
 {
     "questions": [
         {
+            "type": "cartogram",
+            "map": "germany",
+            "data": "germany_gdp"
+        },
+        {
+            "type": "cartogram",
+            "map": "brazil",
+            "data": "brazil_gdp"
+        },
+        {
+            "type": "cartogram",
+            "map": "india",
+            "data": "india_gdp"
+        },
+        {
+            "type":"population",
+            "map":"brazil"
+        },
+        {
+            "type":"population",
+            "map":"china"
+        },
+        {
+            "type":"cartogram",
+            "map":"india",
+            "data":"india_gdp",
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"cartogram",
+            "map":"china",
+            "data":"china_gdp",
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"3switchable",
+            "map":"usa",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"usa_pop1960"},
+                     {"type":"data","name":"usa_pop2010"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"3switchable",
+            "map":"brazil-combined",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"brazil_combined_cow"},
+                     {"type":"pregen","name":"population"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"3switchable",
+            "map":"india-no-tg",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"india_pop1961"},
+                     {"type":"pregen","name":"population"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"3switchable",
+            "map":"germany",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"germany_pop1985"},
+                     {"type":"data","name":"germany_pop2015"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"3switchable",
+            "map":"brazil",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"brazil_pop2000"},
+                     {"type":"data","name":"brazil_pop2030"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"3switchable",
+            "map":"china",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"china_pop2000"},
+                     {"type":"data","name":"china_pop2030"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"3maps",
+            "map":"usa",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"usa_pop1960"},
+                     {"type":"data","name":"usa_pop2010"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"3maps",
+            "map":"india-no-tg",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"india_pop1961"},
+                     {"type":"pregen","name":"population"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"3maps",
+            "map":"germany",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"germany_pop1985"},
+                     {"type":"data","name":"germany_pop2015"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"3maps",
+            "map":"brazil",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"brazil_pop2000"},
+                     {"type":"data","name":"brazil_pop2030"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"3maps",
+            "map":"china",
+            "maps": [{"type":"pregen","name":"original"},
+                     {"type":"data","name":"china_pop2000"},
+                     {"type":"data","name":"china_pop2030"}
+                    ],
+            "interactive": {
+                "deactivate": [
+                ]
+            }
+        },
+        {
+            "type":"population",
+            "map":"india-no-tg",
+            "colors":"india-no-tg-testcolors"
+        },
+        {
             "type":"population",
             "map":"usa",
             "interactive": {

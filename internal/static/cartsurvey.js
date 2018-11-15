@@ -129,12 +129,14 @@ function cartsurvey_init(a_u,t_u,d_u,s_u,sui_u,) {
                 window.cartogram.enable_tooltip = !(question.interactive.deactivate.includes("tooltip"));
                 window.cartogram.enable_highlight = !(question.interactive.deactivate.includes("highlight"));
                 window.cartogram.animation_duration = question.interactive.deactivate.includes("animation") ? 0 : 1000;
+                window.cartogram.enable_switching = !(question.interactive.deactivate.includes("switching"));
             }
             else
             {
                 /* We assume full interactivity */
                 window.cartogram.enable_tooltip = true;
                 window.cartogram.enable_highlight = true;
+                window.cartogram.enable_switching = true;
                 window.cartogram.animation_duration = 1000;
             }
             
@@ -220,7 +222,7 @@ function cartsurvey_init(a_u,t_u,d_u,s_u,sui_u,) {
 
                         document.getElementById('interactivity-message').innerText = window.cartsurvey.interactivity_message([
                             {'name': 'tooltip', 'description': 'infotips'},
-                            {'name': 'highlighting', 'description': 'parallel highlighting'},
+                            {'name': 'highlight', 'description': 'parallel highlighting'},
                             {'name': 'switching', 'description': 'map switching'}
                         ], question.hasOwnProperty("interactive") ? question.interactive.deactivate : []);
 
@@ -231,6 +233,114 @@ function cartsurvey_init(a_u,t_u,d_u,s_u,sui_u,) {
                 }, function(e){
                     window.cartogram.do_fatal_error(e);
                 });
+            }
+            else if(question.type == "3switchable")
+            {
+                this.enter_loading_state();
+
+                /*
+                "map":"india-no-tg",
+                "maps": [{"type":"pregen","name":"original"},
+                        {"type":"data","name":"india_pop1961"},
+                        {"type":"pregen","name":"population"}
+                        ],
+                "interactive": {
+                    "deactivate": [
+                        "tooltip",
+                        "highlight"
+                    ]
+                }
+                */
+
+                question.maps.forEach(function(map, index){
+
+                    if(map.type === "pregen")
+                    {
+                        var promise_array = [
+                            window.cartogram.get_pregenerated_map(question.map, map.name),
+                            window.cartogram.get_default_colors(question.map)
+                        ];
+
+                        if(map.name === "original")
+                            promise_array.push(window.cartogram.get_labels(question.map));
+
+                        question.maps[index].promise = Promise.all(promise_array);
+
+                    }
+                    else
+                    {
+                        var promise_array = [
+                            window.cartogram.http_get(window.cartsurvey.data_base_url + "/" + map.name + "_cartogram.json"),
+                            window.cartogram.http_get(window.cartsurvey.data_base_url + "/" + map.name + "_cartogramui.json")
+                        ];
+
+                        question.maps[index].promise = Promise.all(promise_array);
+                    }
+                });
+
+                Promise.all(question.maps.map(map => map.promise)).then(function(mps){
+    
+                    mps.forEach(function(mp, index){
+            
+                        question.maps[index].map = mp[0];
+            
+                        if(question.maps[index].type == "pregen")
+                        {
+                            question.maps[index].colors = mp[1];
+                            question.maps[index].tooltip = mp[0].tooltip;
+            
+                            if(question.maps[index].name === "original")
+                                question.maps[index].labels = mp[2];
+                        }
+                        else
+                        {
+                            question.maps[index].colors = mp[1].color_data;
+                            question.maps[index].tooltip = mp[1].tooltip;
+                        }
+            
+                    });
+
+                    window.cartogram.get_config(question.map).then(function(map_config){
+
+                        // Pull color data from the second map.
+                        window.cartogram.color_data = question.maps[1].colors;
+                        window.cartogram.map_config = map_config;
+
+                        /* Due to limitations of cartogram.js, we can only display labels
+                           on the first map.
+                        */
+
+                        window.cartogram.draw_three_maps(question.maps[0].map, question.maps[1].map, question.maps[2].map, "map-area", "cartogram-area", question.maps[0].tooltip.label, question.maps[1].tooltip.label, question.maps[2].tooltip.label, question.maps[0].hasOwnProperty("labels") ? question.maps[0].labels : null).then(function(v){
+
+                            window.cartogram.tooltip_clear();
+                            window.cartogram.tooltip_initialize();
+                            window.cartogram.tooltip.push(question.maps[0].tooltip);
+                            window.cartogram.tooltip.push(question.maps[1].tooltip);
+                            window.cartogram.tooltip.push(question.maps[2].tooltip);
+    
+                            window.cartogram.exit_loading_state();
+                            document.getElementById('cartogram').style.display = 'block';
+    
+                            document.getElementById('interactivity-message').innerText = window.cartsurvey.interactivity_message([
+                                {'name': 'tooltip', 'description': 'infotips'},
+                                {'name': 'highlight', 'description': 'parallel highlighting'},
+                                {'name': 'switching', 'description': 'map switching'}
+                            ], question.hasOwnProperty("interactive") ? question.interactive.deactivate : []);
+    
+                        }, function(e){
+                            window.cartogram.do_fatal_error(e);
+                        });
+
+                    }, function(e){
+                        window.cartogram.do_fatal_error(e);
+                    });
+
+
+                }, function(e){
+                    window.cartogram.do_fatal_error(e);
+                });
+
+                
             }
             else
             {

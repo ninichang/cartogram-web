@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "features": [{"extrema": {"min_x": 0.0, "min_y": 896.0, "max_x": 512.0, "max_y": 1024.0}, "type": "Feature", "id": "1", "coordinates": [[0.0, 896.0], [0.0, 1024.0], [512.0, 1024.0], [512.0, 896.0], [0.0, 896.0]], "properties": {"color": "#aaaaaa", "attribute": "89", "name": "UNKNOWN"}}]}

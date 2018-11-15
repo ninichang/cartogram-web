@@ -28,6 +28,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
         scaling_factor: 1,
         enable_highlight: true,
         enable_tooltip: true,
+        enable_switching: true,
         animation_duration: 1000,
         grid_document: null,
         gridedit_window: null,
@@ -433,6 +434,8 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
         },
         draw_d3_graphic: function(this_map, maps, data, element_id, width, height, scale_x, scale_y, labels=null) {
 
+            console.log("Drawing " + this_map + " at scale " + scale_x + " x " + scale_y);
+
             var a = data.extrema.min_x;
 
           	var b = data.extrema.max_y;
@@ -516,6 +519,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                                     .attr('font-family', 'sans-serif')
                                     .attr('font-size', '8.5px')
                                     .attr('fill', '#000')
+                                    .attr('class', 'cartogram-label')
                                     .text(function(d) { return d.text; });
                 
                 var lines = canvas.selectAll("line")
@@ -528,6 +532,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                                     .attr('y1', function(d) { return labels.scale_y*d.y1; })
                                     .attr('y2', function(d) { return labels.scale_y*d.y2; })
                                     .attr('stroke-width', 1)
+                                    .attr('class', 'cartogram-label')
                                     .attr('stroke', '#000');
             }
             
@@ -854,8 +859,17 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                 window.cartogram.map_alternates.maps_possible = ['map1', 'map2', 'map3'];
                 window.cartogram.map_alternates.map_selected = "map2";
 
-                document.getElementById('map1-switch').style.display = 'block';
-                document.getElementById('map2-switch').style.display = 'block';
+                if(window.cartogram.enable_switching)
+                {
+                    document.getElementById('map1-switch').style.display = 'block';
+                    document.getElementById('map2-switch').style.display = 'block';
+                }
+                else
+                {
+                    document.getElementById('map1-switch').style.display = 'none';
+                    document.getElementById('map2-switch').style.display = 'none';
+                }
+                
 
                 document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map2', 'map2', map2_name, true));
                 document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map3', 'map2', map3_name, false));
@@ -929,8 +943,16 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                 window.cartogram.map_alternates.maps_possible = ['map1', 'map2'];
                 window.cartogram.map_alternates.map_selected = "map2";
 
-                document.getElementById('map1-switch').style.display = 'block';
-                document.getElementById('map2-switch').style.display = 'block';
+                if(window.cartogram.enable_switching)
+                {
+                    document.getElementById('map1-switch').style.display = 'block';
+                    document.getElementById('map2-switch').style.display = 'block';
+                }
+                else
+                {
+                    document.getElementById('map1-switch').style.display = 'none';
+                    document.getElementById('map2-switch').style.display = 'none';
+                }
 
                 document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map2', 'map2', map2_name, true));
                 document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map1', 'map2', map1_name, false));

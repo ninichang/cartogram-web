@@ -103,7 +103,7 @@ function draw_3maps(data_base_url, handler, maps, deactivations)
     
                 map.map.features.forEach(function(feature, i){
     
-                    maps[index].map.features[i].properties.color = maps[index].colors['id_' + maps[index].map.features[i].id];
+                    maps[index].map.features[i].properties.color = maps[1].colors['id_' + maps[index].map.features[i].id];
     
                 });
     

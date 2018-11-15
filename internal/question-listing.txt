@@ -1,0 +1,597 @@
+Question 1
+
+Map:		Brazil
+Category:	Cluster
+
+Group 1:	all
+Group 2:	none
+Group 3:	highlighting
+Group 4:	infotips
+Group 5:	switching
+
+
+Question 2
+
+Map:		Germany
+Category:	Compare
+
+Group 1:	infotips
+Group 2:	switching
+Group 3:	all
+Group 4:	none
+Group 5:	highlighting
+
+
+Question 3
+
+Map:		Brazil
+Category:	Detect change
+
+Group 1:	none
+Group 2:	highlighting
+Group 3:	infotips
+Group 4:	switching
+Group 5:	all
+
+
+Question 4
+
+Map:		India
+Category:	Lookup
+
+Group 1:	infotips
+Group 2:	switching
+Group 3:	all
+Group 4:	none
+Group 5:	highlighting
+
+
+Question 5
+
+Map:		Germany
+Category:	Summarize
+
+Group 1:	infotips
+Group 2:	switching
+Group 3:	all
+Group 4:	none
+Group 5:	highlighting
+
+
+Question 6
+
+Map:		China
+Category:	Detect change
+
+Group 1:	all
+Group 2:	none
+Group 3:	highlighting
+Group 4:	infotips
+Group 5:	switching
+
+
+Question 7
+
+Map:		Germany
+Category:	Filter
+
+Group 1:	all
+Group 2:	none
+Group 3:	highlighting
+Group 4:	infotips
+Group 5:	switching
+
+
+Question 8
+
+Map:		China
+Category:	Compare
+
+Group 1:	none
+Group 2:	highlighting
+Group 3:	infotips
+Group 4:	switching
+Group 5:	all
+
+
+Question 9
+
+Map:		USA
+Category:	Cluster
+
+Group 1:	highlighting
+Group 2:	infotips
+Group 3:	switching
+Group 4:	all
+Group 5:	none
+
+
+Question 10
+
+Map:		India
+Category:	Filter
+
+Group 1:	highlighting
+Group 2:	infotips
+Group 3:	switching
+Group 4:	all
+Group 5:	none
+
+
+Question 11
+
+Map:		Brazil
+Category:	Find adjacency
+
+Group 1:	none
+Group 2:	highlighting
+Group 3:	infotips
+Group 4:	switching
+Group 5:	all
+
+
+Question 12
+
+Map:		USA
+Category:	Find top-k
+
+Group 1:	all
+Group 2:	none
+Group 3:	highlighting
+Group 4:	infotips
+Group 5:	switching
+
+
+Question 13
+
+Map:		China
+Category:	Cluster
+
+Group 1:	switching
+Group 2:	all
+Group 3:	none
+Group 4:	highlighting
+Group 5:	infotips
+
+
+Question 14
+
+Map:		USA
+Category:	Compare
+
+Group 1:	switching
+Group 2:	all
+Group 3:	none
+Group 4:	highlighting
+Group 5:	infotips
+
+
+Question 15
+
+Map:		China
+Category:	Find top-k
+
+Group 1:	highlighting
+Group 2:	infotips
+Group 3:	switching
+Group 4:	all
+Group 5:	none
+
+
+Question 16
+
+Map:		Germany
+Category:	Find adjacency
+
+Group 1:	highlighting
+Group 2:	infotips
+Group 3:	switching
+Group 4:	all
+Group 5:	none
+
+
+Question 17
+
+Map:		Brazil
+Category:	Compare
+
+Group 1:	highlighting
+Group 2:	infotips
+Group 3:	switching
+Group 4:	all
+Group 5:	none
+
+
+Question 18
+
+Map:		China
+Category:	Summarize
+
+Group 1:	none
+Group 2:	highlighting
+Group 3:	infotips
+Group 4:	switching
+Group 5:	all
+
+
+Question 19
+
+Map:		Brazil
+Category:	Lookup
+
+Group 1:	all
+Group 2:	none
+Group 3:	highlighting
+Group 4:	infotips
+Group 5:	switching
+
+
+Question 20
+
+Map:		Germany
+Category:	Find top-k
+
+Group 1:	switching
+Group 2:	all
+Group 3:	none
+Group 4:	highlighting
+Group 5:	infotips
+
+
+Question 21
+
+Map:		India
+Category:	Cluster
+
+Group 1:	infotips
+Group 2:	switching
+Group 3:	all
+Group 4:	none
+Group 5:	highlighting
+
+
+Question 22
+
+Map:		USA
+Category:	Summarize
+
+Group 1:	switching
+Group 2:	all
+Group 3:	none
+Group 4:	highlighting
+Group 5:	infotips
+
+
+Question 23
+
+Map:		India
+Category:	Find adjacency
+
+Group 1:	switching
+Group 2:	all
+Group 3:	none
+Group 4:	highlighting
+Group 5:	infotips
+
+
+Question 24
+
+Map:		USA
+Category:	Lookup
+
+Group 1:	highlighting
+Group 2:	infotips
+Group 3:	switching
+Group 4:	all
+Group 5:	none
+
+
+Question 25
+
+Map:		India
+Category:	Summarize
+
+Group 1:	all
+Group 2:	none
+Group 3:	highlighting
+Group 4:	infotips
+Group 5:	switching
+
+
+Question 26
+
+Map:		China
+Category:	Lookup
+
+Group 1:	switching
+Group 2:	all
+Group 3:	none
+Group 4:	highlighting
+Group 5:	infotips
+
+
+Question 27
+
+Map:		Brazil
+Category:	Find top-k
+
+Group 1:	infotips
+Group 2:	switching
+Group 3:	all
+Group 4:	none
+Group 5:	highlighting
+
+
+Question 28
+
+Map:		USA
+Category:	Detect change
+
+Group 1:	infotips
+Group 2:	switching
+Group 3:	all
+Group 4:	none
+Group 5:	highlighting
+
+
+Question 29
+
+Map:		Germany
+Category:	Cluster
+
+Group 1:	none
+Group 2:	highlighting
+Group 3:	infotips
+Group 4:	switching
+Group 5:	all
+
+
+Question 30
+
+Map:		India
+Category:	Compare
+
+Group 1:	all
+Group 2:	none
+Group 3:	highlighting
+Group 4:	infotips
+Group 5:	switching
+
+
+Question 31
+
+Map:		USA
+Category:	Filter
+
+Group 1:	none
+Group 2:	highlighting
+Group 3:	infotips
+Group 4:	switching
+Group 5:	all
+
+
+Question 32
+
+Map:		Germany
+Category:	Detect change
+
+Group 1:	highlighting
+Group 2:	infotips
+Group 3:	switching
+Group 4:	all
+Group 5:	none
+
+
+Question 33
+
+Map:		India
+Category:	Find top-k
+
+Group 1:	none
+Group 2:	highlighting
+Group 3:	infotips
+Group 4:	switching
+Group 5:	all
+
+
+Question 34
+
+Map:		Brazil
+Category:	Summarize
+
+Group 1:	highlighting
+Group 2:	infotips
+Group 3:	switching
+Group 4:	all
+Group 5:	none
+
+
+Question 35
+
+Map:		China
+Category:	Filter
+
+Group 1:	infotips
+Group 2:	switching
+Group 3:	all
+Group 4:	none
+Group 5:	highlighting
+
+
+Question 36
+
+Map:		USA
+Category:	Find adjacency
+
+Group 1:	infotips
+Group 2:	switching
+Group 3:	all
+Group 4:	none
+Group 5:	highlighting
+
+
+Question 37
+
+Map:		Germany
+Category:	Lookup
+
+Group 1:	none
+Group 2:	highlighting
+Group 3:	infotips
+Group 4:	switching
+Group 5:	all
+
+
+Question 38
+
+Map:		China
+Category:	Find adjacency
+
+Group 1:	all
+Group 2:	none
+Group 3:	highlighting
+Group 4:	infotips
+Group 5:	switching
+
+
+Question 39
+
+Map:		India
+Category:	Detect change
+
+Group 1:	switching
+Group 2:	all
+Group 3:	none
+Group 4:	highlighting
+Group 5:	infotips
+
+
+Question 40
+
+Map:		Brazil
+Category:	Filter
+
+Group 1:	switching
+Group 2:	all
+Group 3:	none
+Group 4:	highlighting
+Group 5:	infotips
+
+
+Task Type:	Lookup
+
+none:		5
+highlighting:	5
+infotips:	5
+switching:	5
+all:		5
+
+
+Task Type:	Detect change
+
+none:		5
+highlighting:	5
+infotips:	5
+switching:	5
+all:		5
+
+
+Task Type:	Compare
+
+none:		5
+highlighting:	5
+infotips:	5
+switching:	5
+all:		5
+
+
+Task Type:	Find top-k
+
+none:		5
+highlighting:	5
+infotips:	5
+switching:	5
+all:		5
+
+
+Task Type:	Filter
+
+none:		5
+highlighting:	5
+infotips:	5
+switching:	5
+all:		5
+
+
+Task Type:	Cluster
+
+none:		5
+highlighting:	5
+infotips:	5
+switching:	5
+all:		5
+
+
+Task Type:	Find adjacency
+
+none:		5
+highlighting:	5
+infotips:	5
+switching:	5
+all:		5
+
+
+Task Type:	Summarize
+
+none:		5
+highlighting:	5
+infotips:	5
+switching:	5
+all:		5
+
+
+Group 1
+
+none:		8
+highlighting:	8
+infotips:	8
+switching:	8
+all:		8
+
+
+Group 2
+
+none:		8
+highlighting:	8
+infotips:	8
+switching:	8
+all:		8
+
+
+Group 3
+
+none:		8
+highlighting:	8
+infotips:	8
+switching:	8
+all:		8
+
+
+Group 4
+
+none:		8
+highlighting:	8
+infotips:	8
+switching:	8
+all:		8
+
+
+Group 5
+
+none:		8
+highlighting:	8
+infotips:	8
+switching:	8
+all:		8
+
+
