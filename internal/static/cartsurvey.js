@@ -130,6 +130,8 @@ function cartsurvey_init(a_u,t_u,d_u,s_u,sui_u,) {
                 window.cartogram.enable_highlight = !(question.interactive.deactivate.includes("highlight"));
                 window.cartogram.animation_duration = question.interactive.deactivate.includes("animation") ? 0 : 1000;
                 window.cartogram.enable_switching = !(question.interactive.deactivate.includes("switching"));
+
+                window.cartogram.enable_toplabel = !window.cartogram.enable_switching;
             }
             else
             {
@@ -138,9 +140,24 @@ function cartsurvey_init(a_u,t_u,d_u,s_u,sui_u,) {
                 window.cartogram.enable_highlight = true;
                 window.cartogram.enable_switching = true;
                 window.cartogram.animation_duration = 1000;
+
+                window.cartogram.enable_toplabel = false;
+            }
+
+            if(question.hasOwnProperty("hide"))
+            {
+                window.cartogram.hide_maps_by_id = question.hide;
+            }
+            else
+            {
+                window.cartogram.hide_maps_by_id = [];
             }
             
-            if(question.type == "animation")
+            if(question.type == "url")
+            {
+                window.location = question.url;
+            }
+            else if(question.type == "animation")
             {
                 /* Redirect to the animation page. Specify the next URL if necessary */
 
@@ -182,7 +199,12 @@ function cartsurvey_init(a_u,t_u,d_u,s_u,sui_u,) {
                 if(question.hasOwnProperty("interactive"))
                 {
                     animurl += "&deactivate=" + encodeURIComponent(question.interactive.deactivate.join(","));
-                }               
+                }
+
+                if(question.hasOwnProperty("hide"))
+                {
+                    animurl += "&hide=" + encodeURIComponent(question.hide.join(","));
+                }
 
                 window.location = animurl;
             }
@@ -204,12 +226,13 @@ function cartsurvey_init(a_u,t_u,d_u,s_u,sui_u,) {
             {
                 this.enter_loading_state();
 
-                Promise.all([this.http_get(this.data_base_url + "/" + question.data + "_cartogramui.json"), this.http_get(this.data_base_url + "/" + question.data + "_cartogram.json"), window.cartogram.get_labels(question.map), window.cartogram.get_config(question.map)]).then(function(data){
+                Promise.all([this.http_get(this.data_base_url + "/" + question.data + "_cartogramui.json"), this.http_get(this.data_base_url + "/" + question.data + "_cartogram.json"), window.cartogram.get_labels(question.map), window.cartogram.get_config(question.map), window.cartogram.get_abbreviations(question.map)]).then(function(data){
 
                     window.cartogram.color_data = data[0].color_data;
                     window.cartogram.map_config = data[3];
+                    window.cartogram.abbreviations = data[4];
 
-                    window.cartogram.draw_three_maps(window.cartogram.get_pregenerated_map(question.map, "original"), data[1], window.cartogram.get_pregenerated_map(question.map, "population"), "map-area", "cartogram-area", "Land Area", data[0].tooltip.label, "Population",data[2]).then(function(v){
+                    window.cartogram.draw_three_maps(window.cartogram.get_pregenerated_map(question.map, "original"), data[1], window.cartogram.get_pregenerated_map(question.map, "population"), "map-area", "cartogram-area", "Land Area", data[0].tooltip.label, "Human Population",data[2]).then(function(v){
 
                         window.cartogram.tooltip_clear();
                         window.cartogram.tooltip_initialize();

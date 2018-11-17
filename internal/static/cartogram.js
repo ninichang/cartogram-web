@@ -25,10 +25,13 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
             maps_possible: []
         },
         map_config: {},
+        abbreviations: {},
         scaling_factor: 1,
         enable_highlight: true,
         enable_tooltip: true,
         enable_switching: true,
+        enable_toplabel: false,
+        hide_maps_by_id: [],
         animation_duration: 1000,
         grid_document: null,
         gridedit_window: null,
@@ -170,7 +173,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
 
             if(this.tooltip.length > 0 && this.enable_tooltip)
             {
-                document.getElementById('tooltip').innerHTML = "<b>" + this.tooltip[0].data["id_" + id].name + "</b>";
+                document.getElementById('tooltip').innerHTML = "<b>" + this.tooltip[0].data["id_" + id].name + " (" + this.abbreviations[ this.tooltip[0].data["id_" + id].name ] + ")</b>";
 
                 this.tooltip.forEach(function(v, i){
 
@@ -694,6 +697,9 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
         get_labels: function(handler) {
             return this.http_get(this.cartogram_data_dir + "/" + handler + "/labels.json");
         },
+        get_abbreviations: function(handler) {
+            return this.http_get(this.cartogram_data_dir + "/" + handler + "/abbreviations.json");
+        },
         get_config: function(handler) {
             return this.http_get(this.cartogram_data_dir + "/" + handler + "/config.json");
         },
@@ -744,6 +750,9 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
 
             this.map_alternates.maps_possible.forEach(function(v){
 
+                if(document.getElementById(v + '-selector') === null)
+                    return;
+
                 if(v == new_map_name)
                 {
                     document.getElementById(v + '-selector').setAttribute('onclick', '');
@@ -770,11 +779,11 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
 
             if(active)
             {
-                button.className = "btn btn-secondary btn-sm active";
+                button.className = "btn btn-secondary active";
             }
             else
             {
-                button.className = "btn btn-secondary btn-sm";
+                button.className = "btn btn-secondary";
                 button.setAttribute('onclick', "window.cartogram.switch_displayed_map('" + map_container + "', '" + map + "');");
             }
 
@@ -870,10 +879,34 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                     document.getElementById('map2-switch').style.display = 'none';
                 }
                 
+                if(window.cartogram.enable_toplabel)
+                {
+                    document.getElementById('map1-toplabel').style.display = 'block';
+                    document.getElementById('map2-toplabel').style.display = 'block';
+                }
+                else
+                {
+                    document.getElementById('map1-toplabel').style.display = 'none';
+                    document.getElementById('map2-toplabel').style.display = 'none';
+                }
 
-                document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map2', 'map2', map2_name, true));
-                document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map3', 'map2', map3_name, false));
-                document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map1', 'map2', map1_name, false));
+                document.getElementById('map1-toplabel').innerText = map1_name;
+                document.getElementById('map2-toplabel').innerText = map2_name;
+
+                if(!window.cartogram.hide_maps_by_id.includes(2))
+                {
+                    document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map2', 'map2', map2_name, true));
+                }
+
+                if(!window.cartogram.hide_maps_by_id.includes(3))
+                {
+                    document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map3', 'map2', map3_name, false));
+                }
+
+                if(!window.cartogram.hide_maps_by_id.includes(1))
+                {
+                    document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map1', 'map2', map1_name, false));
+                }               
                 
                 resolve(values);
 
@@ -954,8 +987,29 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                     document.getElementById('map2-switch').style.display = 'none';
                 }
 
-                document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map2', 'map2', map2_name, true));
-                document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map1', 'map2', map1_name, false));
+                if(window.cartogram.enable_toplabel)
+                {
+                    document.getElementById('map1-toplabel').style.display = 'block';
+                    document.getElementById('map2-toplabel').style.display = 'block';
+                }
+                else
+                {
+                    document.getElementById('map1-toplabel').style.display = 'none';
+                    document.getElementById('map2-toplabel').style.display = 'none';
+                }
+
+                document.getElementById('map1-toplabel').innerText = map1_name;
+                document.getElementById('map2-toplabel').innerText = map2_name;
+
+                if(!window.cartogram.hide_maps_by_id.includes(2))
+                {
+                    document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map2', 'map2', map2_name, true));
+                }
+
+                if(!window.cartogram.hide_maps_by_id.includes(1))
+                {
+                    document.getElementById('map2-switch-buttons').appendChild(window.cartogram.create_map_switch_button('map1', 'map2', map1_name, false));
+                }
 
                 resolve(values);
 
@@ -1074,13 +1128,14 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
             if(colors === null)
                 colors = this.get_default_colors(type);
 
-            Promise.all([colors, this.get_grid_document_template(type), this.get_labels(type), this.get_config(type)]).then(function(values){
+            Promise.all([colors, this.get_grid_document_template(type), this.get_labels(type), this.get_config(type), this.get_abbreviations(type)]).then(function(values){
 
               window.cartogram.color_data = values[0];
               window.cartogram.map_config = values[3];
+              window.cartogram.abbreviations = values[4];
               
 
-              window.cartogram.draw_two_maps(window.cartogram.get_pregenerated_map(type, "original"), window.cartogram.get_pregenerated_map(type, "population"), "map-area", "cartogram-area", "Land Area", "Population", values[2]).then(function(v){
+              window.cartogram.draw_two_maps(window.cartogram.get_pregenerated_map(type, "original"), window.cartogram.get_pregenerated_map(type, "population"), "map-area", "cartogram-area", "Land Area", "Human Population", values[2]).then(function(v){
 
                 window.cartogram.tooltip.push(v[0].tooltip);
                 window.cartogram.tooltip.push(v[1].tooltip);

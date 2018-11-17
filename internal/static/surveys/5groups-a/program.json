@@ -1,13 +1,16 @@
 {
     "questions": [
         {
-            "type":"population",
-            "map":"brazil"
+            "type":"cartogram",
+            "map":"brazil-combined",
+            "data":"brazil_combined_cow",
+            "hide": [3]
         },
         {
             "type":"cartogram",
             "map":"germany",
-            "data":"germany_gdp"
+            "data":"germany_gdp",
+            "hide": [3]
         },
         {
             "type":"cartogram",
@@ -29,6 +32,7 @@
                 "deactivate": [
                 ]
             }
+
         },
         {
             "type":"cartogram",
@@ -42,17 +46,20 @@
         {
             "type":"cartogram",
             "map":"china",
-            "data":"china_gdp"
+            "data":"china_gdp",
+            "hide": [3]
         },
         {
             "type":"cartogram",
             "map":"usa",
-            "data":"usa_croptotal2012"
+            "data":"usa_croptotal2012",
+            "hide": [3]
         },
         {
             "type":"cartogram",
             "map":"india",
-            "data":"india_gdp"
+            "data":"india_gdp",
+            "hide": [3]
         },
         {
             "type":"population",
@@ -61,7 +68,8 @@
         {
             "type":"cartogram",
             "map":"usa",
-            "data":"usa_croptotal2012"
+            "data":"usa_croptotal2012",
+            "hide": [3]
         },
         {
             "type":"population",
@@ -70,7 +78,8 @@
         {
             "type":"cartogram",
             "map":"usa",
-            "data":"usa_electoral"
+            "data":"usa_electoral",
+            "hide": [3]
         },
         {
             "type":"population",
@@ -83,7 +92,8 @@
         {
             "type":"cartogram",
             "map":"brazil",
-            "data":"brazil_gdp"
+            "data":"brazil_gdp",
+            "hide": [3]
         },
         {
             "type":"3switchable",
@@ -104,12 +114,14 @@
         {
             "type":"cartogram",
             "map":"germany",
-            "data":"germany_gdp"
+            "data":"germany_gdp",
+            "hide": [3]
         },
         {
             "type":"cartogram",
             "map":"india",
-            "data":"india_gdp"
+            "data":"india_gdp",
+            "hide": [3]
         },
         {
             "type":"3switchable",
@@ -150,7 +162,8 @@
         {
             "type":"cartogram",
             "map":"brazil-combined",
-            "data":"brazil_combined_cow"
+            "data":"brazil_combined_cow",
+            "hide": [3]
         },
         {
             "type":"cartogram",
@@ -164,12 +177,14 @@
         {
             "type":"cartogram",
             "map":"india",
-            "data":"india_gdp"
+            "data":"india_gdp",
+            "hide": [3]
         },
         {
             "type":"cartogram",
             "map":"usa",
-            "data":"usa_electoral"
+            "data":"usa_electoral",
+            "hide": [3]
         },
         {
             "type":"cartogram",
@@ -179,7 +194,8 @@
         {
             "type":"cartogram",
             "map":"india",
-            "data":"india_gdp"
+            "data":"india_gdp",
+            "hide": [3]
         },
         {
             "type":"3switchable",
@@ -196,7 +212,8 @@
         {
             "type":"cartogram",
             "map":"china",
-            "data":"china_gdp"
+            "data":"china_gdp",
+            "hide": [3]
         },
         {
             "type":"population",
@@ -218,7 +235,8 @@
         {
             "type":"cartogram",
             "map":"brazil-combined",
-            "data":"brazil_combined_cow"
+            "data":"brazil_combined_cow",
+            "hide": [3]
         }
     ]
 }

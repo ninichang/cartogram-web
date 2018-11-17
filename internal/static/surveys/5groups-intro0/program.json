@@ -1,0 +1,13 @@
+{
+    "questions": [
+        {
+            "type":"cartogram",
+            "map":"usa",
+            "data":"usa_electoral"
+        },
+        {
+            "type":"url",
+            "url":"/survey/5groups-0"
+        }
+    ]
+}

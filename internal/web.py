@@ -116,7 +116,9 @@ def threemaps():
     maps = request.args.get('maps', '')
     maps = base64.b64decode(maps).decode("utf-8")
 
-    return render_template('3maps.html', page_active='3maps', cartogram_url=url_for('cartogram'), cartogramui_url=url_for('cartogram_ui'), cartogram_data_dir=url_for('static', filename='cartdata'), cartogram_handlers=cartogram_handlers_select, default_cartogram_handler=default_cartogram_handler, display_next=display_next,next_url=next_url, display_question_no=display_question_no, question_no=question_no, deactivate_list=deactivate_list, maps=maps, handler=handler, previous_url=previous_url, display_previous=display_previous)
+    hide = request.args.get('hide', '')
+
+    return render_template('3maps.html', page_active='3maps', cartogram_url=url_for('cartogram'), cartogramui_url=url_for('cartogram_ui'), cartogram_data_dir=url_for('static', filename='cartdata'), cartogram_handlers=cartogram_handlers_select, default_cartogram_handler=default_cartogram_handler, display_next=display_next,next_url=next_url, display_question_no=display_question_no, question_no=question_no, deactivate_list=deactivate_list, maps=maps, handler=handler, previous_url=previous_url, display_previous=display_previous, hide=hide)
 
 @app.route('/survey/<survey_name>', defaults={'survey_question': '0'})
 @app.route('/survey/<survey_name>/<survey_question>', methods=['GET'])

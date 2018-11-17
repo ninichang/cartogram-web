@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<div class="container-fluid" style="margin-top: 75px" id="screenshot">
+<div class="container-fluid" style="margin-top: 20px" id="screenshot">
     {% if display_question_no %}
     <h4>Question {{question_no}}</h4>
     <p id="interactivity-message"></p>
@@ -27,20 +27,17 @@
 
     <div id="cartogram" style="display: none">
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-4" id="map1-container">
             <div style="height: 110px">
                 <p id="tooltip">&nbsp;</p>
             </div>
             <h5 id="map1-name"></h5>
             <div id="map1"></div>
 
-            {% if display_previous %}
-                            <p><a class="btn btn-primary" href="{{previous_url}}" id="prev-button">« Previous</a></p>
-
-            {% endif %}
+            
             
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4" id="map2-container">
                 <div style="height: 110px">
                     <p>&nbsp;</p>
                 </div>
@@ -48,21 +45,32 @@
                 <div id="map2"></div>
                 
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4" id="map3-container">
                 <div style="height: 110px">
                      <p>&nbsp;</p>
                 </div>
                 <h5 id="map3-name"></h5>
                 <div id="map3"></div>
                 
-                {% if display_next %}
-                            <p><a style="float: right" class="btn btn-primary" href="{{next_url}}" id="next-button">Next »</a></p>
 
-                {% endif %}
 
         </div>
 
         
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            {% if display_previous %}
+                            <p><a class="btn btn-primary" href="{{previous_url}}" id="prev-button">« Previous</a></p>
+
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            {% if display_next %}
+            <p><a style="float: right" class="btn btn-primary" href="{{next_url}}" id="next-button">Next »</a></p>
+
+            {% endif %}
+        </div>
     </div>
     </div>
 </div>
@@ -81,7 +89,7 @@
 
         cartogram_init("{{cartogram_url}}", "{{cartogramui_url}}", "{{cartogram_data_dir}}", "{{url_for('gridedit')}}");
 
-        draw_3maps("/static/surveys/data", "{{handler}}", {{maps|safe}}, "{{deactivate_list}}");
+        draw_3maps("/static/surveys/data", "{{handler}}", {{maps|safe}}, "{{deactivate_list}}", "{{hide}}");
         };
     </script>
 

@@ -10,6 +10,9 @@ def transform_viewer_question(question, level):
 
     new_question = {}
 
+    if 'hide' in question:
+        new_question['hide'] = question['hide']
+
     if question['type'] == "population":
 
         new_question['type'] = "population"

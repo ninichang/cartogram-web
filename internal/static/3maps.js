@@ -34,7 +34,7 @@ function interactivity_message(all_features, deactivations){
 
 }
 
-function draw_3maps(data_base_url, handler, maps, deactivations)
+function draw_3maps(data_base_url, handler, maps, deactivations, hide)
 {
     if(window.cartogram.in_loading_state || maps.length != 3)
         return;
@@ -43,12 +43,60 @@ function draw_3maps(data_base_url, handler, maps, deactivations)
 
     deactivations = deactivations.split(",");
 
+    if(hide.trim() === "")
+    {
+        hide = [];
+    }
+    else
+    {
+        hide = hide.split(",");
+        
+        hide.forEach(function(h,i){
+            hide[i] = parseInt(h);
+        });
+    }
+
+    
+
+    if(hide.length > 0)
+    {
+        window.cartogram.scaling_factor = 1.7;
+
+        var col_width = 6;
+
+        if(hide.length > 1)
+        {
+            col_width = 12;
+        }
+
+        (function(h){
+            [1,2,3].forEach(function(map_id){
+
+                console.log(h);
+
+                if(h.includes(map_id))
+                {
+                    document.getElementById('map' + map_id + '-container').style.display = 'none';
+                }
+                
+                document.getElementById('map' + map_id + '-container').className = 'col-md-' + col_width;
+    
+            });
+        }(hide));
+        
+
+
+    }
+
     window.cartogram.enable_highlight = !(deactivations.includes('highlight'));
     window.cartogram.enable_tooltip = !(deactivations.includes('tooltip'));
 
     window.cartogram.get_config(handler).then(function(config){
 
-        window.cartogram.map_config = config;
+        window.cartogram.get_abbreviations(handler).then(function(abbreviations){
+
+            window.cartogram.map_config = config;
+            window.cartogram.abbreviations = abbreviations;
 
         maps.forEach(function(map, index){
 
@@ -153,7 +201,7 @@ function draw_3maps(data_base_url, handler, maps, deactivations)
     
             document.getElementById('loading').style.display = "none";
             document.getElementById('cartogram').style.display = "block";
-    
+            
         }, function(e){
             console.log(e);
         });
@@ -161,6 +209,9 @@ function draw_3maps(data_base_url, handler, maps, deactivations)
     }, function(e){
         console.log(e);
     });
+}, function(e){
+    console.log(e);
+});
     
     
 }
