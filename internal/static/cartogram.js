@@ -24,6 +24,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
             map_selected: '',
             maps_possible: []
         },
+        hovering_on_tooltip: false,
         grid_document: null,
         gridedit_window: null,
         tooltip: new Array(0),
@@ -157,7 +158,7 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
         tooltip_initialize: function() {
             this.tooltip = new Array(0);
         },
-        tooltip_show: function(id) {
+        tooltip_show: function(e, id) {
 
             if(this.tooltip.length > 0)
             {
@@ -168,8 +169,20 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                     document.getElementById('tooltip').innerHTML += "<br/><i>" + window.cartogram.tooltip[i].label + ":</i> " + window.cartogram.tooltip[i].data["id_" + id].value.toLocaleString() + " " + window.cartogram.tooltip[i].unit;
 
                 });
+
+                document.getElementById('tooltip').style.display = 'inline-block';
+
+               
+                document.getElementById('tooltip').style.left = (e.pageX - 50) + 'px';
+            
+
+                document.getElementById('tooltip').style.top = (e.pageY + 15) + 'px';
             }
 
+        },
+        tooltip_hide: function() {
+
+                document.getElementById('tooltip').style.display = 'none';
         },
         draw_bar_chart_from_tooltip(container, tooltip) {
 
@@ -443,15 +456,28 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
               .attr("fill", function(d) {return d.properties.color})
               .attr("stroke", "#000")
               .attr("stroke-width", "0.5")
-              .on('mouseover', function(d, i) {
-                             window.cartogram.highlight_by_id(maps, d.id, 0.6);
+              .on('mouseenter', (function(){
+                return function(d, i){
 
-                             window.cartogram.tooltip_show(d.id);
 
-                             })
-              .on('mouseout', function(d, i) {
-                             window.cartogram.highlight_by_id(maps, d.id, 1);
-                              });
+                              window.cartogram.highlight_by_id(maps, d.id, 0.6);
+
+                              window.cartogram.tooltip_show(d3.event, d.id);
+
+                };
+            }()))
+            .on('mousemove', (function(){
+              return function(d, i){
+
+                              window.cartogram.tooltip_show(d3.event, d.id);
+            };}()))
+            .on('mouseleave', (function(){
+              return function(d, i){
+
+                              window.cartogram.highlight_by_id(maps, d.id, 1);
+
+                              window.cartogram.tooltip_hide();
+                          };}()));
             
             if(labels != null)
             {
@@ -998,4 +1024,18 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
             window.cartogram.gridedit_window.close();
         }
     }
+
+    document.getElementById('tooltip').onmouseenter = (function(){
+        return function(e){
+            window.cartogram.hovering_on_tooltip = true;
+        };
+    }());
+
+    document.getElementById('tooltip').onmouseleave = (function(){
+        return function(e){
+            window.cartogram.hovering_on_tooltip = false;
+
+            window.cartogram.tooltip_hide();
+        };
+    }());
 }
