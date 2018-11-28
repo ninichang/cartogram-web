@@ -182,7 +182,16 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
         },
         tooltip_hide: function() {
 
-                document.getElementById('tooltip').style.display = 'none';
+                if(!this.hovering_on_tooltip)
+                    document.getElementById('tooltip').style.display = 'none';
+        },
+        tooltip_uncover: function(e) {
+            document.getElementById('tooltip').style.display = 'inline-block';
+
+            document.getElementById('tooltip').style.left = (e.pageX - 50) + 'px';
+            
+
+                document.getElementById('tooltip').style.top = (e.pageY + 15) + 'px';
         },
         draw_bar_chart_from_tooltip(container, tooltip) {
 
@@ -493,7 +502,11 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                                     .attr('font-family', 'sans-serif')
                                     .attr('font-size', '7.5px')
                                     .attr('fill', '#000')
-                                    .text(function(d) { return d.text; });
+                                    .text(function(d) { return d.text; })
+                                    /* This fixes the bug where the tooltip disappears when hovering over label text */
+                                    .on('mouseenter', function(d){ window.cartogram.hovering_on_tooltip = true; window.cartogram.tooltip_uncover(d3.event); })
+                                    .on('mousemove', function(d){ window.cartogram.tooltip_uncover(d3.event); })
+                                    .on('mouseleave', function(d){ window.cartogram.hovering_on_tooltip = false;});
                 
                 var lines = canvas.selectAll("line")
                                     .data(labels.lines)
