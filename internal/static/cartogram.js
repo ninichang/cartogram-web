@@ -504,9 +504,9 @@ function cartogram_init(c_u, cui_u, c_d, g_u)
                                     .attr('fill', '#000')
                                     .text(function(d) { return d.text; })
                                     /* This fixes the bug where the tooltip disappears when hovering over label text */
-                                    .on('mouseenter', function(d){ window.cartogram.hovering_on_tooltip = true; window.cartogram.tooltip_uncover(d3.event); })
+                                    /*.on('mouseenter', function(d){ window.cartogram.hovering_on_tooltip = true; window.cartogram.tooltip_uncover(d3.event); })
                                     .on('mousemove', function(d){ window.cartogram.tooltip_uncover(d3.event); })
-                                    .on('mouseleave', function(d){ window.cartogram.hovering_on_tooltip = false;});
+                                    .on('mouseleave', function(d){ window.cartogram.hovering_on_tooltip = false;});*/
                 
                 var lines = canvas.selectAll("line")
                                     .data(labels.lines)
