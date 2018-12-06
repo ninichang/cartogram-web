@@ -1,6 +1,6 @@
 import cartwrap, gen2dict
 import settings
-from handlers import usa, india, china
+from handlers import usa, india, china, germany, brazil
 
 import json
 import csv
@@ -39,7 +39,9 @@ db = SQLAlchemy(app)
 cartogram_handlers = {
     'usa': usa.CartogramHandler(),
     'india': india.CartogramHandler(),
-    'china': china.CartogramHandler()
+    'china': china.CartogramHandler(),
+    'germany': germany.CartogramHandler(),
+    'brazil': brazil.CartogramHandler()
 }
 
 default_cartogram_handler = "usa"
