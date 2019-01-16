@@ -1,42 +1,85 @@
+import xml
 from xml.dom import minidom
 import json
 import sys
+import re
 
-# This script takes an SVG file containing a map with label information and
-# outputs the label JSON information to stdout. Run this script with
-#
-# python svg2labels.py [svg-file] [scale-x] [scale-y]
-#
-# Note that this script only supports files which were originally created by
-# the go-cart web interface. Labels created manually, from scratch with a
-# program like Inkscape are not yet supported.
+little_m_re = re.compile(r'm ([0-9.\-]+),([0-9.\-]+) ([0-9.\-]+),([0-9.\-]+)')
+big_m_re = re.compile(r'M ([0-9.\-]+),([0-9.\-]+) ([0-9.\-]+),([0-9.\-]+)')
 
-svg_map = minidom.parse(sys.argv[1])
-labels = {"scale_x": float(sys.argv[2]), "scale_y": float(sys.argv[3]), "labels": [], "lines": []}
-
-def get_class_list(class_attr):
-
-    return class_attr.split(" ")
-
-for text in svg_map.getElementsByTagName("text"):
-
-    if "cartogram-label" not in get_class_list(text.getAttribute("class")):
-        continue
+def getInnerText(node):
     
-    label = {'x': float(text.getAttribute("x")), 'y': float(text.getAttribute("y")), 'text': text.firstChild.data}
+    text = ""
 
-    labels['labels'].append(label)
+    for child in node.childNodes:
+        
+        if child.nodeType == xml.dom.Node.TEXT_NODE:
 
-for line in svg_map.getElementsByTagName("line"):
+            text += child.nodeValue
+        
+        else:
+
+            text += getInnerText(child)
     
-    if "cartogram-label" not in get_class_list(text.getAttribute("class")):
-        continue
+    return text
+
+def convert(svg_filepath, scale_x, scale_y):
+    svg_map = minidom.parse(svg_filepath)
+    labels = {"scale_x": scale_x, "scale_y": scale_y, "labels": [], "lines": []}
+
+    for text in svg_map.getElementsByTagName("text"):
+
+        if not text.hasAttribute("inkscape:label"):
+            continue
+        
+        if text.getAttribute("inkscape:label") != "gocartlabel":
+            continue
+        
+        label_text = getInnerText(text)
+        label_x = float(text.getAttribute("x"))
+        label_y = float(text.getAttribute("y"))
+
+        labels['labels'].append({'text': label_text, 'x': label_x, 'y': label_y})
     
-    line = {'x1': float(line.getAttribute("x1")), 'x2': float(line.getAttribute("x2")), 'y1': float(line.getAttribute("y1")), 'y2': float(line.getAttribute("y2"))}
+    for path in svg_map.getElementsByTagName("path"):
 
-    labels['lines'].append(line)
+        if not path.hasAttribute("inkscape:label"):
+            continue
+        
+        if path.getAttribute("inkscape:label") != "gocartlabel":
+            continue
+        
+        p = path.getAttribute("d").strip()
 
-print(json.dumps(labels))
+        little_m_match = little_m_re.match(p)
+
+        if little_m_match != None:
+
+            x1 = float(little_m_match.group(1))
+            y1 = float(little_m_match.group(2))
+
+            x2 = float(little_m_match.group(3)) + x1
+            y2 = float(little_m_match.group(4)) + y1
+
+            labels['lines'].append({'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2})
+
+            continue
+        
+        big_m_match = big_m_re.match(p)
+
+        if big_m_match != None:
+
+            x1 = float(little_m_match.group(1))
+            y1 = float(little_m_match.group(2))
+
+            x2 = float(little_m_match.group(3))
+            y2 = float(little_m_match.group(4))
+
+            labels['lines'].append({'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2})
+
+            continue
+    
+    return labels
     
 
 

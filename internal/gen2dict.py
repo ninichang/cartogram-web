@@ -34,7 +34,7 @@ def translate(in_fp, color):
         # Each polygon receives a unique numerical ID, starting from 1.
         # This will be the same for each map.
         # This allows us to do animations when we switch between cartograms in the website.
-        feature = {'type': 'Feature', 'id': id, 'properties': {
+        feature = {'type': 'Feature', 'id': id.strip(), 'properties': {
             'name': 'UNKNOWN',
             'color': color,
             'attribute': str(random.randint(1,100)),

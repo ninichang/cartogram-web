@@ -15,7 +15,7 @@ import copy
 class NotAValidRegionException(Exception):
     pass
 
-class_region_id_re = re.compile(r'path-.*-([0-9]+)')
+class_region_id_re = re.compile(r'region-([0-9]+)')
 linear_gradient_fill_re = re.compile(r'url\(#(.*)\)')
 
 def parse_inline_css(inline_css):
@@ -54,91 +54,99 @@ def get_color_from_linear_gradient(lgs, lg_id):
     else:
         return lgs[lg_id]['value']
 
-colors = {}
-svg_map = minidom.parse(sys.argv[1])
+def convert(svg_filepath, default_colors_filepath):
 
-with open(sys.argv[2], 'r') as default_colors_file:
-    colors = json.load(default_colors_file)
+    colors = {}
+    colors_by_name = {}
+    svg_map = minidom.parse(svg_filepath)
 
-original_colors = copy.deepcopy(colors)
+    with open(default_colors_filepath, 'r') as default_colors_file:
+        colors = json.load(default_colors_file)
 
-# For some reason, Inkscape likes to define solid colors as linear gradients.
-# Therefore, we have to handle them here *sigh*
-linear_gradients = {}
+    original_colors = copy.deepcopy(colors)
 
-for linear_gradient in svg_map.getElementsByTagName("linearGradient"):
+    # For some reason, Inkscape likes to define solid colors as linear gradients.
+    # Therefore, we have to handle them here *sigh*
+    linear_gradients = {}
 
-    if not linear_gradient.hasAttribute("id"):
-        continue
+    for linear_gradient in svg_map.getElementsByTagName("linearGradient"):
 
-    # First, we see if this gradient links to another one instead of defining
-    # its own color
+        if not linear_gradient.hasAttribute("id"):
+            continue
 
-    if linear_gradient.hasAttribute("xlink:href"):
+        # First, we see if this gradient links to another one instead of defining
+        # its own color
 
-        link_id = linear_gradient.getAttribute("xlink:href")
+        if linear_gradient.hasAttribute("xlink:href"):
 
-        if link_id[0] == '#':
-            link_id = link_id[1:]
+            link_id = linear_gradient.getAttribute("xlink:href")
+
+            if link_id[0] == '#':
+                link_id = link_id[1:]
+            
+            linear_gradients[linear_gradient.getAttribute("id")] = {'link': True, 'value': link_id}
+
+            continue
+
+        # Otherwise, we take the color from the 0 (or 0%) stop
+
+        for stop in linear_gradient.getElementsByTagName("stop"):
+
+            if stop.getAttribute("offset") == "0" or stop.getAttribute("offset") == "0%":
+
+                css_properties = parse_inline_css(stop.getAttribute("style"))
+                linear_gradients[linear_gradient.getAttribute("id")] = {'link': False, 'value': css_properties["stop-color"]}
+
+
+    for path in svg_map.getElementsByTagName("path"):
+
+        # First, see if we have a valid region
+        try:
+            region_id = get_path_region_id(path.getAttribute("class"))
+        except NotAValidRegionException:
+            continue
         
-        linear_gradients[linear_gradient.getAttribute("id")] = {'link': True, 'value': link_id}
+        # Next, see if its ID is in the color definition
+        if 'id_{}'.format(region_id) not in colors:
+            print("ID {} is not a valid ID.".format(region_id))
+            continue
+        
+        # Now, update the color if necessary. If the color specified in the SVG
+        # file is the same as the original color, then we don't update.
+        # This makes it easier to color maps with many small polygons. We only
+        # need to update the color for one polygon in a region for the region's
+        # color to be updated.
 
-        continue
+        new_color = path.getAttribute("fill").lower()
 
-    # Otherwise, we take the color from the 0 (or 0%) stop
+        # We have to check inline CSS too *sigh*
+        # Our inline CSS parser is very basic, but it should do
 
-    for stop in linear_gradient.getElementsByTagName("stop"):
+        if path.hasAttribute("style"):
 
-        if stop.getAttribute("offset") == "0" or stop.getAttribute("offset") == "0%":
+            css_properties = parse_inline_css(path.getAttribute("style"))
 
-            css_properties = parse_inline_css(stop.getAttribute("style"))
-            linear_gradients[linear_gradient.getAttribute("id")] = {'link': False, 'value': css_properties["stop-color"]}
+            if "fill" in css_properties:
 
+                linear_gradient_match = linear_gradient_fill_re.match(css_properties["fill"])
 
-for path in svg_map.getElementsByTagName("path"):
+                if linear_gradient_match is not None:
+                    new_color = get_color_from_linear_gradient(linear_gradients, linear_gradient_match.group(1))
+                else:
+                    new_color = css_properties["fill"]
 
-    # First, see if we have a valid region
-    try:
-        region_id = get_path_region_id(path.getAttribute("class"))
-    except NotAValidRegionException:
-        continue
+        if original_colors['id_{}'.format(region_id)].lower() != new_color:
+            #print("Updating color for region {} (original color {}, new color {})".format(region_id, original_colors['id_{}'.format(region_id)], new_color))
+            colors['id_{}'.format(region_id)] = new_color
+        else:
+            pass
+            #print("Did not get new color for region {} (original color {}, new color {})".format(region_id, original_colors['id_{}'.format(region_id)], new_color))
+        
+        if path.hasAttribute("gocart:regionname"):
+            colors_by_name[path.getAttribute("gocart:regionname")] = colors['id_{}'.format(region_id)]
     
-    # Next, see if its ID is in the color definition
-    if 'id_{}'.format(region_id) not in colors:
-        print("ID {} is not a valid ID.".format(region_id))
-        continue
-    
-    # Now, update the color if necessary. If the color specified in the SVG
-    # file is the same as the original color, then we don't update.
-    # This makes it easier to color maps with many small polygons. We only
-    # need to update the color for one polygon in a region for the region's
-    # color to be updated.
+    return colors, colors_by_name
 
-    new_color = path.getAttribute("fill").lower()
-
-    # We have to check inline CSS too *sigh*
-    # Our inline CSS parser is very basic, but it should do
-
-    if path.hasAttribute("style"):
-
-        css_properties = parse_inline_css(path.getAttribute("style"))
-
-        if "fill" in css_properties:
-
-            linear_gradient_match = linear_gradient_fill_re.match(css_properties["fill"])
-
-            if linear_gradient_match is not None:
-                new_color = get_color_from_linear_gradient(linear_gradients, linear_gradient_match.group(1))
-            else:
-                new_color = css_properties["fill"]
-
-    if original_colors['id_{}'.format(region_id)].lower() != new_color:
-        print("Updating color for region {} (original color {}, new color {})".format(region_id, original_colors['id_{}'.format(region_id)], new_color))
-        colors['id_{}'.format(region_id)] = new_color
-    else:
-        print("Did not get new color for region {} (original color {}, new color {})".format(region_id, original_colors['id_{}'.format(region_id)], new_color))
-
-print(json.dumps(colors))
     
 
 

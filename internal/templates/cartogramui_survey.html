@@ -40,7 +40,25 @@
     .btn-group .btn-secondary {
       font-size: large;
     }
+
+#tooltip {
+      display: none;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid black;
+      width: auto;
+      height: auto;
+      min-height: 75px;
+      min-width: 200px;
+      padding: 5px;
+      position: fixed;
+      font-size: small;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+    }
 </style>
+
+<p id="tooltip">&nbsp;</p>
 
 <div class="container" style="display: none">
         <div class="row">
@@ -139,7 +157,7 @@
        <div class="col-md-6">
          <!--<p><a class="btn btn-secondary" href="#" role="button">Download this map &raquo;</a></p>-->
          <div style="height: 110px">
-           <p id="tooltip">&nbsp;</p>
+           
          </div>
          <h5 id="map1-toplabel" style="display: none;"></h5>
          <div id = "map-area">

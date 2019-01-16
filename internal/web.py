@@ -2,6 +2,11 @@ import cartwrap, gen2dict
 import settings
 from handlers import usa, india, china, germany, brazil, brazil_combined, india_no_tg
 
+# !!!DO NOT MODFIY THE FOLLOWING SECTION
+from handlers import china2
+# ---addmap.py header marker---
+# !!!END DO NOT MODFIY
+
 import json
 import csv
 import codecs
@@ -38,13 +43,17 @@ app.config['ENV'] = 'development' if settings.DEBUG else 'production'
 db = SQLAlchemy(app)
 
 cartogram_handlers = {
-    'usa': usa.CartogramHandler(),
-    'india': india.CartogramHandler(),
-    'india-no-tg': india_no_tg.CartogramHandler(),
-    'china': china.CartogramHandler(),
-    'germany': germany.CartogramHandler(),
-    'brazil': brazil.CartogramHandler(),
-    'brazil-combined': brazil_combined.CartogramHandler()    
+'usa': usa.CartogramHandler(),
+'india': india.CartogramHandler(),
+'india-no-tg': india_no_tg.CartogramHandler(),
+'china': china.CartogramHandler(),
+'germany': germany.CartogramHandler(),
+'brazil': brazil.CartogramHandler(),
+'brazil-combined': brazil_combined.CartogramHandler(),
+# !!!DO NOT MODFIY THE FOLLOWING SECTION
+'china2': china2.CartogramHandler(),
+# ---addmap.py body marker---
+# !!!END DO NOT MODFIY
 }
 
 default_cartogram_handler = "usa"

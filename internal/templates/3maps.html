@@ -2,6 +2,24 @@
 
 {% block content %}
 
+<style>
+    #tooltip {
+      display: none;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid black;
+      width: auto;
+      height: auto;
+      min-height: 75px;
+      min-width: 200px;
+      padding: 5px;
+      position: fixed;
+      font-size: small;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+    }
+</style>
+<p id="tooltip">&nbsp;</p>
 <div class="container-fluid" style="margin-top: 20px" id="screenshot">
     {% if display_question_no %}
     <h4>Question {{question_no}}</h4>
@@ -29,7 +47,7 @@
     <div class="row">
         <div class="col-md-4" id="map1-container">
             <div style="height: 110px">
-                <p id="tooltip">&nbsp;</p>
+                
             </div>
             <h5 id="map1-name"></h5>
             <div id="map1"></div>
