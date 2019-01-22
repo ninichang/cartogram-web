@@ -409,7 +409,15 @@ function cartsurvey_init(a_u,t_u,d_u,s_u,sui_u,) {
                 }(id));
             }
 
-            document.getElementById('question-no').innerText = id + 1;
+            if(question.hasOwnProperty("question_title"))
+            {
+                document.getElementById('question-display').innerHTML = question.question_title;
+            }
+            else
+            {
+                document.getElementById('question-no').innerText = id + 1;
+            }
+            
 
 
         }

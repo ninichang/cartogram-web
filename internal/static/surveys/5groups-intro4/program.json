@@ -3,7 +3,8 @@
         {
             "type":"cartogram",
             "map":"usa",
-            "data":"usa_electoral"
+            "data":"usa_electoral",
+            "question_title":"Demo"
         },
         {
             "type":"url",
