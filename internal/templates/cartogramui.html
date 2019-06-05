@@ -83,7 +83,7 @@
              <a class="btn btn-secondary" href="{{cartogram_data_dir}}/{{default_cartogram_handler}}/template.csv" role="button" id="template-link">Download CSV template &raquo;</a>
            </div>
            <div class = "col-md-6">
-             <form action="#" method="POST" enctype="multipart/form-data" class="form-inline" onsubmit="return window.cartogram.request_and_draw_cartogram();" id="cartogram-form">
+             <form action="#" method="POST" enctype="multipart/form-data" class="form-inline" onsubmit="return window.cartogram.requestAndDrawCartogram();" id="cartogram-form">
                <div class="input-group mb-2 mr-sm-2">
                  <label for="handler">Map:&nbsp;&nbsp;</label>
                  <select class="form-control" id="handler">
@@ -94,11 +94,11 @@
                </div>
                <!--<div class="input-group mb-2 mr-sm-2">-->
                  <!--<label for="csv">Choose CSV File:&nbsp;&nbsp;</label>-->
-                 <input type="file" name="csv" id="csv" class="form-control-file" accept="text/csv,.csv" style="display: none" onchange="if(this.value != null) { window.cartogram.request_and_draw_cartogram(); }"/>
+                 <input type="file" name="csv" id="csv" class="form-control-file" accept="text/csv,.csv" style="display: none" onchange="if(this.value != null) { window.cartogram.requestAndDrawCartogram(); }"/>
                <!--</div>-->
                  <input type="button" class="btn btn-primary mb-2" value="Upload Data and Generate" onclick="clearFileInput(document.getElementById('csv'));document.getElementById('csv').click();" id="upload-button"/>
 
-                 <input type="button" class="btn btn-primary mb-2" value="Edit" id="edit-button" style="margin-left: 5px" onclick="window.cartogram.launch_gridedit();" disabled/>
+                 <input type="button" class="btn btn-primary mb-2" value="Edit" id="edit-button" style="margin-left: 5px" onclick="window.cartogram.launchGridEdit();" disabled/>
 
              </form>
              <p id="non-fatal-error" class="text-danger font-weight-bold"></p>

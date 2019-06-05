@@ -10,21 +10,21 @@
 {% block javascript %}
 
 <script src="{{ url_for('static', filename='oboe-browser.js') }}"></script>
-
-    <script src="{{ url_for('static', filename='cartogram.js') }}"></script>
+<script src="{{ url_for('static', filename='tinycolor.js') }}"></script>
+    <script src="{{ url_for('static', filename='cartogram2.js') }}"></script>
 
     <script>
       window.onload = function() {
 
-            cartogram_init("{{cartogram_url}}", "{{cartogramui_url}}", "{{cartogram_data_dir}}", "{{url_for('gridedit')}}");
+            window.cartogram = new Cartogram("{{cartogram_url}}", "{{cartogramui_url}}", "{{cartogram_data_dir}}", "{{url_for('gridedit')}}");
 
             document.getElementById('handler').addEventListener('change', function(e){
 
-                window.cartogram.switch_cartogram_type(document.getElementById('handler').value);
+                window.cartogram.switchMap(document.getElementById('handler').value, "");
 
             });
 
-            window.cartogram.switch_cartogram_type("{{default_cartogram_handler}}");
+            window.cartogram.switchMap("{{default_cartogram_handler}}", "");
 
         };
     </script>

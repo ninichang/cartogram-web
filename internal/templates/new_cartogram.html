@@ -9,47 +9,25 @@
 
 {% block javascript %}
     <script src="{{ url_for('static', filename='oboe-browser.js') }}"></script>
-
-    <script src="{{ url_for('static', filename='cartogram.js') }}"></script>
+    <script src="{{ url_for('static', filename='tinycolor.js') }}"></script>
+    <script src="{{ url_for('static', filename='cartogram2.js') }}"></script>
 
     <script>
 
     var cartogramui_data = {{cartogramui_data|safe}};
-    var cartogram_data = Promise.resolve({{cartogram_data|safe}});
+    var cartogram_data = {{cartogram_data|safe}};
 
     window.onload = function() {
 
-            cartogram_init("{{cartogram_url}}", "{{cartogramui_url}}", "{{cartogram_data_dir}}", "{{url_for('gridedit')}}");
+            window.cartogram = new Cartogram("{{cartogram_url}}", "{{cartogramui_url}}", "{{cartogram_data_dir}}", "{{url_for('gridedit')}}");
 
             document.getElementById('handler').addEventListener('change', function(e){
 
-              window.cartogram.switch_cartogram_type(document.getElementById('handler').value);
+              window.cartogram.switchMap(document.getElementById('handler').value, "");
 
             });
 
-            window.cartogram.enter_loading_state();            
-
-            window.cartogram.color_data = cartogramui_data.color_data;
-
-            window.cartogram.draw_three_maps(window.cartogram.get_pregenerated_map("{{default_cartogram_handler}}", "original"), cartogram_data, window.cartogram.get_pregenerated_map("{{default_cartogram_handler}}", "population"), "map-area", "cartogram-area", "Land Area", cartogramui_data.tooltip.label, "Population").then(function(v){
-
-                window.cartogram.tooltip.push(v[0].tooltip);
-                window.cartogram.tooltip.push(v[2].tooltip);
-                window.cartogram.tooltip.push(cartogramui_data.tooltip);
-
-                window.cartogram.generate_svg_download_links('map-area', 'cartogram-area', 'map-download', 'cartogram-download', 'map', 'cartogram');
-
-                window.cartogram.generate_social_media_links("https://go-cart.io/cart/" + v[1].unique_sharing_key);
-
-                if(typeof(cartogramui_data.grid_document) === "object")
-                {
-                    window.cartogram.update_grid_document(cartogramui_data.grid_document);
-                }
-                
-                window.cartogram.exit_loading_state();
-                document.getElementById('cartogram').style.display = 'flex'; // Bootstrap rows use flexbox
-                
-            }, window.cartogram.do_fatal_error);
+            window.cartogram.switchMap("{{default_cartogram_handler}}", "", new MapVersionData(cartogram_data.features, cartogram_data.extrema, cartogramui_data.tooltip), cartogramui_data.color_data);
 
         };
     </script>
