@@ -401,7 +401,9 @@ class MapVersionData {
 }
 
 /**
- * CartMap contains map data for a conventional map or cartogram
+ * CartMap contains map data for a conventional map or cartogram. One map can contain several versions. In a map version,
+ * the map geography is used to represent a different dataset (e.g. land area in a conventional map version, or GDP or
+ * population in a cartogram map version).
  */
 class CartMap {
 
@@ -805,6 +807,9 @@ class CartMap {
 
 }
 
+/**
+ * Cartogram contains the main frontend logic for the go-cart web application.
+ */
 class Cartogram {
 
     /**
@@ -913,6 +918,9 @@ class Cartogram {
 
                     }.bind(this);
 
+                    /*
+                    This sets whether or not the Update button is clickable in the gridedit document
+                    */
                     this.model.gridedit_window.gridedit.set_allow_update(!this.model.in_loading_state);
 
                     this.model.gridedit_window.gridedit.load_document(gd);
@@ -938,6 +946,10 @@ class Cartogram {
         if(this.model.in_loading_state)
             return;
         
+        /*
+        The user may make changes to the grid document while the cartogram loads. As a result, we don't want to update
+        the grid document with the one returned by CartogramUI.
+        */
         this.requestAndDrawCartogram(gd, null, false);
 
     }
@@ -952,7 +964,7 @@ class Cartogram {
 
     /**
      * updateGridDocument updates the current grid document.
-     * @param {Object} new_gd 
+     * @param {Object} new_gd The new grid document
      */
     updateGridDocument(new_gd) {
 
@@ -963,6 +975,9 @@ class Cartogram {
             if(!this.model.in_loading_state)
                 document.getElementById('edit-button').disabled = false;
 
+            /*
+            If the gridedit window is open, push the new grid document to it
+            */
             if(this.model.gridedit_window !== null && !this.model.gridedit_window.closed)
                 this.model.gridedit_window.gridedit.load_document(this.model.grid_document);
         }
@@ -1457,6 +1472,15 @@ class Cartogram {
     /**
      * requestAndDrawCartogram generates and displays a cartogram with a user-provided dataset. Always returns false to 
      * prevent form submission.
+     * 
+     * This is a two step process. First, we make a request to CartogramUI. This generates color and tooltip information
+     * from the uploaded dataset, as well as the areas string that needs to be given to the cartogram generator to
+     * actually generate the cartogram with the given dataset.
+     * 
+     * Once it receives the areas string, the cartogram generator produces a streaming HTTP response with information on
+     * the progress of cartogram generation, and the cartogram points in JSON format. The information from CartogramUI
+     * and the cartogram generator is then combined to draw the cartogram with the correct colors and tooltip
+     * information.
      * @param {Object} gd The grid document to retrieve the dataset from. If null, the dataset is taken from the
      * uploaded CSV file
      * @param {string} sysname The sysname of the map. If null, it is taken from the map selection form control. 
