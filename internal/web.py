@@ -41,7 +41,10 @@ cartogram_handlers = {
     'india': india.CartogramHandler(),
     'china': china.CartogramHandler(),
     'germany': germany.CartogramHandler(),
-    'brazil': brazil.CartogramHandler()
+    'brazil': brazil.CartogramHandler(),
+# !!!DO NOT MODFIY THE FOLLOWING SECTION
+# ---addmap.py body marker---
+# !!!END DO NOT MODFIY
 }
 
 default_cartogram_handler = "usa"
@@ -280,7 +283,7 @@ def cartogram():
         # On the client side, Oboe.js is intelligent enough to parse this and get the loading information and cartogram output
         yield '{"loading_progress_points":['
 
-        for source, line in cartwrap.generate_cartogram(cartogram_handler.gen_area_data(values), cartogram_handler.get_gen_file(), "{}/cartogram".format(settings.CARTOGRAM_DATA_DIR)):
+        for source, line in cartwrap.generate_cartogram(cartogram_handler.gen_area_data(values), cartogram_handler.get_gen_file(), settings.CARTOGRAM_EXE):
 
             if source == "stdout":
                 cartogram_gen_output += line

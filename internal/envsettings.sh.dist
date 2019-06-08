@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export CARTOGRAM_EXE="/home/jansky/cartogram/cartogram_generator/cartogram"
 export CARTOGRAM_DATA_DIR="/home/jansky/cartogram" #Do not include a trailing slash
 export CARTOGRAM_COLOR="#aaaaaa"
 export CARTOGRAM_DEBUG=TRUE

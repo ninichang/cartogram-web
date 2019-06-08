@@ -1,5 +1,6 @@
 import os
 
+CARTOGRAM_EXE = os.environ['CARTOGRAM_EXE']
 CARTOGRAM_DATA_DIR = os.environ['CARTOGRAM_DATA_DIR']
 CARTOGRAM_COLOR = os.environ['CARTOGRAM_COLOR']
 DEBUG = True if os.environ['CARTOGRAM_DEBUG'].lower() == "true" else False
