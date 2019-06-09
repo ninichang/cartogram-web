@@ -6,7 +6,12 @@
 
 <p>First, you need to install some third-party software dependencies. Open a new terminal window, and run the following command:</p>
 
-<pre><code>$ brew install python3 postgresql pkg-config
+<pre><code>$ brew install python3 postgresql
+</code></pre>
+
+<p>Now you'll need to install virtualenv, a tool that makes it easy to manage dependencies for Python projects:</p>
+
+<pre><code>$ pip3 install virtualenv
 </code></pre>
 
 <p>Now you'll need to configure the PostgreSQL database server. PostgreSQL is a robust SQL database server go-cart uses to store users' generated cartograms so they can be shared on social media. In order for go-cart to use PostgreSQL, you'll need to create an account and database:</p>
@@ -16,7 +21,7 @@
 $ createuser --interactive --pwprompt gocart
 </code></pre>
 
-<p>Enter a password when prompted, and answer no to all of the questions asked by typing <code>n</code> and pressing return each time:</p>
+<p>Enter your chosen password when prompted, and answer no to all of the questions asked by typing <code>n</code> and pressing return each time:</p>
 
 <pre><code>Enter password for new role: 
 Enter it again: 
@@ -36,7 +41,26 @@ $ exit
 <pre><code>$ git clone https://github.com/mgastner/cartogram.git
 ...
 $ cd cartogram
-$ chmod +x autobuild.sh
+</code></pre>
+
+<p>There is a slight bug in the current version of the cartogram generator that prevents it from working properly in the web application. However, it's easy to fix. You'll need to make a small change in <code>main.c</code>:</p>
+
+<pre><code>$ open -a textedit main.c
+</code></pre>
+
+<p>Find line 264. It should read:</p>
+
+<pre><code>printf("correction_factor = %f\n", correction_factor);
+</code></pre>
+
+<p>Replace the contents of this line with:</p>
+
+<pre><code>fprintf(stderr, "correction_factor = %f\n", correction_factor);
+</code></pre>
+
+<p>Save the file and quit TextEdit. Now you're ready to compile:</p>
+
+<pre><code>$ chmod +x autobuild.sh
 $ ./autobuild.sh
 ...
 </code></pre>
@@ -57,14 +81,27 @@ $ cp envsettings.sh.dist envsettings.sh
 $ open -a textedit envsettings.sh
 </code></pre>
 
-<p>In the third line, replace <code>/home/jansky/cartogram</code> in <code>CARTOGRAM_DATA_DIR</code> with the path to the folder containing the cartogram generator. Do not include a trailing slash.</p>
+<p>In the third line, replace <code>/home/jansky/cartogram/cartogram_generator/cartogram</code> in <code>CARTOGRAM_EXE</code> with the path to the folder containing the cartogram generator, followed by <code>/cartogram_generator/cartogram</code>. For example, if the root of the cartogram generator repository is</p>
 
-<p>In the ninth line, in <code>CARTOGRAM_DATABASE_URI</code>, replace <code>username</code> with <code>gocart</code>, <code>password</code> with the database password you created, and <code>database</code> with <code>gocart</code>. Save the file and quit TextEdit.</p>
+<pre><code>/home/jansky/cartogram
+</code></pre>
+
+<p>Then <code>CARTOGRAM_EXE</code> should be set to</p>
+
+<pre><code>/home/jansky/cartogram/cartogram_generator/cartogram
+</code></pre>
+
+<p>In the fourth line, replace <code>/home/jansky/cartogram</code> in <code>CARTOGRAM_DATA_DIR</code> with the path to the folder containing the cartogram generator. Do not include a trailing slash.</p>
+
+<p>In the tenth line, in <code>CARTOGRAM_DATABASE_URI</code>, replace <code>username</code> with <code>gocart</code>, <code>password</code> with the database password you created, and <code>database</code> with <code>gocart</code>. Save the file and quit TextEdit.</p>
 
 <p>Finally, you need to initialize the database:</p>
 
 <pre><code>$ source ./setupenv.sh
 (venv) $ python3
+Python 3...
+...
+Type "help", "copyright", "credits" or "license" for more information.
 &gt;&gt;&gt; import web
 &gt;&gt;&gt; web.db.create_all()
 &gt;&gt;&gt; exit()

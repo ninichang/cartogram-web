@@ -1,86 +1,114 @@
-<h1>Setting Up the Web Application on Mac OS X</h1>
+# Setting Up the Web Application on Mac OS X
 
-<p>This setup guide will help you get the go-cart web application up and running on Max OS X. This guide assumes that you already have Homebrew installed.</p>
+This setup guide will help you get the go-cart web application up and running on Max OS X. This guide assumes that you already have Homebrew installed.
 
-<h2>Installing and Configuring Prerequisites</h2>
+## Installing and Configuring Prerequisites
 
-<p>First, you need to install some third-party software dependencies. Open a new terminal window, and run the following command:</p>
+First, you need to install some third-party software dependencies. Open a new terminal window, and run the following command:
 
-<pre><code>$ brew install python3 postgresql pkg-config
-</code></pre>
+    $ brew install python3 postgresql
 
-<p>Now you'll need to configure the PostgreSQL database server. PostgreSQL is a robust SQL database server go-cart uses to store users' generated cartograms so they can be shared on social media. In order for go-cart to use PostgreSQL, you'll need to create an account and database:</p>
+Now you'll need to install virtualenv, a tool that makes it easy to manage dependencies for Python projects:
 
-<pre><code>$ sudo su - postgres
-...
-$ createuser --interactive --pwprompt gocart
-</code></pre>
+    $ pip3 install virtualenv
 
-<p>Enter a password when prompted, and answer no to all of the questions asked by typing <code>n</code> and pressing return each time:</p>
+Now you'll need to configure the PostgreSQL database server. PostgreSQL is a robust SQL database server go-cart uses to store users' generated cartograms so they can be shared on social media. In order for go-cart to use PostgreSQL, you'll need to create an account and database:
 
-<pre><code>Enter password for new role: 
-Enter it again: 
-Shall the new role be a superuser? (y/n) n
-Shall the new role be allowed to create databases? (y/n) n
-Shall the new role be allowed to create more new roles? (y/n) n
-</code></pre>
+    $ sudo su - postgres
+    ...
+    $ createuser --interactive --pwprompt gocart
 
-<p>Now, you can create the database and finish up:</p>
+Enter your chosen password when prompted, and answer no to all of the questions asked by typing `n` and pressing return each time:
 
-<pre><code>$ createdb -O gocart gocart
-$ exit
-</code></pre>
+    Enter password for new role: 
+    Enter it again: 
+    Shall the new role be a superuser? (y/n) n
+    Shall the new role be allowed to create databases? (y/n) n
+    Shall the new role be allowed to create more new roles? (y/n) n
 
-<p>Now, you need to download and compile the cartogram generator. You must use the cartogram generator from the repository below, <strong>not</strong> the one from <code>Flow-Based-Cartograms/go_cart</code>.</p>
+Now, you can create the database and finish up:
 
-<pre><code>$ git clone https://github.com/mgastner/cartogram.git
-...
-$ cd cartogram
-$ chmod +x autobuild.sh
-$ ./autobuild.sh
-...
-</code></pre>
+    $ createdb -O gocart gocart
+    $ exit
 
-<p>Remember the path to the root of this repository, as you'll need it when configuring the web application later.</p>
+Now, you need to download and compile the cartogram generator. You must use the cartogram generator from the repository below, **not** the one from `Flow-Based-Cartograms/go_cart`.
 
-<h2>Installing and Configuring the Web Application</h2>
+    $ git clone https://github.com/mgastner/cartogram.git
+    ...
+    $ cd cartogram
 
-<p>First, clone the web application code from GitHub</p>
+There is a slight bug in the current version of the cartogram generator that prevents it from working properly in the web application. However, it's easy to fix. You'll need to make a small change in `main.c`:
 
-<pre><code>$ git clone https://github.com/jansky/cartogram-web
-</code></pre>
+    $ open -a textedit main.c
 
-<p>Now, you need to change some settings:</p>
+Find line 264. It should read:
 
-<pre><code>$ cd cartogram-web/internal
-$ cp envsettings.sh.dist envsettings.sh
-$ open -a textedit envsettings.sh
-</code></pre>
+    printf("correction_factor = %f\n", correction_factor);
 
-<p>In the third line, replace <code>/home/jansky/cartogram</code> in <code>CARTOGRAM_DATA_DIR</code> with the path to the folder containing the cartogram generator. Do not include a trailing slash.</p>
+Replace the contents of this line with:
 
-<p>In the ninth line, in <code>CARTOGRAM_DATABASE_URI</code>, replace <code>username</code> with <code>gocart</code>, <code>password</code> with the database password you created, and <code>database</code> with <code>gocart</code>. Save the file and quit TextEdit.</p>
+    fprintf(stderr, "correction_factor = %f\n", correction_factor);
 
-<p>Finally, you need to initialize the database:</p>
+Save the file and quit TextEdit. Now you're ready to compile:
 
-<pre><code>$ source ./setupenv.sh
-(venv) $ python3
-&gt;&gt;&gt; import web
-&gt;&gt;&gt; web.db.create_all()
-&gt;&gt;&gt; exit()
-(venv) $
-</code></pre>
+    $ chmod +x autobuild.sh
+    $ ./autobuild.sh
+    ...
 
-<h2>Running the Web Application</h2>
+Remember the path to the root of this repository, as you'll need it when configuring the web application later.
 
-<p>When you want to run the web application, open a new terminal window and navigate to the root of the <code>cartogram-web</code> repository using <code>cd</code>. Then, run</p>
+## Installing and Configuring the Web Application
 
-<pre><code>$ cd internal
-$ source ./setupenv.sh
-(venv) $ python web.py
-...
-</code></pre>
+First, clone the web application code from GitHub
 
-<p>Now, you can navigate to http://localhost:5000 in your web browser to access the go-cart web application. </p>
+    $ git clone https://github.com/jansky/cartogram-web
 
-<p>When you are finished, you can go back to the terminal window and press Control-C to kill the web application process.</p>
+Now, you need to change some settings:
+
+    $ cd cartogram-web/internal
+    $ cp envsettings.sh.dist envsettings.sh
+    $ open -a textedit envsettings.sh
+
+In the third line, replace `/home/jansky/cartogram/cartogram_generator/cartogram` in `CARTOGRAM_EXE` with the path to the folder containing the cartogram generator, followed by `/cartogram_generator/cartogram`. For example, if the root of the cartogram generator repository is
+
+    /home/jansky/cartogram
+
+Then `CARTOGRAM_EXE` should be set to
+
+    /home/jansky/cartogram/cartogram_generator/cartogram
+
+
+In the fourth line, replace `/home/jansky/cartogram` in `CARTOGRAM_DATA_DIR` with the path to the folder containing the cartogram generator. Do not include a trailing slash.
+
+In the tenth line, in `CARTOGRAM_DATABASE_URI`, replace `username` with `gocart`, `password` with the database password you created, and `database` with `gocart`. Save the file and quit TextEdit.
+
+Finally, you need to initialize the database:
+
+    $ source ./setupenv.sh
+    (venv) $ python3
+    Python 3...
+    ...
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import web
+    >>> web.db.create_all()
+    >>> exit()
+    (venv) $
+
+## Running the Web Application
+
+When you want to run the web application, open a new terminal window and navigate to the root of the `cartogram-web` repository using `cd`. Then, run
+
+    $ cd internal
+    $ source ./setupenv.sh
+    (venv) $ python web.py
+    ...
+
+Now, you can navigate to http://localhost:5000 in your web browser to access the go-cart web application. 
+
+When you are finished, you can go back to the terminal window and press Control-C to kill the web application process.
+
+
+
+
+
+
