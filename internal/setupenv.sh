@@ -1,7 +1,7 @@
 #!/bin/bash
 
 VIRTUALENV_LOCATION=${VIRTUALENV_LOCATION:=venv}
-PYTHON=${PYTHON:="/usr/bin/python3"}
+PYTHON=${PYTHON:=`which python3`}
 
 if [ ! -d "$VIRTUALENV_LOCATION" ]; then
 

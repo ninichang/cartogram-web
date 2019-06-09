@@ -1,6 +1,6 @@
 # Adding a Map
 
-This guide will help you add a new map to the go-cart.io website. This guide assumes that you have already set up the website code for local testing and development. If you have not done this, please read the setup guide in `docs/setup` before you continue.
+This guide will help you add a new map to the go-cart.io website. This guide assumes that you have already set up the website code for local testing and development.
 
 ## What You'll Need
 
