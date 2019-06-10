@@ -489,7 +489,6 @@ def data(map_name):
 
     try:
         labels = svg2labels.convert("{}.svg".format(map_name), labels_scale_x, labels_scale_y)
-        print(repr(labels))
     except Exception as e:
         print(repr(e))
         cleanup()
@@ -562,7 +561,7 @@ def data(map_name):
 
         gen_output_lines = []
 
-        for source, line in cartwrap.generate_cartogram(map_handler.gen_area_data(areas), map_handler.get_gen_file(), "{}/cartogram".format(os.environ["CARTOGRAM_DATA_DIR"])):
+        for source, line in cartwrap.generate_cartogram(map_handler.gen_area_data(areas), map_handler.get_gen_file(), os.environ["CARTOGRAM_EXE"]):
 
             if source == "stdout":
                 gen_output_lines.append(line.decode().strip())

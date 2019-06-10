@@ -128,11 +128,11 @@ def convert(svg_filepath, default_colors_filepath):
                     new_color = css_properties["fill"]
 
         if original_colors['id_{}'.format(region_id)].lower() != new_color:
-            #print("Updating color for region {} (original color {}, new color {})".format(region_id, original_colors['id_{}'.format(region_id)], new_color))
+            print("Updating color for region {} (original color {}, new color {})".format(region_id, original_colors['id_{}'.format(region_id)], new_color))
             colors['id_{}'.format(region_id)] = new_color
         else:
             pass
-            #print("Did not get new color for region {} (original color {}, new color {})".format(region_id, original_colors['id_{}'.format(region_id)], new_color))
+            print("Did not get new color for region {} (original color {}, new color {})".format(region_id, original_colors['id_{}'.format(region_id)], new_color))
         
         if path.hasAttribute("gocart:regionname"):
             colors_by_name[path.getAttribute("gocart:regionname")] = colors['id_{}'.format(region_id)]

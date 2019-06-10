@@ -505,6 +505,16 @@ class CartMap {
             max_height = new_version_height;
         }
 
+        if(max_width > 500.0) {
+            var max_width_old = max_width;
+            max_width = 500.0;
+            max_height = (max_width / max_width_old) * max_height;
+        }
+
+        if(max_height > 1000.0) {
+            max_height = 1000.0;
+        }
+
         this.width = max_width;
         this.height = max_height;
 
