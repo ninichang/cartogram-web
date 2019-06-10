@@ -255,10 +255,8 @@ class CartogramHandler(handlers.base_handler.BaseCartogramHandler):
                 width = max_x - min_x
                 height = max_y - min_y
 
-                if width > 750.0:
-                    scale = 1.0
-                else:
-                    scale = 750.0/width
+
+                scale = 750.0/width
                 
                 width *= scale
                 height *= scale
