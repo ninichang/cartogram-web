@@ -1,12 +1,12 @@
 # Setting Up the Web Application on Mac OS X
 
-This setup guide will help you get the go-cart web application up and running on Max OS X. This guide assumes that you already have Homebrew installed.
+This setup guide will help you get the go-cart web application up and running on Ubuntu.
 
 ## Installing and Configuring Prerequisites
 
 First, you need to install some third-party software dependencies. Open a new terminal window, and run the following command:
 
-    $ brew install python3 postgresql
+    $ sudo apt-get install python3 postgresql
 
 Now you'll need to install virtualenv, a tool that makes it easy to manage dependencies for Python projects:
 
@@ -14,23 +14,7 @@ Now you'll need to install virtualenv, a tool that makes it easy to manage depen
 
 Now you'll need to configure the PostgreSQL database server. PostgreSQL is a robust SQL database server go-cart uses to store users' generated cartograms so they can be shared on social media. In order for go-cart to use PostgreSQL, you'll need to first initialize it, then create an account and database:
 
-    $ brew services start postgresql
-    $ initdb /usr/local/var/postgres
-
-If you receive the error
-
-    initdb: directory "/usr/local/var/postgres" exists but is not empty
-    If you want to create a new database system, either remove or empty
-    the directory "/usr/local/var/postgres" or run initdb
-    with an argument other than "/usr/local/var/postgres".
-
-then run the following commands:
-
-    $ rm -r /usr/local/var/postgres
-    $ initdb /usr/local/var/postgres
-
-Now you can create a PostgreSQL account and database for the web application:
-
+    $ sudo su - postgres
     $ createuser --interactive --pwprompt gocart
 
 Enter your chosen password when prompted, and answer no to all of the questions asked by typing `n` and pressing return each time:
@@ -44,6 +28,7 @@ Enter your chosen password when prompted, and answer no to all of the questions 
 Now, you can create the database:
 
     $ createdb -O gocart gocart
+    $ exit
 
 Now, you need to download and compile the cartogram generator. You must use the cartogram generator from the repository below, **not** the one from `Flow-Based-Cartograms/go_cart`.
 
@@ -53,7 +38,7 @@ Now, you need to download and compile the cartogram generator. You must use the 
 
 There is a slight bug in the current version of the cartogram generator that prevents it from working properly in the web application. However, it's easy to fix. You'll need to make a small change in `main.c`:
 
-    $ open -a textedit cartogram_generator/main.c
+    $ gedit cartogram_generator/main.c
 
 Find line 264. It should read:
 
@@ -81,7 +66,7 @@ Now, you need to change some settings:
 
     $ cd cartogram-web/internal
     $ cp envsettings.sh.dist envsettings.sh
-    $ open -a textedit envsettings.sh
+    $ gedit envsettings.sh
 
 In the third line, replace `/home/jansky/cartogram/cartogram_generator/cartogram` in `CARTOGRAM_EXE` with the path to the folder containing the cartogram generator, followed by `/cartogram_generator/cartogram`. For example, if the root of the cartogram generator repository is
 
