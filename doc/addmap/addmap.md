@@ -161,7 +161,7 @@ Now the coloring process becomes significantly easier. Left click on each region
 
 Some of your map regions may include many small polygons that are hard to spot in Inkscape. You don't have to color each one. The Add Map Wizard only requires that you color **one** polygon per map region (usually it is easiest if you color the largest one).
 
-When you are done coloring each region, you should save your SVG file. Go to `File -> Save As...` in the Inkscape menu. Don't change the filename, but ensure that the file type is `Plain SVG`, and **not** `Inkscape SVG`. When saving, Inkscape may ask you whether you want to overwrite your SVG file. You should accept overwriting this file. 
+When you are done coloring each region, you should save your SVG file by going to `File -> Save`.
 
 ### Adding Labels
 
@@ -173,7 +173,7 @@ First, we'll add a text label. Click the text tool on the toolbar, left click on
 
 ![Inkscape 7](inkscape-labels2.png)
 
-Adjust the font size to 14 so that the label text appears as it would on the website. The font size of the labels in Inkscape does not affect their appearance on the website, but setting it appropriately will make it easier for you to place them correctly.
+After you've added the text label, go to `Text -> Convert to Text` in the menubar (if you don't do this, then the text label won't be detected by the Add Map Wizard). Then, adjust the font size to 14 so that the label text appears as it would on the website. The font size of the labels in Inkscape does not affect their appearance on the website, but setting it appropriately will make it easier for you to place them correctly.
 
 Now, go to `Object -> Object Properties...`. Set the 'Label' field to `gocartlabel`, and click 'Set'. This will help the Add Map Wizard find your text labels in the SVG document.
 
@@ -187,7 +187,7 @@ If a region is too small to contain a text label, you can place the text label o
 
 Again, go to `Object -> Object Properties...`. Set the 'Label' field to `gocartlabel`, and click 'Set'.
 
-Once you have finished adding all of your labels, you should save your SVG file. Go to `File -> Save As...` in the Inkscape menu. Don't change the filename, but ensure that the file type is `Plain SVG`, and **not** `Inkscape SVG`. When saving, Inkscape may ask you whether you want to overwrite your SVG file. You should accept overwriting this file.
+Once you have finished adding all of your labels, you should save your SVG file by going to `File -> Save`.
 
 ### Finishing Up
 
