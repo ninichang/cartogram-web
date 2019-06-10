@@ -12,10 +12,25 @@ Now you'll need to install virtualenv, a tool that makes it easy to manage depen
 
     $ pip3 install virtualenv
 
-Now you'll need to configure the PostgreSQL database server. PostgreSQL is a robust SQL database server go-cart uses to store users' generated cartograms so they can be shared on social media. In order for go-cart to use PostgreSQL, you'll need to create an account and database:
+Now you'll need to configure the PostgreSQL database server. PostgreSQL is a robust SQL database server go-cart uses to store users' generated cartograms so they can be shared on social media. In order for go-cart to use PostgreSQL, you'll need to first initialize it, then create an account and database:
 
-    $ sudo su - postgres
-    ...
+    $ brew services start postgresql
+    $ initdb /usr/local/var/postgres
+
+If you receive the error
+
+    initdb: directory "/usr/local/var/postgres" exists but is not empty
+    If you want to create a new database system, either remove or empty
+    the directory "/usr/local/var/postgres" or run initdb
+    with an argument other than "/usr/local/var/postgres".
+
+then run the following commands:
+
+    $ rm -r /usr/local/var/postgres
+    $ initdb /usr/local/var/postgres
+
+Now you can create a PostgreSQL account and database for the web application:
+
     $ createuser --interactive --pwprompt gocart
 
 Enter your chosen password when prompted, and answer no to all of the questions asked by typing `n` and pressing return each time:
@@ -26,10 +41,9 @@ Enter your chosen password when prompted, and answer no to all of the questions 
     Shall the new role be allowed to create databases? (y/n) n
     Shall the new role be allowed to create more new roles? (y/n) n
 
-Now, you can create the database and finish up:
+Now, you can create the database:
 
     $ createdb -O gocart gocart
-    $ exit
 
 Now, you need to download and compile the cartogram generator. You must use the cartogram generator from the repository below, **not** the one from `Flow-Based-Cartograms/go_cart`.
 

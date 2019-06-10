@@ -14,11 +14,29 @@
 <pre><code>$ pip3 install virtualenv
 </code></pre>
 
-<p>Now you'll need to configure the PostgreSQL database server. PostgreSQL is a robust SQL database server go-cart uses to store users' generated cartograms so they can be shared on social media. In order for go-cart to use PostgreSQL, you'll need to create an account and database:</p>
+<p>Now you'll need to configure the PostgreSQL database server. PostgreSQL is a robust SQL database server go-cart uses to store users' generated cartograms so they can be shared on social media. In order for go-cart to use PostgreSQL, you'll need to first initialize it, then create an account and database:</p>
 
-<pre><code>$ sudo su - postgres
-...
-$ createuser --interactive --pwprompt gocart
+<pre><code>$ brew services start postgresql
+$ initdb /usr/local/var/postgres
+</code></pre>
+
+<p>If you receive the error</p>
+
+<pre><code>initdb: directory "/usr/local/var/postgres" exists but is not empty
+If you want to create a new database system, either remove or empty
+the directory "/usr/local/var/postgres" or run initdb
+with an argument other than "/usr/local/var/postgres".
+</code></pre>
+
+<p>then run the following commands:</p>
+
+<pre><code>$ rm -r /usr/local/var/postgres
+$ initdb /usr/local/var/postgres
+</code></pre>
+
+<p>Now you can create a PostgreSQL account and database for the web application:</p>
+
+<pre><code>$ createuser --interactive --pwprompt gocart
 </code></pre>
 
 <p>Enter your chosen password when prompted, and answer no to all of the questions asked by typing <code>n</code> and pressing return each time:</p>
@@ -30,10 +48,9 @@ Shall the new role be allowed to create databases? (y/n) n
 Shall the new role be allowed to create more new roles? (y/n) n
 </code></pre>
 
-<p>Now, you can create the database and finish up:</p>
+<p>Now, you can create the database:</p>
 
 <pre><code>$ createdb -O gocart gocart
-$ exit
 </code></pre>
 
 <p>Now, you need to download and compile the cartogram generator. You must use the cartogram generator from the repository below, <strong>not</strong> the one from <code>Flow-Based-Cartograms/go_cart</code>.</p>
