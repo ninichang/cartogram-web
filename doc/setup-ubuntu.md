@@ -77,7 +77,15 @@ Then `CARTOGRAM_EXE` should be set to
     /home/jansky/cartogram/cartogram_generator/cartogram
 
 
-In the fourth line, replace `/home/jansky/cartogram` in `CARTOGRAM_DATA_DIR` with the path to the folder containing the cartogram generator. Do not include a trailing slash.
+In the fourth line, replace `/home/jansky/cartogram` in `CARTOGRAM_DATA_DIR` with the path to the folder containing the cartogram generator, followed by `/data`. Do not include a trailing slash.
+
+For example, if the root of the cartogram generator repository is
+
+    /home/jansky/cartogram
+
+Then `CARTOGRAM_DATA_DIR` should be set to
+
+    /home/jansky/cartogram/data
 
 In the tenth line, in `CARTOGRAM_DATABASE_URI`, replace `username` with `gocart`, `password` with the database password you created, and `database` with `gocart`. Save the file and quit TextEdit.
 
