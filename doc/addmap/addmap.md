@@ -45,8 +45,7 @@ When you're finished creating your .dat file, you should save it in `CARTOGRAM_D
 
 Before creating a new map, you should create a Git branch to contain your work. Open a Terminal window and navigate to the `internal/` directory of the repository. Then, run
 
-    $ git branch add-my-map-name
-    $ git checkout add-my-map-name
+    $ git checkout -b add-my-map-name
 
 You should never add maps or make other changes on the default `master` branch!
 

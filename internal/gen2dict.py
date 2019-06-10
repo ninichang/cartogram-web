@@ -30,6 +30,9 @@ def translate(in_fp, color):
         if id == "END":
             break
         
+        id_parts = id.split()
+        id = id_parts[0]
+        
         # Each polygon receives a unique numerical ID, starting from 1.
         # This will be the same for each map.
         # This allows us to do animations when we switch between cartograms in the website.

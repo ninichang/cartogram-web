@@ -234,6 +234,7 @@ class CartogramHandler(handlers.base_handler.BaseCartogramHandler):
         with open("{}/{}".format(os.environ["CARTOGRAM_DATA_DIR"], map_gen_path), "r") as map_gen_file:
 
             gen_json = gen2dict.translate(map_gen_file, "#aaaaaa")
+
     except Exception as e:
         print(repr(e))
         cleanup()
