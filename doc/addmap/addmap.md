@@ -9,7 +9,7 @@ To add a map, you will need the following files, information, and software:
 * Conventional map geography, in .gen format
 * Map region names and abbreviations
 * A sample dataset (e.g. GDP)
-* Population and land area (in km^2) for each map region
+* Population and land area (in km<sup>2</sup>) for each map region
 * Inkscape, a free, open-source vector graphics editor for Windows, Mac, and Linux that can be downloaded at https://inkscape.org/. 
 
 ## Preparing Your Data
