@@ -3,7 +3,6 @@ import settings
 from handlers import usa, india, china, germany, brazil
 
 # !!!DO NOT MODFIY THE FOLLOWING SECTION
-from handlers import australia
 # ---addmap.py header marker---
 # !!!END DO NOT MODFIY
 
@@ -48,7 +47,6 @@ cartogram_handlers = {
     'germany': germany.CartogramHandler(),
     'brazil': brazil.CartogramHandler(),
 # !!!DO NOT MODFIY THE FOLLOWING SECTION
-'australia': australia.CartogramHandler(),
 # ---addmap.py body marker---
 # !!!END DO NOT MODFIY
 }
