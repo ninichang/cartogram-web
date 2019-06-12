@@ -3,6 +3,7 @@ import json
 import sys
 import re
 import copy
+import os
 
 class NotAValidRegionException(Exception):
     pass
@@ -127,11 +128,10 @@ def convert(svg_filepath, default_colors_filepath):
                 else:
                     new_color = css_properties["fill"]
 
-        if original_colors['id_{}'.format(region_id)].lower() != new_color:
+        if original_colors['id_{}'.format(region_id)].lower() != new_color and new_color != os.environ['CARTOGRAM_COLOR']:
             print("Updating color for region {} (original color {}, new color {})".format(region_id, original_colors['id_{}'.format(region_id)], new_color))
             colors['id_{}'.format(region_id)] = new_color
         else:
-            pass
             print("Did not get new color for region {} (original color {}, new color {})".format(region_id, original_colors['id_{}'.format(region_id)], new_color))
         
         if path.hasAttribute("gocart:regionname"):

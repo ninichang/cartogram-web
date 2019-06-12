@@ -1,8 +1,8 @@
-region 1: cartogram area = 502.976854, relative error = 0.002543
-region 2: cartogram area = 10455.875652, relative error = -0.000195
-region 3: cartogram area = 313.045699, relative error = 0.007734
-region 4: cartogram area = 6062.902078, relative error = -0.000111
-region 5: cartogram area = 2377.809176, relative error = -0.000574
-region 6: cartogram area = 749.129296, relative error = 0.000491
-region 7: cartogram area = 7739.915720, relative error = 0.000157
-region 8: cartogram area = 3090.391868, relative error = -0.000385
+region 1: cartogram area = 267.298361, relative error = -0.000089
+region 2: cartogram area = 5128.029206, relative error = -0.000017
+region 3: cartogram area = 164.290844, relative error = 0.008391
+region 4: cartogram area = 3212.898805, relative error = -0.000065
+region 5: cartogram area = 1135.749743, relative error = -0.000122
+region 6: cartogram area = 343.181107, relative error = -0.000039
+region 7: cartogram area = 4093.657352, relative error = -0.000034
+region 8: cartogram area = 16946.940925, relative error = -0.000044

@@ -15,6 +15,9 @@ class BaseCartogramHandler:
     
     def csv_to_area_string_and_colors(self, csvfile):
         raise NotImplementedError("This function must be implemented.")
+    
+    def remove_holes(self):
+        return False
 
     
     # This function takes a CSVReader and returns a tuple containing:

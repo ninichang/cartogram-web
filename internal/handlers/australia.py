@@ -21,6 +21,9 @@ class CartogramHandler(handlers.base_handler.BaseCartogramHandler):
 
         return True
     
+    def remove_holes(self):
+        return True
+    
     def gen_area_data(self, values):
         return """2 {} New South Wales
 7 {} Victoria

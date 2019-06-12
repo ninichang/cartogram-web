@@ -306,7 +306,7 @@ def cartogram():
         # We create a fake last entry because you can't have dangling commas in JSON
         yield '{"loading_point":0, "stderr_line": ""}],"cartogram_data":'
 
-        cartogram_json = gen2dict.translate(io.StringIO(cartogram_gen_output.decode()), settings.CARTOGRAM_COLOR)        
+        cartogram_json = gen2dict.translate(io.StringIO(cartogram_gen_output.decode()), settings.CARTOGRAM_COLOR, cartogram_handler.remove_holes())        
 
         cartogram_json['unique_sharing_key'] = unique_sharing_key
         cartogram_json = json.dumps(cartogram_json)

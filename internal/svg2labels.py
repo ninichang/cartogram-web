@@ -38,6 +38,8 @@ def convert(svg_filepath, scale_x, scale_y):
         label_text = getInnerText(text)
         label_x = float(text.getAttribute("x"))
         label_y = float(text.getAttribute("y"))
+        
+        print("Found text label '{}' at {},{}.".format(label_text, label_x, label_y))
 
         labels['labels'].append({'text': label_text, 'x': label_x, 'y': label_y})
     
@@ -55,11 +57,14 @@ def convert(svg_filepath, scale_x, scale_y):
 
         if little_m_match != None:
 
+
             x1 = float(little_m_match.group(1))
             y1 = float(little_m_match.group(2))
 
             x2 = float(little_m_match.group(3)) + x1
             y2 = float(little_m_match.group(4)) + y1
+
+            print("Found line from {},{} to {},{}.".format(x1,x2,y1,y2))
 
             labels['lines'].append({'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2})
 
@@ -69,11 +74,13 @@ def convert(svg_filepath, scale_x, scale_y):
 
         if big_m_match != None:
 
-            x1 = float(little_m_match.group(1))
-            y1 = float(little_m_match.group(2))
+            x1 = float(big_m_match.group(1))
+            y1 = float(big_m_match.group(2))
 
-            x2 = float(little_m_match.group(3))
-            y2 = float(little_m_match.group(4))
+            x2 = float(big_m_match.group(3))
+            y2 = float(big_m_match.group(4))
+
+            print("Found line from {},{} to {},{}.".format(x1,x2,y1,y2))
 
             labels['lines'].append({'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2})
 

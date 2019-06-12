@@ -7,6 +7,7 @@ import shutil
 import gen2dict
 import svg2color
 import svg2labels
+import svg2config
 import traceback
 import importlib
 import cartwrap
@@ -129,6 +130,9 @@ class CartogramHandler(handlers.base_handler.BaseCartogramHandler):
     
     def gen_area_data(self, values):
         return """{3}""".format(*values)
+    
+    def remove_holes(self):
+        return True
 
     def csv_to_area_string_and_colors(self, csvfile):
 
@@ -495,6 +499,19 @@ def data(map_name):
         return
     
     print()
+    print("I will now parse {}.svg for configuration information.".format(map_name))
+    print()
+    
+    print("Reading {}.svg...".format(map_name))
+
+    try:
+        config = svg2config.convert("{}.svg".format(map_name))
+    except Exception as e:
+        print(repr(e))
+        cleanup()
+        return
+    
+    print()
     print("I will now parse the land area and population information from each region from {0}-landarea.csv and {0}-population.csv".format(map_name))
     print()
 
@@ -573,7 +590,7 @@ def data(map_name):
         with open("{}-population.gen".format(map_name), "w") as population_gen_file:
             population_gen_file.write(gen_output)
 
-        cartogram_json = gen2dict.translate(io.StringIO(gen_output), "#aaaaaa")
+        cartogram_json = gen2dict.translate(io.StringIO(gen_output), "#aaaaaa", True)
 
         cartogram_json["tooltip"] = population_cartogramui[2]
     except Exception as e:
@@ -589,7 +606,7 @@ def data(map_name):
         with open(map_handler.get_gen_file(), "r") as map_gen_file:
 
             try:
-                original_json = gen2dict.translate(map_gen_file, "#aaaaaa")
+                original_json = gen2dict.translate(map_gen_file, "#aaaaaa", True)
 
                 original_tooltip = landarea_cartogramui[2]
                 original_tooltip['unit'] = 'km sq.'
@@ -738,6 +755,21 @@ def data(map_name):
 
             try:
                 json.dump(new_colors, colors_json_file)
+            except Exception as e:
+                print(repr(e))
+                cleanup()
+                return
+    except Exception as e:
+        print(repr(e))
+        cleanup()
+        return
+    
+    print("Writing static/cartdata/{}/config.json...".format(map_name))
+    try:
+        with open("static/cartdata/{}/config.json".format(map_name), "w") as colors_json_file:
+
+            try:
+                json.dump(config, colors_json_file)
             except Exception as e:
                 print(repr(e))
                 cleanup()

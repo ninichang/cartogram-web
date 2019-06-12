@@ -49,8 +49,7 @@
 
 <p>Before creating a new map, you should create a Git branch to contain your work. Open a Terminal window and navigate to the <code>internal/</code> directory of the repository. Then, run</p>
 
-<pre><code>$ git branch add-my-map-name
-$ git checkout add-my-map-name
+<pre><code>$ git checkout -b add-my-map-name
 </code></pre>
 
 <p>You should never add maps or make other changes on the default <code>master</code> branch!</p>
@@ -131,7 +130,17 @@ All done!
 
 <p>At this point, the Add Map Wizard has produced several files in the <code>internal/</code> directory that you'll need to edit to complete the map addition process. First, you should edit <code>your-map-landarea.csv</code> and <code>your-map-population.csv</code> to add the population and land area information for each map region. You can edit these manually, using a text editor, or with a spreadsheet program like LibreOffice Calc or Microsoft Excel.</p>
 
-<p>Now, by editing <code>your-map.svg</code> using Inkscape, you will set the default color for each map region and add labels for the conventional map. </p>
+<p>Now, by editing <code>your-map.svg</code> using Inkscape, you will ensure enclaves are displayed properly, set the default color for each map region and add labels for the conventional map.</p>
+
+<h3>Ensuring Enclaves Display Properly</h3>
+
+<p>Some regions of your map may be enclaves, meaning that they are completely surrounded by other regions. The go-cart.io web application is able to prevent holes in the region surrounding an enclave from displaying improperly. However, sometimes the region surrounding and enclave may hide the enclave. For example, in the map of Australia below, New South Wales is covering up the Australian Capital Territory. When you are adding maps, you should check if this is the case. </p>
+
+<p><img src="inkscape-enclave1.png" alt="Inkscape Enclave 1" title="" /></p>
+
+<p>This problem is easily fixable. First, select the surrounding region that is hiding the enclave (in this case, New South Wales). Then, go to <code>Object -&gt; Lower to Bottom</code>. The enclave region should now become visible. Select the enclave region. Now, go to <code>Object -&gt; Object Properties...</code>. Set the 'Label' field to <code>gocartelevate</code>, and click 'Set'. This will help the Add Map Wizard ensure that the enclave region is displayed properly.</p>
+
+<p><img src="inkscape-enclave2.png" alt="Inkscape Enclave 2" title="" /></p>
 
 <h3>Adding Colors</h3>
 
@@ -176,7 +185,7 @@ All done!
 
 <p>Some of your map regions may include many small polygons that are hard to spot in Inkscape. You don't have to color each one. The Add Map Wizard only requires that you color <strong>one</strong> polygon per map region (usually it is easiest if you color the largest one).</p>
 
-<p>When you are done coloring each region, you should save your SVG file. Go to <code>File -&gt; Save As...</code> in the Inkscape menu. Don't change the filename, but ensure that the file type is <code>Plain SVG</code>, and <strong>not</strong> <code>Inkscape SVG</code>. When saving, Inkscape may ask you whether you want to overwrite your SVG file. You should accept overwriting this file. </p>
+<p>When you are done coloring each region, you should save your SVG file by going to <code>File -&gt; Save</code>.</p>
 
 <h3>Adding Labels</h3>
 
@@ -188,7 +197,7 @@ All done!
 
 <p><img src="inkscape-labels2.png" alt="Inkscape 7" title="" /></p>
 
-<p>Adjust the font size to 14 so that the label text appears as it would on the website. The font size of the labels in Inkscape does not affect their appearance on the website, but setting it appropriately will make it easier for you to place them correctly.</p>
+<p>After you've added the text label, go to <code>Text -&gt; Convert to Text</code> in the menubar (if you don't do this, then the text label won't be detected by the Add Map Wizard). Then, adjust the font size to 14 so that the label text appears as it would on the website. The font size of the labels in Inkscape does not affect their appearance on the website, but setting it appropriately will make it easier for you to place them correctly.</p>
 
 <p>Now, go to <code>Object -&gt; Object Properties...</code>. Set the 'Label' field to <code>gocartlabel</code>, and click 'Set'. This will help the Add Map Wizard find your text labels in the SVG document.</p>
 
@@ -202,7 +211,7 @@ All done!
 
 <p>Again, go to <code>Object -&gt; Object Properties...</code>. Set the 'Label' field to <code>gocartlabel</code>, and click 'Set'.</p>
 
-<p>Once you have finished adding all of your labels, you should save your SVG file. Go to <code>File -&gt; Save As...</code> in the Inkscape menu. Don't change the filename, but ensure that the file type is <code>Plain SVG</code>, and <strong>not</strong> <code>Inkscape SVG</code>. When saving, Inkscape may ask you whether you want to overwrite your SVG file. You should accept overwriting this file.</p>
+<p>Once you have finished adding all of your labels, you should save your SVG file by going to <code>File -&gt; Save</code>.</p>
 
 <h3>Finishing Up</h3>
 

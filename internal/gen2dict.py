@@ -5,6 +5,22 @@ import random
 import sys
 import json
 
+def polygon_area(coordinates):
+
+    area_sum = 0.0
+
+    for i in range(len(coordinates)):
+
+        x1 = coordinates[i % len(coordinates)][0]
+        y1 = coordinates[i % len(coordinates)][1]
+        x2 = coordinates[(i+1) % len(coordinates)][0]
+        y2 = coordinates[(i+1) % len(coordinates)][1]
+
+        area_sum += (x1 * y2) - (y1 * x2)
+    
+    return area_sum / 2.0
+
+
 # This function turns .gen output from the C code into JSON plottable by D3. It returns a Python dictionary that can be
 # easily turned into json via json.dump or json.dumps. You may invoke this module as a script:
 # 
@@ -15,7 +31,7 @@ import json
 # in_fp:    A stream that contains the .gen file contents
 # color:    A default color in case color information cannot be added later. This color should be a hex color code
 #           (.e.g. "#aaaaaa") or a valid CSS color name (e.g. "red")
-def translate(in_fp, color):
+def translate(in_fp, color, remove_holes=False):
 
     result = {'type': 'FeatureCollection', 'features': [], 'extrema': {'max_x': None, 'min_x': None, 'min_y': None, 'max_y': None}}
     polygon_id = 1
@@ -78,7 +94,13 @@ def translate(in_fp, color):
             except ValueError:
                 break #The region has been completed
         
-        result['features'].append(feature)
+        if remove_holes:
+            if polygon_area(feature['coordinates']) > 0.0: # If the polygon is a hole, ignore it
+                pass
+            else:
+                result['features'].append(feature)
+        else:        
+            result['features'].append(feature)
     
     return result
 
