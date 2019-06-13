@@ -57,7 +57,7 @@ def translate(in_fp, color, remove_holes=False):
             'color': color,
             'attribute': str(random.randint(1,100)),
             'polygon_id': polygon_id,
-        }, 'coordinates': []}
+        }, 'coordinates': [], 'holes': []}
 
         polygon_id += 1
 
@@ -95,8 +95,8 @@ def translate(in_fp, color, remove_holes=False):
                 break #The region has been completed
         
         if remove_holes:
-            if polygon_area(feature['coordinates']) > 0.0: # If the polygon is a hole, ignore it
-                pass
+            if polygon_area(feature['coordinates']) > 0.0: # If the polygon is a hole, add it to the previous polygon as a hole
+                result['features'][-1]['holes'].append(feature['coordinates'])
             else:
                 result['features'].append(feature)
         else:        
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
     with open(sys.argv[1], 'r') as genfile:
 
-        gen_info = translate(genfile, sys.argv[3])
+        gen_info = translate(genfile, sys.argv[3], True)
     
     with open(sys.argv[2], 'w') as jsonfile:
 

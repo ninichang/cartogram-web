@@ -218,6 +218,55 @@ class HTTP {
 }
 
 /**
+ * SVG contains helper methods for drawing SVG objects
+ */
+class SVG {
+
+    /**
+     * lineFunction returns a string of SVG path commands for a polygon with holes
+     * @param {Function} scaleX A function to scale X coordinates
+     * @param {Function} scaleY A function to scale Y coordinates
+     * @param {Array} coordinates An array of coordinates for the polygon
+     * @param {Array} holes An array of arrays of coordinates for the holes of the polygon
+     * @returns {string} The SVG path
+     */
+    static lineFunction(scaleX, scaleY, coordinates, holes) {
+
+        var path = "";
+
+        for(let i = 0; i < coordinates.length; i++) {
+
+            if(i == 0) {
+                path += "M " + scaleX(coordinates[i]).toString() + "," + scaleY(coordinates[i]).toString() + " ";
+            } else {
+                path += "L " + scaleX(coordinates[i]).toString() + "," + scaleY(coordinates[i]).toString() + " ";
+            }
+
+        }
+
+        path += "z ";
+
+        holes.forEach(function(hole_coords){
+
+            for(let i = 0; i < hole_coords.length; i++) {
+                if(i == 0) {
+                    path += "M " + scaleX(hole_coords[i]).toString() + "," + scaleY(hole_coords[i]).toString() + " ";
+                } else {
+                    path += "L " + scaleX(hole_coords[i]).toString() + "," + scaleY(hole_coords[i]).toString() + " ";
+                }
+            }
+
+            path += "z ";
+
+        });
+
+        return path;
+
+    }
+
+}
+
+/**
  * Polygon contains data for one D3 polygon
  */
 class Polygon {
@@ -227,8 +276,9 @@ class Polygon {
      * @param {string} id The id of the Path
      * @param {Object} path The D3 line function of the Polygon
      * @param {Array<Array<number,number>>} coordinates The raw coordinates of the Polygon, to be used to rescale the polygon for area equalization
+     * @param {Array<Array<Array<number,number>>>} holes The raw holes of the Polygon, to be used to rescale the polygon for area equalization
      */
-    constructor(id, path, coordinates) {
+    constructor(id, path, coordinates, holes=[]) {
         /**
          * The Polygon ID
          * @type {string}
@@ -242,6 +292,8 @@ class Polygon {
         this.path = path;
 
         this.coordinates = coordinates;
+
+        this.holes = holes;
     }
 }
 
@@ -355,7 +407,8 @@ class MapVersionData {
 
                 this.regions[feature.id].polygons.push({
                     id: feature.properties.polygon_id.toString(),
-                    coordinates: feature.coordinates
+                    coordinates: feature.coordinates,
+                    holes: feature.hasOwnProperty("holes") ? feature.holes : []
                 })
 
             } else {
@@ -364,7 +417,8 @@ class MapVersionData {
                     polygons: [
                         {
                             id: feature.properties.polygon_id.toString(),
-                            coordinates: feature.coordinates
+                            coordinates: feature.coordinates,
+                            holes: feature.hasOwnProperty("holes") ? feature.holes : []
                         }
                     ],
                     name: tooltip.data["id_" + feature.id]["name"],
@@ -422,7 +476,7 @@ class CartMap {
          */
         this.config = {
             dont_draw: config.dont_draw.map(id => id.toString()),
-            elevate: config.elevate.map(id => id.toString())
+            elevate: config.elevate.map(id => id.toString()),
         }
 
         /**
@@ -536,11 +590,19 @@ class CartMap {
             var polygons = region.polygons.map(polygon =>
                 new Polygon(
                     polygon.id,
-                    d3.svg.line()
+                    /*d3.svg.line()
                         .x(d => scale_factors[sysname].x * (-1*(data.extrema.min_x) + d[0]))
                         .y(d => scale_factors[sysname].y * ((data.extrema.max_y) - d[1]))
-                        .interpolate("linear")(polygon.coordinates),
-                    polygon.coordinates
+                        .interpolate("linear")(polygon.coordinates),*/
+                    SVG.lineFunction(
+                        d => scale_factors[sysname].x * (-1*(data.extrema.min_x) + d[0]),
+                        d => scale_factors[sysname].y * ((data.extrema.max_y) - d[1]),
+                        polygon.coordinates,
+                        polygon.holes
+                    ),
+                    polygon.coordinates,
+                    polygon.holes
+
                 )
             );
 
@@ -573,11 +635,18 @@ class CartMap {
                 var polygons = this.regions[region_id].versions[version_sysname].polygons.map(polygon =>
                     new Polygon(
                         polygon.id,
-                        d3.svg.line()
+                        /*d3.svg.line()
                             .x(d => scale_factors[version_sysname].x * (-1*(this.versions[version_sysname].extrema.min_x) + d[0]))
                             .y(d => scale_factors[version_sysname].y * ((this.versions[version_sysname].extrema.max_y) - d[1]))
-                            .interpolate("linear")(polygon.coordinates),
-                        polygon.coordinates
+                            .interpolate("linear")(polygon.coordinates),*/
+                        SVG.lineFunction(
+                            d => scale_factors[version_sysname].x * (-1*(this.versions[version_sysname].extrema.min_x) + d[0]),
+                            d => scale_factors[version_sysname].y * ((this.versions[version_sysname].extrema.max_y) - d[1]),
+                            polygon.coordinates,
+                            polygon.holes
+                        ),
+                        polygon.coordinates,
+                        polygon.holes
                     )
                 )
 

@@ -237,7 +237,7 @@ class CartogramHandler(handlers.base_handler.BaseCartogramHandler):
     try:
         with open("{}/{}".format(os.environ["CARTOGRAM_DATA_DIR"], map_gen_path), "r") as map_gen_file:
 
-            gen_json = gen2dict.translate(map_gen_file, "#aaaaaa")
+            gen_json = gen2dict.translate(map_gen_file, "#aaaaaa", True)
 
     except Exception as e:
         print(repr(e))
@@ -282,11 +282,21 @@ class CartogramHandler(handlers.base_handler.BaseCartogramHandler):
 
                 for feature in gen_json["features"]:
 
-                    path = " ".join(list(map(lambda coord: "{} {}".format(round(x_transform(coord[0]), 3), round(y_transform(coord[1]), 3)), feature["coordinates"])))
+                    polygon_path = " ".join(list(map(lambda coord: "{} {}".format(round(x_transform(coord[0]), 3), round(y_transform(coord[1]), 3)), feature["coordinates"])))
+
+                    hole_paths = []
+
+                    for hole in feature['holes']:
+
+                        hole_points = " ".join(list(map(lambda coord: "{} {}".format(round(x_transform(coord[0]), 3), round(y_transform(coord[1]), 3)), hole)))
+                        hole_path = "M {} z".format(hole_points)
+                        hole_paths.append(hole_path)
+                    
+                    path = "M {} z {}".format(polygon_path, " ".join(hole_paths))
 
                     region = find_region_by_id(feature["id"])
 
-                    svg_file.write('<path gocart:regionname="{}" d="M {} z" id="polygon-{}" class="region-{}" fill="#aaaaaa" stroke="#000000" stroke-width="1"/>\n'.format(region["name"], path, feature["properties"]["polygon_id"], feature["id"]))
+                    svg_file.write('<path gocart:regionname="{}" d="{}" id="polygon-{}" class="region-{}" fill="#aaaaaa" stroke="#000000" stroke-width="1"/>\n'.format(region["name"], path, feature["properties"]["polygon_id"], feature["id"]))
                 
                 svg_file.write("</svg>")
             

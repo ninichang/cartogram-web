@@ -130,17 +130,7 @@ All done!
 
 <p>At this point, the Add Map Wizard has produced several files in the <code>internal/</code> directory that you'll need to edit to complete the map addition process. First, you should edit <code>your-map-landarea.csv</code> and <code>your-map-population.csv</code> to add the population and land area information for each map region. You can edit these manually, using a text editor, or with a spreadsheet program like LibreOffice Calc or Microsoft Excel.</p>
 
-<p>Now, by editing <code>your-map.svg</code> using Inkscape, you will ensure enclaves are displayed properly, set the default color for each map region and add labels for the conventional map.</p>
-
-<h3>Ensuring Enclaves Display Properly</h3>
-
-<p>Some regions of your map may be enclaves, meaning that they are completely surrounded by other regions. The go-cart.io web application is able to prevent holes in the region surrounding an enclave from displaying improperly. However, sometimes the region surrounding and enclave may hide the enclave. For example, in the map of Australia below, New South Wales is covering up the Australian Capital Territory. When you are adding maps, you should check if this is the case. </p>
-
-<p><img src="inkscape-enclave1.png" alt="Inkscape Enclave 1" title="" /></p>
-
-<p>This problem is easily fixable. First, select the surrounding region that is hiding the enclave (in this case, New South Wales). Then, go to <code>Object -&gt; Lower to Bottom</code>. The enclave region should now become visible. Select the enclave region. Now, go to <code>Object -&gt; Object Properties...</code>. Set the 'Label' field to <code>gocartelevate</code>, and click 'Set'. This will help the Add Map Wizard ensure that the enclave region is displayed properly.</p>
-
-<p><img src="inkscape-enclave2.png" alt="Inkscape Enclave 2" title="" /></p>
+<p>Now, by editing <code>your-map.svg</code> using Inkscape, you will set the default color for each map region and add labels for the conventional map.</p>
 
 <h3>Adding Colors</h3>
 

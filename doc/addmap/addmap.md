@@ -119,17 +119,7 @@ If there is a problem, the wizard will print an error message, clean up, and exi
 
 At this point, the Add Map Wizard has produced several files in the `internal/` directory that you'll need to edit to complete the map addition process. First, you should edit `your-map-landarea.csv` and `your-map-population.csv` to add the population and land area information for each map region. You can edit these manually, using a text editor, or with a spreadsheet program like LibreOffice Calc or Microsoft Excel.
 
-Now, by editing `your-map.svg` using Inkscape, you will ensure enclaves are displayed properly, set the default color for each map region and add labels for the conventional map.
-
-### Ensuring Enclaves Display Properly
-
-Some regions of your map may be enclaves, meaning that they are completely surrounded by other regions. The go-cart.io web application is able to prevent holes in the region surrounding an enclave from displaying improperly. However, sometimes the region surrounding and enclave may hide the enclave. For example, in the map of Australia below, New South Wales is covering up the Australian Capital Territory. When you are adding maps, you should check if this is the case. 
-
-![Inkscape Enclave 1](inkscape-enclave1.png)
-
-This problem is easily fixable. First, select the surrounding region that is hiding the enclave (in this case, New South Wales). Then, go to `Object -> Lower to Bottom`. The enclave region should now become visible. Select the enclave region. Now, go to `Object -> Object Properties...`. Set the 'Label' field to `gocartelevate`, and click 'Set'. This will help the Add Map Wizard ensure that the enclave region is displayed properly.
-
-![Inkscape Enclave 2](inkscape-enclave2.png)
+Now, by editing `your-map.svg` using Inkscape, you will set the default color for each map region and add labels for the conventional map.
 
 ### Adding Colors
 
