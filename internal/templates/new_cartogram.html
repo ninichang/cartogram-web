@@ -10,7 +10,7 @@
 {% block javascript %}
     <script src="{{ url_for('static', filename='oboe-browser.js') }}"></script>
     <script src="{{ url_for('static', filename='tinycolor.js') }}"></script>
-    <script src="{{ url_for('static', filename='cartogram2.js') }}"></script>
+    <script src="{{ url_for('static', filename='cartogram2.js') }}v=20190624-1"></script>
 
     <script>
 
@@ -27,7 +27,27 @@
 
             });
 
-            window.cartogram.switchMap("{{default_cartogram_handler}}", "", new MapVersionData(cartogram_data.features, cartogram_data.extrema, cartogramui_data.tooltip), cartogramui_data.color_data);
+            /* We need to find out the map format. If the extrema is located in the bbox property, then we have
+               GeoJSON. Otherwise, we have the old JSON format.
+            */
+           if(cartogram_data.hasOwnProperty("bbox")) {
+
+               var extrema = {
+                   min_x: cartogram_data.bbox[0],
+                   min_y: cartogram_data.bbox[1],
+                   max_x: cartogram_data.bbox[2],
+                   max_y: cartogram_data.bbox[3]
+               };
+
+               window.cartogram.switchMap("{{default_cartogram_handler}}", "", new MapVersionData(cartogram_data.features, extrema, cartogramui_data.tooltip, null, null, MapDataFormat.GEOJSON), cartogramui_data.color_data);
+
+
+           } else {
+                window.cartogram.switchMap("{{default_cartogram_handler}}", "", new MapVersionData(cartogram_data.features, cartogram_data.extrema, cartogramui_data.tooltip, null, null, MapDataFormat.GOCARTJSON), cartogramui_data.color_data);
+           }
+
+
+            
 
         };
     </script>

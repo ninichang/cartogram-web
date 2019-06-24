@@ -18,6 +18,9 @@ class BaseCartogramHandler:
     
     def remove_holes(self):
         return False
+    
+    def expect_geojson_output(self):
+        return False
 
     
     # This function takes a CSVReader and returns a tuple containing:
