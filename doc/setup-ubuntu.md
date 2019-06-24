@@ -4,13 +4,14 @@ This setup guide will help you get the go-cart web application up and running on
 
 ## Installing and Configuring Prerequisites
 
-First, you need to install some third-party software dependencies. Open a new terminal window, and run the following command:
+First, you need to install some third-party software dependencies. Open a new terminal window, and run the following commands:
 
     $ sudo apt-get install python3 postgresql
+    $ sudo apt install python3-pip
 
 Now you'll need to install virtualenv, a tool that makes it easy to manage dependencies for Python projects:
 
-    $ pip3 install virtualenv
+    $ sudo pip3 install virtualenv
 
 Now you'll need to configure the PostgreSQL database server. PostgreSQL is a robust SQL database server go-cart uses to store users' generated cartograms so they can be shared on social media. In order for go-cart to use PostgreSQL, you'll need to first initialize it, then create an account and database:
 
@@ -36,22 +37,9 @@ Now, you need to download and compile the cartogram generator. You must use the 
     ...
     $ cd cartogram
 
-There is a slight bug in the current version of the cartogram generator that prevents it from working properly in the web application. However, it's easy to fix. You'll need to make a small change in `main.c`:
+Compile the program:
 
-    $ gedit cartogram_generator/main.c
-
-Find line 264. It should read:
-
-    printf("correction_factor = %f\n", correction_factor);
-
-Replace the contents of this line with:
-
-    fprintf(stderr, "correction_factor = %f\n", correction_factor);
-
-Save the file and quit TextEdit. Now you're ready to compile:
-
-    $ chmod +x autobuild.sh
-    $ ./autobuild.sh
+    $ sudo bash autobuild.sh
     ...
 
 Remember the path to the root of this repository, as you'll need it when configuring the web application later.
