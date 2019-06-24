@@ -8,6 +8,7 @@ import gen2dict
 import svg2color
 import svg2labels
 import svg2config
+import geojson_extrema
 import traceback
 import importlib
 import cartwrap
@@ -55,12 +56,12 @@ def init(map_name):
     user_friendly_name = input("Enter a user friendly name for this map: ")
 
     print()
-    print("Now I need to know where the .gen and .dat files for this map are located. These files should be located in the CARTOGRAM_DATA_DIR directory. You should supply me with a path relative to CARTOGRAM_DATA_DIR.")
-    print("E.G: The .gen file for this map is located at CARTOGRAM_DATA_DIR/map.gen. Enter \"map.gen\".")
+    print("Now I need to know where the .json and .csv files for this map are located. These files should be located in the CARTOGRAM_DATA_DIR directory. You should supply me with a path relative to CARTOGRAM_DATA_DIR.")
+    print("E.G: The .json file for this map is located at CARTOGRAM_DATA_DIR/map.json. Enter \"map.json\".")
     print()
 
-    map_gen_path = input("Enter the location of the .gen file for this map: ")
-    map_dat_path = input("Enter the location of the .dat file for this map: ")
+    map_gen_path = input("Enter the location of the .json file for this map: ")
+    map_dat_path = input("Enter the location of the .csv file for this map: ")
 
     if not os.path.exists("{}/{}".format(os.environ["CARTOGRAM_DATA_DIR"], map_gen_path)):
         print("Error: It looks like the file {}/{} does not exist.".format(os.environ["CARTOGRAM_DATA_DIR"], map_gen_path))
@@ -74,26 +75,19 @@ def init(map_name):
         dat_contents = dat_file.read()
     
     regions = []
-    for line in dat_contents.split("\n"):
-        if len(line.strip()) < 1:
-            continue
-        
-        line_parts = line.split(" ")
+    
+    with open("{}/{}".format(os.environ["CARTOGRAM_DATA_DIR"], map_dat_path), newline='') as dat_file:
 
-        if len(line_parts) < 4:
-            print("Error: The following line in the .dat file you specified is malformed:\n\n{}".format(line))
-            print()
-            print("I expect each line of the .dat file to look like: ")
-            print()
-            print("[Region ID] [Data Value] [Region Name] [Region Abbreviation]")
-            return
-        
-        region_id = line_parts[0]
-        region_data = line_parts[1]
-        region_name = " ".join(line_parts[2:-1])
-        region_abbreviation = line_parts[-1]
+        reader = csv.DictReader(dat_file)
 
-        regions.append({"id": region_id, "data": region_data, "name": region_name, "abbreviation": region_abbreviation})
+        for row in reader:
+
+            regions.append({
+                "id": row["Region Id"],
+                "data": row["Region Data"],
+                "name": row["Region Name"],
+                "abbreviation": row["Region Abbreviation"]
+            })
     
     def find_region_by_id(i):
         for region in regions:
@@ -131,7 +125,7 @@ class CartogramHandler(handlers.base_handler.BaseCartogramHandler):
     def gen_area_data(self, values):
         return """{3}""".format(*values)
     
-    def remove_holes(self):
+    def expect_geojson_output(self):
         return True
 
     def csv_to_area_string_and_colors(self, csvfile):
@@ -237,7 +231,7 @@ class CartogramHandler(handlers.base_handler.BaseCartogramHandler):
     try:
         with open("{}/{}".format(os.environ["CARTOGRAM_DATA_DIR"], map_gen_path), "r") as map_gen_file:
 
-            gen_json = gen2dict.translate(map_gen_file, "#aaaaaa", True)
+            geo_json = json.load(map_gen_file)
 
     except Exception as e:
         print(repr(e))
@@ -251,10 +245,10 @@ class CartogramHandler(handlers.base_handler.BaseCartogramHandler):
 
             try:
 
-                max_x = gen_json["extrema"]["max_x"]
-                min_x = gen_json["extrema"]["min_x"]
-                max_y = gen_json["extrema"]["max_y"]
-                min_y = gen_json["extrema"]["min_y"]
+                max_x = geo_json["bbox"][2]
+                min_x = geo_json["bbox"][0]
+                max_y = geo_json["bbox"][3]
+                min_y = geo_json["bbox"][1]
 
                 width = max_x - min_x
                 height = max_y - min_y
@@ -280,23 +274,64 @@ class CartogramHandler(handlers.base_handler.BaseCartogramHandler):
      xmlns:gocart="https://go-cart.io">
 """.format(round(width,2), round(height, 2)))
 
-                for feature in gen_json["features"]:
+                next_polygon_id = 1
 
-                    polygon_path = " ".join(list(map(lambda coord: "{} {}".format(round(x_transform(coord[0]), 3), round(y_transform(coord[1]), 3)), feature["coordinates"])))
+                for feature in geo_json["features"]:
 
-                    hole_paths = []
+                    if feature["geometry"]["type"] == "Polygon":
 
-                    for hole in feature['holes']:
+                        polygon_path = None
+                        hole_paths = []
+                        polygon_id = next_polygon_id
 
-                        hole_points = " ".join(list(map(lambda coord: "{} {}".format(round(x_transform(coord[0]), 3), round(y_transform(coord[1]), 3)), hole)))
-                        hole_path = "M {} z".format(hole_points)
-                        hole_paths.append(hole_path)
-                    
-                    path = "M {} z {}".format(polygon_path, " ".join(hole_paths))
+                        for path in feature["geometry"]["coordinates"]:
 
-                    region = find_region_by_id(feature["id"])
+                            next_polygon_id += 1
 
-                    svg_file.write('<path gocart:regionname="{}" d="{}" id="polygon-{}" class="region-{}" fill="#aaaaaa" stroke="#000000" stroke-width="1"/>\n'.format(region["name"], path, feature["properties"]["polygon_id"], feature["id"]))
+                            if polygon_path == None:
+
+                                polygon_path = " ".join(list(map(lambda coord: "{} {}".format(round(x_transform(coord[0]), 3), round(y_transform(coord[1]), 3)), path)))
+                                
+                            else:
+
+                                hole_path = " ".join(list(map(lambda coord: "{} {}".format(round(x_transform(coord[0]), 3), round(y_transform(coord[1]), 3)), path)))
+
+                                hole_paths.append("M {} z".format(hole_path))
+                        
+                        path = "M {} z {}".format(polygon_path, " ".join(hole_paths))
+
+                        region = find_region_by_id(feature["id"])
+
+                        svg_file.write('<path gocart:regionname="{}" d="{}" id="polygon-{}" class="region-{}" fill="#aaaaaa" stroke="#000000" stroke-width="1"/>\n'.format(region["name"], path, polygon_id, feature["id"]))
+                    elif feature["geometry"]["type"] == "MultiPolygon":
+
+                        for polygon in feature["geometry"]["coordinates"]:
+
+                            polygon_path = None
+                            hole_paths = []
+                            polygon_id = next_polygon_id
+
+                            for path in polygon:
+
+                                next_polygon_id += 1
+
+                                if polygon_path == None:
+
+                                    polygon_path = " ".join(list(map(lambda coord: "{} {}".format(round(x_transform(coord[0]), 3), round(y_transform(coord[1]), 3)), path)))
+                                    
+                                else:
+
+                                    hole_path = " ".join(list(map(lambda coord: "{} {}".format(round(x_transform(coord[0]), 3), round(y_transform(coord[1]), 3)), path)))
+
+                                    hole_paths.append("M {} z".format(hole_path))
+                            
+                            path = "M {} z {}".format(polygon_path, " ".join(hole_paths))
+
+                            region = find_region_by_id(feature["properties"]["cartogram_id"])
+
+                            svg_file.write('<path gocart:regionname="{}" d="{}" id="polygon-{}" class="region-{}" fill="#aaaaaa" stroke="#000000" stroke-width="1"/>\n'.format(region["name"], path, polygon_id, feature["properties"]["cartogram_id"]))
+                    else:
+                        raise Exception("Unsupported feature type {}.".format(feature["geometry"]["type"]))
                 
                 svg_file.write("</svg>")
             
@@ -600,7 +635,11 @@ def data(map_name):
         with open("{}-population.gen".format(map_name), "w") as population_gen_file:
             population_gen_file.write(gen_output)
 
-        cartogram_json = gen2dict.translate(io.StringIO(gen_output), "#aaaaaa", True)
+        cartogram_json = json.loads(gen_output)
+
+        # Calculate the bounding box if necessary
+        if "bbox" not in cartogram_json:
+            cartogram_json["bbox"] = geojson_extrema.get_extrema_from_geojson(cartogram_json)
 
         cartogram_json["tooltip"] = population_cartogramui[2]
     except Exception as e:
@@ -616,7 +655,7 @@ def data(map_name):
         with open(map_handler.get_gen_file(), "r") as map_gen_file:
 
             try:
-                original_json = gen2dict.translate(map_gen_file, "#aaaaaa", True)
+                original_json = json.load(map_gen_file)
 
                 original_tooltip = landarea_cartogramui[2]
                 original_tooltip['unit'] = 'km sq.'

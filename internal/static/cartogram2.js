@@ -379,6 +379,17 @@ class MapVersion {
 }
 
 /**
+ * An enum of the supported map data formats.
+ * @constant 
+ * @type {Object<string,number>}
+ * @default
+ */
+const MapDataFormat = {
+    GOCARTJSON: 1,
+    GEOJSON: 2
+};
+
+/**
  * MapVersionData contains data used to construct a map from raw JSON data
  */
 class MapVersionData {
@@ -393,42 +404,145 @@ class MapVersionData {
      * @param {Object.<string,{name: string, value: number}>} tooltip.data
      * @param {Object.<string,string>} abbreviations A map of region names to abbreviations. Only needs to be specified once per map.
      * @param {Labels} labels Labels for the map version
+     * @param {number} format The format of the given map data.
      */
-    constructor(features, extrema, tooltip, abbreviations=null, labels=null) {
+    constructor(features, extrema, tooltip, abbreviations=null, labels=null, format=MapDataFormat.GOCARTJSON) {
 
         /**
          * @type {Object.<string,{polygons: Array<{id: string, coordinates: Array<Array<number,number>>}>, name: string, value: string}}
          */
         this.regions = {};
 
-        features.forEach(function(feature){
+        switch(format) {
+        case MapDataFormat.GOCARTJSON:
+            features.forEach(function(feature){
 
-            if(this.regions.hasOwnProperty(feature.id)) {
+                if(this.regions.hasOwnProperty(feature.id)) {
 
-                this.regions[feature.id].polygons.push({
-                    id: feature.properties.polygon_id.toString(),
-                    coordinates: feature.coordinates,
-                    holes: feature.hasOwnProperty("holes") ? feature.holes : []
-                })
+                    this.regions[feature.id].polygons.push({
+                        id: feature.properties.polygon_id.toString(),
+                        coordinates: feature.coordinates,
+                        holes: feature.hasOwnProperty("holes") ? feature.holes : []
+                    })
 
-            } else {
+                } else {
 
-                this.regions[feature.id] = {
-                    polygons: [
-                        {
-                            id: feature.properties.polygon_id.toString(),
-                            coordinates: feature.coordinates,
-                            holes: feature.hasOwnProperty("holes") ? feature.holes : []
-                        }
-                    ],
-                    name: tooltip.data["id_" + feature.id]["name"],
-                    value: tooltip.data["id_" + feature.id]["value"],
-                    abbreviation: abbreviations !== null ? abbreviations[tooltip.data["id_" + feature.id]["name"]] : ""
+                    this.regions[feature.id] = {
+                        polygons: [
+                            {
+                                id: feature.properties.polygon_id.toString(),
+                                coordinates: feature.coordinates,
+                                holes: feature.hasOwnProperty("holes") ? feature.holes : []
+                            }
+                        ],
+                        name: tooltip.data["id_" + feature.id]["name"],
+                        value: tooltip.data["id_" + feature.id]["value"],
+                        abbreviation: abbreviations !== null ? abbreviations[tooltip.data["id_" + feature.id]["name"]] : ""
+                    }
+
                 }
 
-            }
+            }, this);
 
-        }, this);
+            break;
+        case MapDataFormat.GEOJSON:
+
+            var next_polygon_id = 1;
+
+            features.forEach(function(feature){
+
+                switch(feature.geometry.type) {
+                case "Polygon":
+                    
+                    var polygon_coords;
+                    var polygon_holes = [];
+
+                    var polygon_id = next_polygon_id.toString();
+
+                    for(let i = 0; i < feature.geometry.coordinates.length; i++) {
+
+                        /* The first array of coordinates is the outer ring. The rest are holes */
+                        if(i == 0) {
+                            polygon_coords = feature.geometry.coordinates[0];
+                            next_polygon_id++;
+                            continue;
+                        }
+
+                        polygon_holes.push(feature.geometry.coordinates[i]);
+
+                        /* We increase the polygon ID for holes for compatibility reasons. This is what the gen2json
+                           Python script does.
+                        */
+                        next_polygon_id++;
+                    }
+
+                    this.regions[feature.properties.cartogram_id] = {
+                        polygons: [
+                            {
+                                id: polygon_id,
+                                coordinates: polygon_coords,
+                                holes: polygon_holes
+                            }
+                        ],
+                        name: tooltip.data["id_" + feature.properties.cartogram_id]["name"],
+                        value: tooltip.data["id_" + feature.properties.cartogram_id]["value"],
+                        abbreviation: abbreviations !== null ? abbreviations[tooltip.data["id_" + feature.properties.cartogram_id]["name"]] : ""
+                    }
+
+                    break;
+                case "MultiPolygon":
+                    
+                    var polygons = [];
+
+                    feature.geometry.coordinates.forEach(function(polygon){
+
+                        var polygon_coords;
+                        var polygon_holes = [];
+                        var polygon_id = next_polygon_id.toString();
+
+                        for(let i = 0; i < polygon.length; i++) {
+
+                            /* The first array of coordinates is the outer ring. The rest are holes */
+                            if(i == 0) {
+                                polygon_coords = polygon[0];
+                                next_polygon_id++;
+                                continue;
+                            }
+
+                            polygon_holes.push(polygon[i]);
+
+                            /* We increase the polygon ID for holes for compatibility reasons. This is what the gen2json
+                            Python script does.
+                            */
+                            next_polygon_id++;
+                        }
+
+                        polygons.push({
+                            id: polygon_id,
+                            coordinates: polygon_coords,
+                            holes: polygon_holes
+                        });
+
+                    }, this);
+
+                    this.regions[feature.properties.cartogram_id] = {
+                        polygons: polygons,
+                        name: tooltip.data["id_" + feature.properties.cartogram_id]["name"],
+                        value: tooltip.data["id_" + feature.properties.cartogram_id]["value"],
+                        abbreviation: abbreviations !== null ? abbreviations[tooltip.data["id_" + feature.properties.cartogram_id]["name"]] : ""
+                    }
+                    
+                    break;
+                default:
+                    throw ("Feature type '" + feature.geometry.type + "' not supported");
+
+                }
+
+            }, this);
+            break;
+        default:
+            throw "Unsupported map format";
+        }        
 
         /**
          * @type {Extrema}
@@ -565,8 +679,10 @@ class CartMap {
             max_height = (max_width / max_width_old) * max_height;
         }
 
-        if(max_height > 1000.0) {
-            max_height = 1000.0;
+        if(max_height > 500.0) {
+            var max_height_old = max_height;
+            max_height = 500.0;
+            max_width = (max_height / max_height_old) * max_width;
         }
 
         this.width = max_width;
@@ -1638,7 +1754,27 @@ class Cartogram {
 
                 this.getGeneratedCartogram(sysname, response.areas_string, response.unique_sharing_key).then(function(cartogram){
 
-                    this.model.map.addVersion("cartogram", new MapVersionData(cartogram.features, cartogram.extrema, response.tooltip));
+                    /* We need to find out the map format. If the extrema is located in the bbox property, then we have
+                       GeoJSON. Otherwise, we have the old JSON format.
+                    */
+
+                    if(cartogram.hasOwnProperty("bbox")) {
+
+                        var extrema = {
+                            min_x: cartogram.bbox[0],
+                            min_y: cartogram.bbox[1],
+                            max_x: cartogram.bbox[2],
+                            max_y: cartogram.bbox[3]
+                        };
+
+                        this.model.map.addVersion("cartogram", new MapVersionData(cartogram.features, extrema, response.tooltip, null, null, MapDataFormat.GEOJSON));
+
+
+                    } else {
+                        this.model.map.addVersion("cartogram", new MapVersionData(cartogram.features, cartogram.extrema, response.tooltip,null, null,  MapDataFormat.GOCARTJSON));
+                    }
+
+                    
 
                     this.model.map.drawVersion("original", "map-area", ["map-area", "cartogram-area"]);
                     this.model.map.drawVersion("cartogram", "cartogram-area", ["map-area", "cartogram-area"]);
@@ -1757,8 +1893,39 @@ class Cartogram {
 
             var map = new CartMap(hrname, config);
 
-            map.addVersion("original", new MapVersionData(original.features, original.extrema, original.tooltip, abbreviations, labels));
-            map.addVersion("population", new MapVersionData(population.features, population.extrema, population.tooltip));
+            /* We need to find out the map format. If the extrema is located in the bbox property, then we have
+               GeoJSON. Otherwise, we have the old JSON format.
+            */
+
+            if(original.hasOwnProperty("bbox")) {
+
+                var extrema = {
+                    min_x: original.bbox[0],
+                    min_y: original.bbox[1],
+                    max_x: original.bbox[2],
+                    max_y: original.bbox[3]
+                };
+
+                map.addVersion("original", new MapVersionData(original.features, extrema, original.tooltip, abbreviations, labels, MapDataFormat.GEOJSON));
+
+            } else {
+                map.addVersion("original", new MapVersionData(original.features, original.extrema, original.tooltip, abbreviations, labels, MapDataFormat.GOCARTJSON));
+            }
+
+            if(population.hasOwnProperty("bbox")) {
+
+                var extrema = {
+                    min_x: population.bbox[0],
+                    min_y: population.bbox[1],
+                    max_x: population.bbox[2],
+                    max_y: population.bbox[3]
+                };
+
+                map.addVersion("population", new MapVersionData(population.features, extrema, population.tooltip, null, null, MapDataFormat.GEOJSON));
+
+            } else {
+                map.addVersion("population", new MapVersionData(population.features, population.extrema, population.tooltip, null, null, MapDataFormat.GOCARTJSON));
+            }            
 
             if(cartogram !== null) {
                 map.addVersion("cartogram", cartogram);

@@ -1,9 +1,10 @@
-import cartwrap, gen2dict
+import cartwrap, gen2dict, geojson_extrema
 import settings
 from handlers import usa, india, china, germany, brazil
 
 # !!!DO NOT MODFIY THE FOLLOWING SECTION
 from handlers import srilanka
+from handlers import australia
 # ---addmap.py header marker---
 # !!!END DO NOT MODFIY
 
@@ -49,6 +50,7 @@ cartogram_handlers = {
     'brazil': brazil.CartogramHandler(),
 # !!!DO NOT MODFIY THE FOLLOWING SECTION
 'srilanka': srilanka.CartogramHandler(),
+'australia': australia.CartogramHandler(),
 # ---addmap.py body marker---
 # !!!END DO NOT MODFIY
 }
@@ -306,9 +308,17 @@ def cartogram():
         # We create a fake last entry because you can't have dangling commas in JSON
         yield '{"loading_point":0, "stderr_line": ""}],"cartogram_data":'
 
-        cartogram_json = gen2dict.translate(io.StringIO(cartogram_gen_output.decode()), settings.CARTOGRAM_COLOR, cartogram_handler.remove_holes())        
+        if cartogram_handler.expect_geojson_output():
+            # Just confirm that we've been given valid JSON. Calculate the extrema if necessary
+            cartogram_json = json.loads(cartogram_gen_output.decode())
 
+            if "bbox" not in cartogram_json:
+                cartogram_json["bbox"] = geojson_extrema.get_extrema_from_geojson(cartogram_json)
+        else:
+            cartogram_json = gen2dict.translate(io.StringIO(cartogram_gen_output.decode()), settings.CARTOGRAM_COLOR, cartogram_handler.remove_holes())        
+                
         cartogram_json['unique_sharing_key'] = unique_sharing_key
+        
         cartogram_json = json.dumps(cartogram_json)
 
         cartogram_entry = CartogramEntry.query.filter_by(string_key=unique_sharing_key).first()

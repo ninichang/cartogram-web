@@ -14,32 +14,15 @@ To add a map, you will need the following files, information, and software:
 
 ## Preparing Your Data
 
-The first step in adding a map is to prepare your data. First, you will need to copy the .gen file for the conventional map into `CARTOGRAM_DATA_DIR` (the folder where the C code lives). Then, you will need to create a .dat file for your map. This file will contain the names and abbreviations of your map, and your sample dataset. It is a text file that contains one entry per line. Each entry should look like (brackets should be omitted):
+The first step in adding a map is to prepare your data. Follow the steps at https://github.com/bbkc22113/geojson-to-csv to generate a GeoJSON file and a CSV file for your map.  Then, copy the GeoJSON file for the conventional map into `CARTOGRAM_DATA_DIR` (the folder where the C code lives). 
 
-    [Region ID] [Sample Dataset Value] [Region Name] [Region Abbreviation]
+Now, you should edit the CSV file. Insert an example dataset under the 'Region Data' column, and ensure that there is a filled 'Region Abbreviation' column (you may need to create it). Do not use population for your example dataset. You will add population data for your map later in this process. A good choice for the example dataset is GDP by region. 
 
-The region IDs in the .dat file should correspond to the region IDs in your .gen file. For your reference, here is a .dat file for Germany:
+Some region names may contain accent marks or other unicode characters. Please use only ASCII characters in your CSV file. You can see an example of a completed CSV file below:
 
-    1 1787408 Hamburg HH
-    2 7926599 Niedersachsen NI
-    3 671489 Bremen HB
-    4 17865516 Nordrhein-Westfalen NW
-    5 6176172 Hessen HE
-    6 4052803 Rheinland-Pfalz RP
-    7 10879618 Baden-Wuerttemberg BW
-    8 12843514 Bayern BY
-    9 995597 Saarland SL
-    10 3520031 Berlin BE
-    11 2484826 Brandenburg BB
-    12 1612362 Mecklenburg-Vorpommern MV
-    13 4084851 Sachsen SN
-    14 2245470 Sachsen-Anhalt ST
-    15 2170714 Thueringen TH
-    16 2858714 Schleswig-Holstein SH
+![CSV](edit-csv.png)
 
-Some region names may contain accent marks or other unicode characters. Please use only ASCII characters in your .dat file. For example, in the .dat file above Thüringen is rendered as 'Theuringen'.
-
-When you're finished creating your .dat file, you should save it in `CARTOGRAM_DATA_DIR`.
+When you're finished creating your CSV file, you should save it in `CARTOGRAM_DATA_DIR`.
 
 ## Initializing Your Map
 
@@ -47,7 +30,9 @@ Before creating a new map, you should create a Git branch to contain your work. 
 
     $ git checkout -b add-my-map-name
 
-You should never add maps or make other changes on the default `master` branch!
+replacing `my-map-name` with the name of your map, with no spaces. 
+
+**You should never add maps or make other changes on the default `master` branch!** You can confirm the branch you are currently on by running `git status`. 
 
 From here on, you will be making use of the Add Map Wizard. Before you can use this wizard to initialize your new map, you must enter the Python virtual environment used by the go-cart.io website code. To do this, run
 
@@ -78,11 +63,11 @@ The wizard will then ask you a series of questions about your map, and generate 
 
     Enter a user friendly name for this map: France
 
-    Now I need to know where the .gen and .dat files for this map are located. These files should be located in the CARTOGRAM_DATA_DIR directory. You should supply me with a path relative to CARTOGRAM_DATA_DIR.
-    E.G: The .gen file for this map is located at CARTOGRAM_DATA_DIR/map.gen. Enter "map.gen".
+    Now I need to know where the .json and .csv files for this map are located. These files should be located in the CARTOGRAM_DATA_DIR directory. You should supply me with a path relative to CARTOGRAM_DATA_DIR.
+    E.G: The .json file for this map is located at CARTOGRAM_DATA_DIR/map.json. Enter "map.json".
 
-    Enter the location of the .gen file for this map: france.gen
-    Enter the location of the .dat file for this map: france.dat
+    Enter the location of the .gen file for this map: france.json
+    Enter the location of the .dat file for this map: france.csv
     What are the regions of this map called (e.g. State, Province)? Department
     What is the name of the dataset in the .dat file (e.g. GDP)? GDP
 
