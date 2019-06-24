@@ -1,4 +1,4 @@
-# Setting Up the Web Application on Mac OS X
+# Setting Up the Web Application on Ubuntu
 
 This setup guide will help you get the go-cart web application up and running on Ubuntu.
 
