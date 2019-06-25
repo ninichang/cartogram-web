@@ -14,7 +14,7 @@ To add a map, you will need the following files, information, and software:
 
 ## Preparing Your Data
 
-The first step in adding a map is to prepare your data. Follow the steps at https://github.com/bbkc22113/geojson-to-csv to generate a GeoJSON file and a CSV file for your map.  Then, copy the GeoJSON file for the conventional map into `CARTOGRAM_DATA_DIR` (the folder where the C code lives). 
+The first step in adding a map is to prepare your data. Follow the steps at https://github.com/bbkc22113/geojson-to-csv-cartogram-web to generate a GeoJSON file and a CSV file for your map.  Then, copy the GeoJSON file for the conventional map into `CARTOGRAM_DATA_DIR` (the folder where the C code lives). 
 
 Now, you should edit the CSV file. Insert an example dataset under the 'Region Data' column, and ensure that there is a filled 'Region Abbreviation' column (you may need to create it). Do not use population for your example dataset. You will add population data for your map later in this process. A good choice for the example dataset is GDP by region. 
 
