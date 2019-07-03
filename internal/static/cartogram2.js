@@ -1559,7 +1559,7 @@ class Cartogram {
 
                 return function(){
 
-                    HTTP.get(cartogram_inst.config.getprogress_url + "?key=" + encodeURIComponent(unique_sharing_key) + "&time=" + Date.now()).then(function(progress){
+                    HTTP.get(cartogram_inst.config.getprogress_url + "?key=" + encodeURIComponent(key) + "&time=" + Date.now()).then(function(progress){
 
                         if(progress.progress === null)
                         {
@@ -1618,7 +1618,10 @@ class Cartogram {
 
                 resolve(response.cartogram_data);
                 
-            }.bind(this), () => reject(Error("There was an error retrieving the cartogram from the server.")));
+            }.bind(this), function(){
+                window.clearInterval(progressUpdater);
+                reject(Error("There was an error retrieving the cartogram from the server."));
+            });
 
         }.bind(this));
 
