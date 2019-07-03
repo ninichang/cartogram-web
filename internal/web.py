@@ -1,4 +1,4 @@
-import cartwrap, gen2dict, geojson_extrema
+import cartwrap, gen2dict, geojson_extrema, awslambda
 import settings
 from handlers import usa, india, china, germany, brazil
 
@@ -21,6 +21,7 @@ import validate_email
 import smtplib
 import email.mime.text
 import socket
+import redis
 
 app = Flask(__name__)
 
@@ -40,6 +41,8 @@ app.config['ENV'] = 'development' if settings.DEBUG else 'production'
 # NOTE: SQLAlchemy does not do database migrations. If you do change something, you'll need to figure out how to migrate
 #       the data manually, or delete everything and start from scratch.
 db = SQLAlchemy(app)
+
+redis_conn = redis.Redis(host=settings.CARTOGRAM_REDIS_HOST,port=settings.CARTOGRAM_REDIS_PORT,db=0)
 
 cartogram_handlers = {
     'usa': usa.CartogramHandler(),
@@ -78,7 +81,7 @@ def index():
 
     cartogram_handlers_select = [{'id': key, 'display_name': handler.get_name()} for key, handler in cartogram_handlers.items()]
 
-    return render_template('new_index.html', page_active='home', cartogram_url=url_for('cartogram'), cartogramui_url=url_for('cartogram_ui'), cartogram_data_dir=url_for('static', filename='cartdata'), cartogram_handlers=cartogram_handlers_select, default_cartogram_handler=default_cartogram_handler)
+    return render_template('new_index.html', page_active='home', cartogram_url=url_for('cartogram'), cartogramui_url=url_for('cartogram_ui'), getprogress_url=url_for('getprogress'),cartogram_data_dir=url_for('static', filename='cartdata'), cartogram_handlers=cartogram_handlers_select, default_cartogram_handler=default_cartogram_handler)
 
 @app.route('/faq', methods=['GET'])
 def faq():
@@ -189,9 +192,53 @@ def cartogram_by_key(string_key):
     
     cartogram_handlers_select = [{'id': key, 'display_name': handler.get_name()} for key, handler in cartogram_handlers.items()]
 
-    return render_template('new_cartogram.html', page_active='home',cartogram_url=url_for('cartogram'), cartogramui_url=url_for('cartogram_ui'), cartogram_data_dir=url_for('static', filename='cartdata'), cartogram_handlers=cartogram_handlers_select, default_cartogram_handler=cartogram_entry.handler, cartogram_data=cartogram_entry.cartogram_data, cartogramui_data=cartogram_entry.cartogramui_data)
+    return render_template('new_cartogram.html', page_active='home',cartogram_url=url_for('cartogram'), cartogramui_url=url_for('cartogram_ui'), getprogress_url=url_for('getprogress'), cartogram_data_dir=url_for('static', filename='cartdata'), cartogram_handlers=cartogram_handlers_select, default_cartogram_handler=cartogram_entry.handler, cartogram_data=cartogram_entry.cartogram_data, cartogramui_data=cartogram_entry.cartogramui_data)
     
 
+@app.route('/setprogress', methods=['POST'])
+def setprogress():
+
+    params = json.loads(request.data)
+
+    if params['secret'] != settings.CARTOGRAM_PROGRESS_SECRET:
+        return Response("", status=200)
+    
+    current_progress = redis_conn.get("cartprogress-{}".format(params['key']))
+
+    if current_progress is None:
+
+        current_progress = {
+            'order': params['order'],
+            'stderr': params['stderr'],
+            'progress': params['progress']
+        }
+    
+    else:
+
+        current_progress = json.loads(current_progress.decode())
+
+        if current_progress['order'] < params['order']:
+            current_progress = {
+                'order': params['order'],
+                'stderr': params['stderr'],
+                'progress': params['progress']
+            }
+    
+    redis_conn.set("cartprogress-{}".format(params['key']), json.dumps(current_progress))
+    redis_conn.expire("cartprogress-{}".format(params['key']), 300)
+
+    return Response('', status=200)
+
+@app.route('/getprogress', methods=['GET'])
+def getprogress():
+
+    current_progress = redis_conn.get("cartprogress-{}".format(request.args["key"]))    
+
+    if current_progress == None:
+        return Response(json.dumps({'progress': None, 'stderr': ''}), status=200, content_type='application/json')
+    else:
+        current_progress = json.loads(current_progress.decode())
+        return Response(json.dumps({'progress': current_progress['progress'], 'stderr': current_progress['stderr']}), status=200, content_type='application/json')
 
 @app.route('/cartogramui', methods=['POST'])
 def cartogram_ui():
@@ -273,63 +320,28 @@ def cartogram():
     if 'unique_sharing_key' in request.form:
         unique_sharing_key = request.form['unique_sharing_key']
     
-    #cartogram_output = cartwrap.generate_cartogram(cartogram_handler.gen_area_data(values), cartogram_handler.get_gen_file(), "{}/cartogram".format(settings.CARTOGRAM_DATA_DIR))
+    lambda_result = awslambda.generate_cartogram(cartogram_handler.gen_area_data(values), cartogram_handler.get_gen_file(), settings.CARTOGRAM_LAMBDA_URL, settings.CARTOGRAM_LAMDA_API_KEY, unique_sharing_key)
 
-    #return Response(json.dumps(gen2dict.translate(cartogram_output, settings.CARTOGRAM_COLOR)), status=200, content_type="application/json")
+    cartogram_gen_output = lambda_result['stdout']
 
-    # This function returns a generator used by Flask to generate a streaming HTTP response.
-    # It uses output from stderr to determine the generation progress (particularly the value 'max abs. error')
-    # When generation is done, it returns the .gen output converted into JSON by gen2dict
-    def generate_streamed_json_response():
+    if cartogram_handler.expect_geojson_output():
+        # Just confirm that we've been given valid JSON. Calculate the extrema if necessary
+        cartogram_json = json.loads(cartogram_gen_output)
 
-        cartogram_gen_output = b''
-        current_loading_point = "null"
-
-        # We have to format our JSON manually, since we're not sending a complete object.
-        # On the client side, Oboe.js is intelligent enough to parse this and get the loading information and cartogram output
-        yield '{"loading_progress_points":['
-
-        for source, line in cartwrap.generate_cartogram(cartogram_handler.gen_area_data(values), cartogram_handler.get_gen_file(), settings.CARTOGRAM_EXE):
-
-            if source == "stdout":
-                cartogram_gen_output += line
-            else:
-                s = re.search(r'max\. abs\. area error: (.+)', line.decode())
-
-                if s != None:
-                    current_loading_point = s.groups(1)[0]
+        if "bbox" not in cartogram_json:
+            cartogram_json["bbox"] = geojson_extrema.get_extrema_from_geojson(cartogram_json)
+    else:
+        cartogram_json = gen2dict.translate(io.StringIO(cartogram_gen_output), settings.CARTOGRAM_COLOR, cartogram_handler.remove_holes())        
                 
-                # We always include the loading progress, even if it hasn't changed.
-                # This makes life easier on the client side
-                yield '{{"loading_point": {}, "stderr_line": "{}"}},'.format(current_loading_point, line.decode())
-        
-        # We create a fake last entry because you can't have dangling commas in JSON
-        yield '{"loading_point":0, "stderr_line": ""}],"cartogram_data":'
+    cartogram_json['unique_sharing_key'] = unique_sharing_key
 
-        if cartogram_handler.expect_geojson_output():
-            # Just confirm that we've been given valid JSON. Calculate the extrema if necessary
-            cartogram_json = json.loads(cartogram_gen_output.decode())
+    cartogram_entry = CartogramEntry.query.filter_by(string_key=unique_sharing_key).first()
 
-            if "bbox" not in cartogram_json:
-                cartogram_json["bbox"] = geojson_extrema.get_extrema_from_geojson(cartogram_json)
-        else:
-            cartogram_json = gen2dict.translate(io.StringIO(cartogram_gen_output.decode()), settings.CARTOGRAM_COLOR, cartogram_handler.remove_holes())        
-                
-        cartogram_json['unique_sharing_key'] = unique_sharing_key
-        
-        cartogram_json = json.dumps(cartogram_json)
-
-        cartogram_entry = CartogramEntry.query.filter_by(string_key=unique_sharing_key).first()
-
-        if cartogram_entry != None:
-            cartogram_entry.cartogram_data = cartogram_json
-            db.session.commit()
-
-        yield cartogram_json
-
-        yield "}"
+    if cartogram_entry != None:
+        cartogram_entry.cartogram_data = json.dumps(cartogram_json)
+        db.session.commit()
     
-    return Response(generate_streamed_json_response(), content_type='application/json', status=200)            
+    return Response(json.dumps({'cartogram_data': cartogram_json}), content_type='application/json', status=200)            
 
 if __name__ == '__main__':
     app.run(debug=settings.DEBUG,host=settings.HOST,port=settings.PORT)

@@ -1012,15 +1012,17 @@ class Cartogram {
      * @param {string} c_u The URL of the cartogram generator
      * @param {string} cui_u The cartogramui URL 
      * @param {string} c_d  The URL of the cartogram data directory
-     * @param {string} g_u The URL of the gridedit page 
+     * @param {string} g_u The URL of the gridedit page
+     * @param {srinng} gp_u The URL to retrieve progress information
      */
-    constructor(c_u, cui_u, c_d, g_u) {
+    constructor(c_u, cui_u, c_d, g_u, gp_u) {
 
         this.config = {
             cartogram_url: c_u,
             cartogramui_url: cui_u,
             cartogram_data_dir: c_d,
-            gridedit_url: g_u
+            gridedit_url: g_u,
+            getprogress_url: gp_u
         };
 
         /**
@@ -1553,50 +1555,66 @@ class Cartogram {
 
             this.setExtendedErrorInfo("");
 
+            var progressUpdater = window.setInterval(function(cartogram_inst, key){
+
+                return function(){
+
+                    HTTP.get(cartogram_inst.config.getprogress_url + "?key=" + encodeURIComponent(unique_sharing_key) + "&time=" + Date.now()).then(function(progress){
+
+                        if(progress.progress === null)
+                        {
+                            return;
+                        }
+
+                        if(cartogram_inst.model.loading_state === null) {
+
+                            cartogram_inst.model.loading_state = Math.log10(progress.progress);
+                            cartogram_inst.updateProgressBar(0, 100, 5);
+
+                        } else {
+
+                            if(progress.progress < 0.01) {
+                                progress.progress = 0.01
+                            }
+
+                            if(progress.progress > cartogram_inst.model.loading_state) {
+                                progress.progress = cartogram_inst.model.loading_state;
+                            }
+
+                            /*console.log("progress: " + progress.progress);
+                            console.log("distance: " + Math.abs(cartogram_inst.model.loading_state - Math.log10(progress.progress)));
+                            console.log("area: " + Math.abs(cartogram_inst.model.loading_state - (-2)));*/
+                        
+
+                            var percentage = Math.floor(Math.abs(cartogram_inst.model.loading_state - Math.log10(progress.progress)) / Math.abs(cartogram_inst.model.loading_state - (-2))*100);
+
+                            /*console.log("percentage: " + percentage);
+                            console.log("");*/
+
+                            cartogram_inst.updateProgressBar(5, 100, percentage);
+
+                            cartogram_inst.setExtendedErrorInfo(progress.stderr);
+                        }
+
+                    });
+
+                };
+
+            }(this, unique_sharing_key), 500);
+
             HTTP.streaming(
                 this.config.cartogram_url,
                 "POST",
                 {'Content-type': 'application/x-www-form-urlencoded'},
                 req_body,
-                {
-                    'loading_progress_points.*': function(loading_progress_point){
-
-                        /*
-                        For each integration of the algorithm, we receive the maximum absolute area error. Generation
-                        stops when this number is <= 0.01. As we get closer to reaching 0.01, the change in error
-                        decreases. We calculate the progress bar percentage by measuring how fast the error approaches
-                        0.01.
-                        */
-                        if(loading_progress_point.loading_point !== null)
-                        {
-                            if(this.model.loading_state === null)
-                            {
-                                this.model.loading_state = loading_progress_point.loading_point;
-                                this.updateProgressBar(0,100,20);
-                            }
-                            else
-                            {
-                                if(loading_progress_point.loading_point < 0.01)
-                                    loading_progress_point.loading_point = 0.01;
-                                
-                                var percentage = Math.floor(((this.model.loading_state - loading_progress_point.loading_point) / (this.model.loading_state - 0.01))*95);
-    
-                                /* It's unlikely to happen, but we don't want the progress bar to go in reverse */
-                                this.updateProgressBar(20,100,percentage);
-                            }
-                        }
-    
-                        console.log(loading_progress_point.stderr_line);
-    
-                        this.appendToExtendedErrorInfo(loading_progress_point.stderr_line);
-    
-                    }.bind(this)
-                }
+                {}
             ).then(function(response){
 
                 this.clearExtendedErrorInfo();
 
                 this.updateProgressBar(0,100,100);
+
+                window.clearInterval(progressUpdater);
 
                 resolve(response.cartogram_data);
                 
