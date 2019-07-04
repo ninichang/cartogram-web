@@ -673,9 +673,9 @@ class CartMap {
             max_height = new_version_height;
         }
 
-        if(max_width > 500.0) {
+        if(max_width > 400.0) {
             var max_width_old = max_width;
-            max_width = 500.0;
+            max_width = 400.0;
             max_height = (max_width / max_width_old) * max_height;
         }
 
@@ -1767,19 +1767,19 @@ class Cartogram {
                             max_y: cartogram.bbox[3]
                         };
 
-                        this.model.map.addVersion("cartogram", new MapVersionData(cartogram.features, extrema, response.tooltip, null, null, MapDataFormat.GEOJSON));
+                        this.model.map.addVersion("3-cartogram", new MapVersionData(cartogram.features, extrema, response.tooltip, null, null, MapDataFormat.GEOJSON));
 
 
                     } else {
-                        this.model.map.addVersion("cartogram", new MapVersionData(cartogram.features, cartogram.extrema, response.tooltip,null, null,  MapDataFormat.GOCARTJSON));
+                        this.model.map.addVersion("3-cartogram", new MapVersionData(cartogram.features, cartogram.extrema, response.tooltip,null, null,  MapDataFormat.GOCARTJSON));
                     }
 
                     
 
-                    this.model.map.drawVersion("original", "map-area", ["map-area", "cartogram-area"]);
-                    this.model.map.drawVersion("cartogram", "cartogram-area", ["map-area", "cartogram-area"]);
+                    this.model.map.drawVersion("1-conventional", "map-area", ["map-area", "cartogram-area"]);
+                    this.model.map.drawVersion("3-cartogram", "cartogram-area", ["map-area", "cartogram-area"]);
 
-                    this.model.current_sysname = "cartogram";
+                    this.model.current_sysname = "3-cartogram";
 
                     this.generateSocialMediaLinks("https://go-cart.io/cart/" + response.unique_sharing_key);
                     this.generateSVGDownloadLinks();
@@ -1906,10 +1906,10 @@ class Cartogram {
                     max_y: original.bbox[3]
                 };
 
-                map.addVersion("original", new MapVersionData(original.features, extrema, original.tooltip, abbreviations, labels, MapDataFormat.GEOJSON));
+                map.addVersion("1-conventional", new MapVersionData(original.features, extrema, original.tooltip, abbreviations, labels, MapDataFormat.GEOJSON));
 
             } else {
-                map.addVersion("original", new MapVersionData(original.features, original.extrema, original.tooltip, abbreviations, labels, MapDataFormat.GOCARTJSON));
+                map.addVersion("1-conventional", new MapVersionData(original.features, original.extrema, original.tooltip, abbreviations, labels, MapDataFormat.GOCARTJSON));
             }
 
             if(population.hasOwnProperty("bbox")) {
@@ -1921,14 +1921,14 @@ class Cartogram {
                     max_y: population.bbox[3]
                 };
 
-                map.addVersion("population", new MapVersionData(population.features, extrema, population.tooltip, null, null, MapDataFormat.GEOJSON));
+                map.addVersion("2-population", new MapVersionData(population.features, extrema, population.tooltip, null, null, MapDataFormat.GEOJSON));
 
             } else {
-                map.addVersion("population", new MapVersionData(population.features, population.extrema, population.tooltip, null, null, MapDataFormat.GOCARTJSON));
+                map.addVersion("2-population", new MapVersionData(population.features, population.extrema, population.tooltip, null, null, MapDataFormat.GOCARTJSON));
             }            
 
             if(cartogram !== null) {
-                map.addVersion("cartogram", cartogram);
+                map.addVersion("3-cartogram", cartogram);
             }
 
             /*
@@ -1946,14 +1946,14 @@ class Cartogram {
 
             map.colors = colors;
 
-            map.drawVersion("original", "map-area", ["map-area", "cartogram-area"]);
+            map.drawVersion("1-conventional", "map-area", ["map-area", "cartogram-area"]);
 
             if(cartogram !== null) {
-                map.drawVersion("cartogram", "cartogram-area", ["map-area", "cartogram-area"]);
-                this.model.current_sysname = "cartogram";
+                map.drawVersion("3-cartogram", "cartogram-area", ["map-area", "cartogram-area"]);
+                this.model.current_sysname = "1-cartogram";
             } else {
-                map.drawVersion("population", "cartogram-area", ["map-area", "cartogram-area"]);
-                this.model.current_sysname = "population";
+                map.drawVersion("2-population", "cartogram-area", ["map-area", "cartogram-area"]);
+                this.model.current_sysname = "2-population";
             }           
 
             this.model.map = map;           
