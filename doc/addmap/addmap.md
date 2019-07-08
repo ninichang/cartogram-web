@@ -15,12 +15,15 @@ To add a map, you will need the following files, information, and software:
 ## Preparing Your Data
 
 The first step in adding a map is to prepare your data. Follow the steps at https://github.com/bbkc22113/geojson-to-csv-cartogram-web to generate a GeoJSON file and a CSV file for your map.  Then, copy the GeoJSON file for the conventional map into `CARTOGRAM_DATA_DIR` (the folder where the C code lives). 
+The first step in adding a map is to prepare your data. Follow the steps at https://github.com/bbkc22113/geojson-to-csv to generate a GeoJSON file and a CSV file for your map.  Then, copy the GeoJSON file for the conventional map into `CARTOGRAM_DATA_DIR` (the folder where the C code lives). 
 
 Now, you should edit the CSV file. Insert an example dataset under the 'Region Data' column, and ensure that there is a filled 'Region Abbreviation' column (you may need to create it). Do not use population for your example dataset. You will add population data for your map later in this process. A good choice for the example dataset is GDP by region. 
 
 Some region names may contain accent marks or other unicode characters. Please use only ASCII characters in your CSV file. You can see an example of a completed CSV file below:
 
 ![CSV](edit-csv.png)
+
+**Important:** Before you finish, you should make sure that all of the region names are spelled correctly before you finish. If you notice that a region's name is misspelled, simply correct its spelling. Please note that after you initialize your map in the next step, you *cannot* correct spelling errors. Please double check the spelling of all the map region names before moving on to the next step.
 
 When you're finished creating your CSV file, you should save it in `CARTOGRAM_DATA_DIR`.
 
@@ -108,43 +111,31 @@ Now, by editing `your-map.svg` using Inkscape, you will set the default color fo
 
 ### Adding Colors
 
-The go-cart.io website uses the same color scheme for all maps. The six colors you should use are listed below in Hex form, and can be seen by going to the [color scheme page](http://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=6) on ColorBrewer:
 
-    #1b9e77
-    #d95f02
-    #7570b3
-    #e7298a
-    #66a61e
-    #e6ab02
+The go-cart.io website uses the same color scheme for all maps. The six colors you should use can be seen by going to the [color scheme page](http://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=6) on ColorBrewer. To make the coloring process easier, you should download the ColorBrewer color palette file and import it into Inkscape (you only need to do this once).
 
-Open `your-map.svg` in Inkscape. You should see a rendered version of your conventional map, with each region shaded with a light-gray:
+#### Importing the ColorBrewer Color Palette Into Inkscape
 
-![Inkscape 1](inkscape-colors1.png)
+First, download the color palette file at http://colorbrewer2.org/export/gpl/Dark2_6.gpl.
 
-To make adding colors easier, you will create a custom palette with the six colors in the ColorBrewer color scheme. To do this, click the left-pointing arrow at the bottom right corner of the Inkscape window. Then, select the 'Auto' palette. The color palette bar at the bottom of the window should then appear like in the screenshot above.
+If you are using Linux, you should place the downloaded `Dark2_6.gpl` file into the folder `~/.config/inkscape/palettes`. Restart Inkscape.
 
-Now, right-click on a region you want to color, and select 'Fill and Stroke...'. A panel should open on the right-hand side of the Inkscape window:
+If you are using Mac OS, you should navigate to the Applications folder. Find and right click on the Inkscape icon, and select 'Show Package Contents'. Navigate to 'Contents', 'Resources', and finally 'palettes'. You should copy the `Dark2_6.gpl` file into the 'palettes' folder. Restart Inkscape.
 
-![Inkscape 2](inkscape-colors2.png)
+#### Coloring the Map Regions
 
-Now, enter the Hex code for the color you want into the textbox labeled 'RGBA'. Add `ff` to the end for full opacity:
+Open `your-map.svg` in Inkscape. You should see a rendered version of your conventional map, with each region shaded with a light-gray.
 
-![Inkscape 3](inkscape-colors3.png)
-
-Now, click the swatch button (to the left of the question mark button in the Fill and Stroke panel). This will add the color to the palette bar:
-
-![Inkscape 4](inkscape-colors4.png)
-
-Repeat this process for the remaining five colors. When you are finished, the palette bar should look something like:
+First, ensure that the ColorBrewer color palette is selected. To do this, click the left-pointing arrow at the bottom right corner of the Inkscape window. Then, select the 'CB_qual_Dark2_6' palette.
 
 ![Inkscape 5](inkscape-colors5.png)
 
-Now the coloring process becomes significantly easier. Left click on each region you want to color, and then left click on the color in the palette bar you want to apply to that region. Color the map as you wish while keeping in mind the following constraints:
+The coloring process is straightforward. Left click on each region you want to color, and then left click on the color in the palette bar you want to apply to that region. Color the map as you wish while keeping in mind the following constraints:
 
 * Neighboring regions **must not** have the same color.
 * The distribution of colors throughout the map should be roughly equal. The default colors are not used to indicate data, but instead to allow users to clearly see the region boundaries.
 
-Some of your map regions may include many small polygons that are hard to spot in Inkscape. You don't have to color each one. The Add Map Wizard only requires that you color **one** polygon per map region (usually it is easiest if you color the largest one).
+**Important:** Some of your map regions may include many small polygons that are hard to spot in Inkscape. You don't have to color each one. The Add Map Wizard only requires that you color **one** polygon per map region (usually it is easiest if you color the largest one).
 
 When you are done coloring each region, you should save your SVG file by going to `File -> Save`.
 
@@ -171,6 +162,8 @@ If a region is too small to contain a text label, you can place the text label o
 ![Inkscape 10](inkscape-labels5.png)
 
 Again, go to `Object -> Object Properties...`. Set the 'Label' field to `gocartlabel`, and click 'Set'.
+
+**Tip**: Once you have created one text label or line, you can create additional labels or lines much quicker. Simply select a finished text label or line, and press `CTRL-D` (or, right click on the text label or line and select 'Duplicate') to create a copy. You can then move around the duplicated label or line and edit its text or line path to create additional labels.
 
 Once you have finished adding all of your labels, you should save your SVG file by going to `File -> Save`.
 

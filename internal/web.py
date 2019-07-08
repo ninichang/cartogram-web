@@ -5,6 +5,8 @@ from handlers import usa, india, china, germany, brazil
 # !!!DO NOT MODFIY THE FOLLOWING SECTION
 from handlers import srilanka
 from handlers import canada
+from handlers import singapore
+from handlers import japan2
 # ---addmap.py header marker---
 # !!!END DO NOT MODFIY
 
@@ -51,6 +53,8 @@ cartogram_handlers = {
 # !!!DO NOT MODFIY THE FOLLOWING SECTION
 'srilanka': srilanka.CartogramHandler(),
 'canada': canada.CartogramHandler(),
+'singapore': singapore.CartogramHandler(),
+'japan2': japan2.CartogramHandler(),
 # ---addmap.py body marker---
 # !!!END DO NOT MODFIY
 }
