@@ -866,7 +866,8 @@ class CartMap {
                         polygon_id: polygon.id,
                         path: polygon.path,
                         color: this.colors[region_id],
-                        elevated: this.config.elevate.includes(polygon.id)
+                        elevated: this.config.elevate.includes(polygon.id),
+                        value: this.regions[region_id].getVersion(sysname).value
                     });
                 }
 
@@ -904,8 +905,12 @@ class CartMap {
             
         var areas = group.attr("d", d => d.path
         ).attr("id", d => "path-" + element_id + "-" + d.polygon_id)
-          .attr("class", d => "area" + " path-" + element_id + "-" + d.region_id)
-          .attr("fill", d => d.color)
+          /* Giving NA regions a different class prevents them from being highlighted, preserving
+             their white fill color.
+          */
+          .attr("class", d => "area" + " path-" + element_id + "-" + d.region_id + (d.value === "NA" ? "-na" : ""))
+          /* NA regions are filled with white */
+          .attr("fill", d => d.value === "NA" ? "#FFFFFF" : d.color)
           .attr("stroke", "#000")
           .attr("stroke-width", "0.5")
           .on('mouseenter', (function(map, where_drawn){
@@ -992,6 +997,25 @@ class CartMap {
                     .duration(1000)
                     .attr('d', this.regions[region_id].versions[new_sysname].polygons.find(poly => poly.id == polygon.id).path
                     );
+                
+                /* Change the color and ensure correct highlighting behavior after animation
+                   is complete
+                */
+                window.setTimeout(function(){
+                    if(this.regions[region_id].versions[new_sysname].value === "NA") {
+                        document.getElementById('path-' + element_id + '-' + polygon.id).setAttribute('fill', '#FFFFFF');
+
+                        document.getElementById('path-' + element_id + '-' + polygon.id).classList.remove('path-' + element_id + '-' + region_id);
+                        document.getElementById('path-' + element_id + '-' + polygon.id).classList.add('path-' + element_id + '-' + region_id + '-na');
+
+                    } else {
+                        document.getElementById('path-' + element_id + '-' + polygon.id).setAttribute('fill', this.colors[region_id]);
+
+                        document.getElementById('path-' + element_id + '-' + polygon.id).classList.add('path-' + element_id + '-' + region_id);
+                        document.getElementById('path-' + element_id + '-' + polygon.id).classList.remove('path-' + element_id + '-' + region_id + '-na');
+                    }
+                }.bind(this), 800);
+                
 
             }, this);
             
