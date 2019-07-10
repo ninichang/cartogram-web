@@ -910,7 +910,7 @@ class CartMap {
           */
           .attr("class", d => "area" + " path-" + element_id + "-" + d.region_id + (d.value === "NA" ? "-na" : ""))
           /* NA regions are filled with white */
-          .attr("fill", d => d.value === "NA" ? "#FFFFFF" : d.color)
+          .attr("fill", d => d.value === "NA" ? "#CCCCCC" : d.color)
           .attr("stroke", "#000")
           .attr("stroke-width", "0.5")
           .on('mouseenter', (function(map, where_drawn){
@@ -1003,7 +1003,7 @@ class CartMap {
                 */
                 window.setTimeout(function(){
                     if(this.regions[region_id].versions[new_sysname].value === "NA") {
-                        document.getElementById('path-' + element_id + '-' + polygon.id).setAttribute('fill', '#FFFFFF');
+                        document.getElementById('path-' + element_id + '-' + polygon.id).setAttribute('fill', '#CCCCCC');
 
                         document.getElementById('path-' + element_id + '-' + polygon.id).classList.remove('path-' + element_id + '-' + region_id);
                         document.getElementById('path-' + element_id + '-' + polygon.id).classList.add('path-' + element_id + '-' + region_id + '-na');
