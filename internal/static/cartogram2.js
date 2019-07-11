@@ -673,9 +673,9 @@ class CartMap {
             max_height = new_version_height;
         }
 
-        if(max_width > 500.0) {
+        if(max_width > 400.0) {
             var max_width_old = max_width;
-            max_width = 500.0;
+            max_width = 400.0;
             max_height = (max_width / max_width_old) * max_height;
         }
 
@@ -866,7 +866,8 @@ class CartMap {
                         polygon_id: polygon.id,
                         path: polygon.path,
                         color: this.colors[region_id],
-                        elevated: this.config.elevate.includes(polygon.id)
+                        elevated: this.config.elevate.includes(polygon.id),
+                        value: this.regions[region_id].getVersion(sysname).value
                     });
                 }
 
@@ -904,8 +905,12 @@ class CartMap {
             
         var areas = group.attr("d", d => d.path
         ).attr("id", d => "path-" + element_id + "-" + d.polygon_id)
-          .attr("class", d => "area" + " path-" + element_id + "-" + d.region_id)
-          .attr("fill", d => d.color)
+          /* Giving NA regions a different class prevents them from being highlighted, preserving
+             their white fill color.
+          */
+          .attr("class", d => "area" + " path-" + element_id + "-" + d.region_id + (d.value === "NA" ? "-na" : ""))
+          /* NA regions are filled with white */
+          .attr("fill", d => d.value === "NA" ? "#CCCCCC" : d.color)
           .attr("stroke", "#000")
           .attr("stroke-width", "0.5")
           .on('mouseenter', (function(map, where_drawn){
@@ -992,6 +997,25 @@ class CartMap {
                     .duration(1000)
                     .attr('d', this.regions[region_id].versions[new_sysname].polygons.find(poly => poly.id == polygon.id).path
                     );
+                
+                /* Change the color and ensure correct highlighting behavior after animation
+                   is complete
+                */
+                window.setTimeout(function(){
+                    if(this.regions[region_id].versions[new_sysname].value === "NA") {
+                        document.getElementById('path-' + element_id + '-' + polygon.id).setAttribute('fill', '#CCCCCC');
+
+                        document.getElementById('path-' + element_id + '-' + polygon.id).classList.remove('path-' + element_id + '-' + region_id);
+                        document.getElementById('path-' + element_id + '-' + polygon.id).classList.add('path-' + element_id + '-' + region_id + '-na');
+
+                    } else {
+                        document.getElementById('path-' + element_id + '-' + polygon.id).setAttribute('fill', this.colors[region_id]);
+
+                        document.getElementById('path-' + element_id + '-' + polygon.id).classList.add('path-' + element_id + '-' + region_id);
+                        document.getElementById('path-' + element_id + '-' + polygon.id).classList.remove('path-' + element_id + '-' + region_id + '-na');
+                    }
+                }.bind(this), 800);
+                
 
             }, this);
             
@@ -1767,19 +1791,19 @@ class Cartogram {
                             max_y: cartogram.bbox[3]
                         };
 
-                        this.model.map.addVersion("cartogram", new MapVersionData(cartogram.features, extrema, response.tooltip, null, null, MapDataFormat.GEOJSON));
+                        this.model.map.addVersion("3-cartogram", new MapVersionData(cartogram.features, extrema, response.tooltip, null, null, MapDataFormat.GEOJSON));
 
 
                     } else {
-                        this.model.map.addVersion("cartogram", new MapVersionData(cartogram.features, cartogram.extrema, response.tooltip,null, null,  MapDataFormat.GOCARTJSON));
+                        this.model.map.addVersion("3-cartogram", new MapVersionData(cartogram.features, cartogram.extrema, response.tooltip,null, null,  MapDataFormat.GOCARTJSON));
                     }
 
                     
 
-                    this.model.map.drawVersion("original", "map-area", ["map-area", "cartogram-area"]);
-                    this.model.map.drawVersion("cartogram", "cartogram-area", ["map-area", "cartogram-area"]);
+                    this.model.map.drawVersion("1-conventional", "map-area", ["map-area", "cartogram-area"]);
+                    this.model.map.drawVersion("3-cartogram", "cartogram-area", ["map-area", "cartogram-area"]);
 
-                    this.model.current_sysname = "cartogram";
+                    this.model.current_sysname = "3-cartogram";
 
                     this.generateSocialMediaLinks("https://go-cart.io/cart/" + response.unique_sharing_key);
                     this.generateSVGDownloadLinks();
@@ -1906,10 +1930,10 @@ class Cartogram {
                     max_y: original.bbox[3]
                 };
 
-                map.addVersion("original", new MapVersionData(original.features, extrema, original.tooltip, abbreviations, labels, MapDataFormat.GEOJSON));
+                map.addVersion("1-conventional", new MapVersionData(original.features, extrema, original.tooltip, abbreviations, labels, MapDataFormat.GEOJSON));
 
             } else {
-                map.addVersion("original", new MapVersionData(original.features, original.extrema, original.tooltip, abbreviations, labels, MapDataFormat.GOCARTJSON));
+                map.addVersion("1-conventional", new MapVersionData(original.features, original.extrema, original.tooltip, abbreviations, labels, MapDataFormat.GOCARTJSON));
             }
 
             if(population.hasOwnProperty("bbox")) {
@@ -1921,14 +1945,14 @@ class Cartogram {
                     max_y: population.bbox[3]
                 };
 
-                map.addVersion("population", new MapVersionData(population.features, extrema, population.tooltip, null, null, MapDataFormat.GEOJSON));
+                map.addVersion("2-population", new MapVersionData(population.features, extrema, population.tooltip, null, null, MapDataFormat.GEOJSON));
 
             } else {
-                map.addVersion("population", new MapVersionData(population.features, population.extrema, population.tooltip, null, null, MapDataFormat.GOCARTJSON));
+                map.addVersion("2-population", new MapVersionData(population.features, population.extrema, population.tooltip, null, null, MapDataFormat.GOCARTJSON));
             }            
 
             if(cartogram !== null) {
-                map.addVersion("cartogram", cartogram);
+                map.addVersion("3-cartogram", cartogram);
             }
 
             /*
@@ -1946,14 +1970,14 @@ class Cartogram {
 
             map.colors = colors;
 
-            map.drawVersion("original", "map-area", ["map-area", "cartogram-area"]);
+            map.drawVersion("1-conventional", "map-area", ["map-area", "cartogram-area"]);
 
             if(cartogram !== null) {
-                map.drawVersion("cartogram", "cartogram-area", ["map-area", "cartogram-area"]);
-                this.model.current_sysname = "cartogram";
+                map.drawVersion("3-cartogram", "cartogram-area", ["map-area", "cartogram-area"]);
+                this.model.current_sysname = "1-cartogram";
             } else {
-                map.drawVersion("population", "cartogram-area", ["map-area", "cartogram-area"]);
-                this.model.current_sysname = "population";
+                map.drawVersion("2-population", "cartogram-area", ["map-area", "cartogram-area"]);
+                this.model.current_sysname = "2-population";
             }           
 
             this.model.map = map;           

@@ -133,35 +133,41 @@ function gridedit_init()
 
                 var cell_input =  document.getElementById('input-' + this.editing_cell[0] + '-' + this.editing_cell[1]).value;
 
-                if(Number.isNaN(Number.parseFloat(cell_input)))
-                {
-                    var cell = this.editing_cell.slice();
-                    this.editing_cell = null;
+                if(cell_input.trim() === "NA") {
+                    this.grid_document.set_value(this.editing_cell, "NA");
+                } else {
+                    if(Number.isNaN(Number.parseFloat(cell_input)))
+                    {
+                        var cell = this.editing_cell.slice();
+                        this.editing_cell = null;
 
-                    this.begin_cell_edit(cell, true, cell_input);
-                    return false;
+                        this.begin_cell_edit(cell, true, cell_input);
+                        return false;
+                    }
+
+                    var in_bounds = true;
+                    var min = this.get_cell_property(this.editing_cell, 'min', null);
+                    var max = this.get_cell_property(this.editing_cell, 'max', null);
+
+                    if(min !== null && cell_input < min)
+                        in_bounds = false;
+                    
+                    if(max !== null && cell_input > max)
+                        in_bounds = false;
+                    
+                    if(!in_bounds)
+                    {
+                        var cell = this.editing_cell.slice();
+                        this.editing_cell = null;
+
+                        this.begin_cell_edit(cell, true, cell_input);
+                        return false;
+                    }
+
+                    this.grid_document.set_value(this.editing_cell, cell_input);
                 }
 
-                var in_bounds = true;
-                var min = this.get_cell_property(this.editing_cell, 'min', null);
-                var max = this.get_cell_property(this.editing_cell, 'max', null);
-
-                if(min !== null && cell_input < min)
-                    in_bounds = false;
                 
-                if(max !== null && cell_input > max)
-                    in_bounds = false;
-                
-                if(!in_bounds)
-                {
-                    var cell = this.editing_cell.slice();
-                    this.editing_cell = null;
-
-                    this.begin_cell_edit(cell, true, cell_input);
-                    return false;
-                }
-
-                this.grid_document.set_value(this.editing_cell, cell_input);
             }
             else
             {
@@ -209,11 +215,11 @@ function gridedit_init()
 
                 var cell_input = document.createElement('input');
                 cell_input.id = 'input-' + cell[0] + '-' + cell[1];
-                cell_input.type = cell_type;
+                cell_input.type = cell_type === "color" ? "color" : "text";
                 cell_input.value = cell_value;
                 cell_input.style.width = document.getElementById('cell-' + cell[0] + '-' + cell[1]).clientWidth + "px";
 
-                /* For number inputs we need to allow people to enter floats, and include max and min (if they are defined) */
+                /* For number inputs we need to allow people to enter floats, and include max and min (if they are defined)
                 if(cell_type == "number")
                 {
                     var step = this.get_cell_property(cell, 'step', '0.001');
@@ -227,7 +233,7 @@ function gridedit_init()
                     
                     if(max !== null)
                         cell_input.max = max;
-                }
+                }*/
 
                 cell_input.onclick = function(e) {
                     e.stopPropagation();

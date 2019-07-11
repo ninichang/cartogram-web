@@ -5,6 +5,9 @@ from handlers import usa, india, china, germany, brazil
 # !!!DO NOT MODFIY THE FOLLOWING SECTION
 from handlers import srilanka
 from handlers import australia
+from handlers import canada
+from handlers import singapore
+from handlers import japan2
 # ---addmap.py header marker---
 # !!!END DO NOT MODFIY
 
@@ -51,6 +54,9 @@ cartogram_handlers = {
 # !!!DO NOT MODFIY THE FOLLOWING SECTION
 'srilanka': srilanka.CartogramHandler(),
 'australia': australia.CartogramHandler(),
+'canada': canada.CartogramHandler(),
+'singapore': singapore.CartogramHandler(),
+'japan2': japan2.CartogramHandler(),
 # ---addmap.py body marker---
 # !!!END DO NOT MODFIY
 }
@@ -261,13 +267,21 @@ def cartogram():
         return Response('{"error":"badrequest"}', status=400, content_type="application/json")
     
     values = request.form['values'].split(";")
+    # The existing verificaiton code expects all floats. To avoid modifying it, we replace the string "NA" with the
+    # number 0.0 for verification purposes only.
+    values_to_verify = []
 
     try:
-        values = [float(i) for i in values]
+        for i in range(len(values)):
+            if values[i] == "NA":
+                values_to_verify.append(0.0)
+            else:
+                values[i] = float(values[i])
+                values_to_verify.append(values[i])
     except ValueError:
         return Response('{"error":"badvalues"}', status=400, content_type="application/json")
     
-    if cartogram_handler.validate_values(values) != True:
+    if cartogram_handler.validate_values(values_to_verify) != True:
         return Response('{"error":"badvalues"}', status=400, content_type="application/json")
     
     unique_sharing_key = ""
