@@ -4,6 +4,7 @@ from handlers import usa, india, china, germany, brazil
 
 # !!!DO NOT MODFIY THE FOLLOWING SECTION
 from handlers import srilanka
+from handlers import australia
 from handlers import canada
 from handlers import singapore
 from handlers import japan2
@@ -52,6 +53,7 @@ cartogram_handlers = {
     'brazil': brazil.CartogramHandler(),
 # !!!DO NOT MODFIY THE FOLLOWING SECTION
 'srilanka': srilanka.CartogramHandler(),
+'australia': australia.CartogramHandler(),
 'canada': canada.CartogramHandler(),
 'singapore': singapore.CartogramHandler(),
 'japan2': japan2.CartogramHandler(),
