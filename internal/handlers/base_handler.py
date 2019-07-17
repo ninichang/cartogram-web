@@ -68,10 +68,19 @@ class BaseCartogramHandler:
             #if name_column not in row or data_column not in row or color_column not in row:
             #    raise ValueError('Invalid CSV file.')           
 
-            result[order.index(row[name_column])] = float(row[data_column])
+            result[order.index(row[name_column])] = row[data_column].strip()
 
-            color_values['id_{}'.format(id_data[row[name_column]])] =  row[color_column]
-            tooltip['data']['id_{}'.format(id_data[row[name_column]])] = {'name': row[name_column], 'value': float(row[data_column])}
+            try:
+                result[order.index(row[name_column])] = float(result[order.index(row[name_column])])
+                tooltip['data']['id_{}'.format(id_data[row[name_column]])] = {'name': row[name_column], 'value': float(row[data_column])}
+            except ValueError:
+                if row[data_column].strip() != "NA":
+                    raise ValueError("Value must be number or 'NA'")
+                
+                tooltip['data']['id_{}'.format(id_data[row[name_column]])] = {'name': row[name_column], 'value': "NA"}
+
+            color_values['id_{}'.format(id_data[row[name_column]])] = row[color_column]
+            
 
             grid_document['contents'].extend([row[name_column], row[population_column], row[data_column], row[color_column]])
         

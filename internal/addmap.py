@@ -619,7 +619,7 @@ def data(map_name):
     try:
 
         areas = population_cartogramui[0].split(";")
-        areas = list(map(lambda area: float(area), areas))
+        #areas = list(map(lambda area: float(area), areas))
 
         gen_output_lines = []
 
