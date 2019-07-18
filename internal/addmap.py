@@ -12,6 +12,7 @@ import geojson_extrema
 import traceback
 import importlib
 import cartwrap
+import mappackify
 
 def print_welcome():
 
@@ -823,6 +824,15 @@ def data(map_name):
                 print(repr(e))
                 cleanup()
                 return
+    except Exception as e:
+        print(repr(e))
+        cleanup()
+        return
+    
+    print("Generating map pack in static/cartdata/{}/mappack.json...".format(map_name))
+
+    try:
+        mappackify.mappackify(map_name)
     except Exception as e:
         print(repr(e))
         cleanup()

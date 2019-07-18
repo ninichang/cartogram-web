@@ -1044,15 +1044,17 @@ class Cartogram {
      * @param {string} c_u The URL of the cartogram generator
      * @param {string} cui_u The cartogramui URL 
      * @param {string} c_d  The URL of the cartogram data directory
-     * @param {string} g_u The URL of the gridedit page 
+     * @param {string} g_u The URL of the gridedit page
+     * @param {string} version The version string used to prevent improper caching of map assets
      */
-    constructor(c_u, cui_u, c_d, g_u) {
+    constructor(c_u, cui_u, c_d, g_u, version) {
 
         this.config = {
             cartogram_url: c_u,
             cartogramui_url: cui_u,
             cartogram_data_dir: c_d,
-            gridedit_url: g_u
+            gridedit_url: g_u,
+            version: version
         };
 
         /**
@@ -1900,10 +1902,19 @@ class Cartogram {
         return HTTP.get(this.config.cartogram_data_dir + "/" + sysname + "/config.json");
     }
 
+    /**
+     * getMapMap returns an HTTP get request for all of the static data (abbreviations, original and population map
+     * geometries, etc.) for a map. The progress bar is automatically updated with the download progress.
+     * 
+     * A map pack is a JSON object containing all of this information, which used to be located in separate JSON files.
+     * Combining all of this information into one file increases download speed, especially for users on mobile devices,
+     * and makes it easier to display a progress bar of map information download progress, which is useful for users
+     * with slow Internet connections.
+     * @param {string} sysname The sysname of the map
+     * @returns {Promise}
+     */
     getMapPack(sysname) {
-        return HTTP.get(this.config.cartogram_data_dir + "/" + sysname + "/mappack.json", null, function(e){
-
-            console.log(e);
+        return HTTP.get(this.config.cartogram_data_dir + "/" + sysname + "/mappack.json?v=" + this.config.version, null, function(e){
 
             this.updateProgressBar(0, 100, Math.floor(e.loaded / e.total * 100));
 
