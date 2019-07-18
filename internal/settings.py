@@ -9,6 +9,8 @@ DATABASE_URI = os.environ['CARTOGRAM_DATABASE_URI']
 HOST = os.environ['CARTOGRAM_HOST']
 PORT = int(os.environ['CARTOGRAM_PORT'])
 
+VERSION = os.environ['CARTOGRAM_VERSION']
+
 SMTP_HOST = os.environ['CARTOGRAM_SMTP_HOST']
 SMTP_PORT = int(os.environ['CARTOGRAM_SMTP_PORT'])
 SMTP_AUTHENTICATION_REQUIRED = True if os.environ['CARTOGRAM_SMTP_AUTHENTICATION_REQUIRED'].lower() == "true" else False
