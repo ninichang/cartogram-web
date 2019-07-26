@@ -48,9 +48,10 @@ class HTTP {
      * Performs an HTTP GET request and returns a promise with the JSON value of the response
      * @param {string} url The URL of the GET request 
      * @param {number} timeout The timeout, in seconds, of the GET request
+     * @param {function} onprogress A function to be called when the request progress information is updated
      * @returns {Promise} A promise to the HTTP response
      */
-    static get(url, timeout=15000) {
+    static get(url, timeout=null, onprogress=null) {
         return new Promise(function(resolve, reject){
 
             var xhttp = new XMLHttpRequest();
@@ -79,12 +80,19 @@ class HTTP {
                 }
             };
 
+            if(onprogress !== null) {
+                xhttp.onprogress = onprogress;
+            }
+
             xhttp.ontimeout = function(e) {
                 reject(Error('The request has timed out.'));
             }
 
+            if(timeout !== null) {
+                xhttp.timeout = timeout;
+            }
+
             xhttp.open("GET", url, true);
-            xhttp.timeout = timeout;
             xhttp.send();
 
         });
@@ -1036,15 +1044,17 @@ class Cartogram {
      * @param {string} c_u The URL of the cartogram generator
      * @param {string} cui_u The cartogramui URL 
      * @param {string} c_d  The URL of the cartogram data directory
-     * @param {string} g_u The URL of the gridedit page 
+     * @param {string} g_u The URL of the gridedit page
+     * @param {string} version The version string used to prevent improper caching of map assets
      */
-    constructor(c_u, cui_u, c_d, g_u) {
+    constructor(c_u, cui_u, c_d, g_u, version) {
 
         this.config = {
             cartogram_url: c_u,
             cartogramui_url: cui_u,
             cartogram_data_dir: c_d,
-            gridedit_url: g_u
+            gridedit_url: g_u,
+            version: version
         };
 
         /**
@@ -1893,6 +1903,25 @@ class Cartogram {
     }
 
     /**
+     * getMapMap returns an HTTP get request for all of the static data (abbreviations, original and population map
+     * geometries, etc.) for a map. The progress bar is automatically updated with the download progress.
+     * 
+     * A map pack is a JSON object containing all of this information, which used to be located in separate JSON files.
+     * Combining all of this information into one file increases download speed, especially for users on mobile devices,
+     * and makes it easier to display a progress bar of map information download progress, which is useful for users
+     * with slow Internet connections.
+     * @param {string} sysname The sysname of the map
+     * @returns {Promise}
+     */
+    getMapPack(sysname) {
+        return HTTP.get(this.config.cartogram_data_dir + "/" + sysname + "/mappack.json?v=" + this.config.version, null, function(e){
+
+            this.updateProgressBar(0, 100, Math.floor(e.loaded / e.total * 100));
+
+        }.bind(this));
+    }
+
+    /**
      * switchMap loads a new map with the given sysname, and displays the conventional and population versions, as well
      * as an optional extra cartogram.
      * @param {string} sysname The sysname of the new map to load
@@ -1904,51 +1933,45 @@ class Cartogram {
         if(this.model.in_loading_state)
             return;
         
-        Promise.all(
-            [ this.getPregeneratedVersion(sysname, 'original')
-            , this.getPregeneratedVersion(sysname, 'population')
-            , colors === null ? this.getDefaultColors(sysname) : Promise.resolve(colors)
-            , this.getGridDocumentTemplate(sysname)
-            , this.getAbbreviations(sysname)
-            , this.getLabels(sysname)
-            , this.getConfig(sysname)
-            ]
-        ).then(function([original, population, default_colors, grid_document, abbreviations, labels, config]){
+        this.enterLoadingState();
+        this.showProgressBar();
+        
+        this.getMapPack(sysname).then(function(mappack){
 
-            var map = new CartMap(hrname, config);
+            var map = new CartMap(hrname, mappack.config);
 
             /* We need to find out the map format. If the extrema is located in the bbox property, then we have
                GeoJSON. Otherwise, we have the old JSON format.
             */
 
-            if(original.hasOwnProperty("bbox")) {
+            if(mappack.original.hasOwnProperty("bbox")) {
 
                 var extrema = {
-                    min_x: original.bbox[0],
-                    min_y: original.bbox[1],
-                    max_x: original.bbox[2],
-                    max_y: original.bbox[3]
+                    min_x: mappack.original.bbox[0],
+                    min_y: mappack.original.bbox[1],
+                    max_x: mappack.original.bbox[2],
+                    max_y: mappack.original.bbox[3]
                 };
 
-                map.addVersion("1-conventional", new MapVersionData(original.features, extrema, original.tooltip, abbreviations, labels, MapDataFormat.GEOJSON));
+                map.addVersion("1-conventional", new MapVersionData(mappack.original.features, extrema, mappack.original.tooltip, mappack.abbreviations, mappack.labels, MapDataFormat.GEOJSON));
 
             } else {
-                map.addVersion("1-conventional", new MapVersionData(original.features, original.extrema, original.tooltip, abbreviations, labels, MapDataFormat.GOCARTJSON));
+                map.addVersion("1-conventional", new MapVersionData(mappack.original.features, mappack.original.extrema, mappack.original.tooltip, mappack.abbreviations, mappack.labels, MapDataFormat.GOCARTJSON));
             }
 
-            if(population.hasOwnProperty("bbox")) {
+            if(mappack.population.hasOwnProperty("bbox")) {
 
                 var extrema = {
-                    min_x: population.bbox[0],
-                    min_y: population.bbox[1],
-                    max_x: population.bbox[2],
-                    max_y: population.bbox[3]
+                    min_x: mappack.population.bbox[0],
+                    min_y: mappack.population.bbox[1],
+                    max_x: mappack.population.bbox[2],
+                    max_y: mappack.population.bbox[3]
                 };
 
-                map.addVersion("2-population", new MapVersionData(population.features, extrema, population.tooltip, null, null, MapDataFormat.GEOJSON));
+                map.addVersion("2-population", new MapVersionData(mappack.population.features, extrema, mappack.population.tooltip, null, null, MapDataFormat.GEOJSON));
 
             } else {
-                map.addVersion("2-population", new MapVersionData(population.features, population.extrema, population.tooltip, null, null, MapDataFormat.GOCARTJSON));
+                map.addVersion("2-population", new MapVersionData(mappack.population.features, mappack.population.extrema, mappack.population.tooltip, null, null, MapDataFormat.GOCARTJSON));
             }            
 
             if(cartogram !== null) {
@@ -1964,7 +1987,7 @@ class Cartogram {
 
             Object.keys(map.regions).forEach(function(region_id){
 
-                colors[region_id] = default_colors["id_" + region_id];
+                colors[region_id] = mappack.colors["id_" + region_id];
 
             }, this);
 
@@ -1987,7 +2010,7 @@ class Cartogram {
             this.generateSocialMediaLinks(window.location.href);
             this.generateSVGDownloadLinks();
             this.displayVersionSwitchButtons();
-            this.updateGridDocument(grid_document);
+            this.updateGridDocument(mappack.griddocument);
 
             document.getElementById('template-link').href = this.config.cartogram_data_dir+ "/" + sysname + "/template.csv";
 
