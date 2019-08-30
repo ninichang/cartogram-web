@@ -9,7 +9,9 @@ from handlers import australia
 from handlers import canada
 from handlers import singapore
 from handlers import japan2
+from handlers import france
 from handlers import uae
+from handlers import spain
 # ---addmap.py header marker---
 # !!!END DO NOT MODFIY
 
@@ -46,7 +48,8 @@ app.config['ENV'] = 'development' if settings.DEBUG else 'production'
 #
 # NOTE: SQLAlchemy does not do database migrations. If you do change something, you'll need to figure out how to migrate
 #       the data manually, or delete everything and start from scratch.
-db = SQLAlchemy(app)
+if settings.USE_DATABASE:
+    db = SQLAlchemy(app)
 
 redis_conn = redis.Redis(host=settings.CARTOGRAM_REDIS_HOST,port=settings.CARTOGRAM_REDIS_PORT,db=0)
 
@@ -63,24 +66,27 @@ cartogram_handlers = {
 'canada': canada.CartogramHandler(),
 'singapore': singapore.CartogramHandler(),
 'japan2': japan2.CartogramHandler(),
+'france': france.CartogramHandler(),
 'uae': uae.CartogramHandler(),
+'spain': spain.CartogramHandler(),
 # ---addmap.py body marker---
 # !!!END DO NOT MODFIY
 }
 
 default_cartogram_handler = "usa"
 
-class CartogramEntry(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    string_key = db.Column(db.String(32), unique=True, nullable=False)
-    date_created = db.Column(db.DateTime(), nullable=False)
-    handler = db.Column(db.String(100), nullable=False)
-    areas_string = db.Column(db.UnicodeText(), nullable=False)
-    cartogram_data = db.Column(db.UnicodeText(), nullable=False)
-    cartogramui_data = db.Column(db.UnicodeText(), nullable=False)
+if settings.USE_DATABASE:
+    class CartogramEntry(db.Model):
+        id = db.Column(db.Integer, primary_key=True)
+        string_key = db.Column(db.String(32), unique=True, nullable=False)
+        date_created = db.Column(db.DateTime(), nullable=False)
+        handler = db.Column(db.String(100), nullable=False)
+        areas_string = db.Column(db.UnicodeText(), nullable=False)
+        cartogram_data = db.Column(db.UnicodeText(), nullable=False)
+        cartogramui_data = db.Column(db.UnicodeText(), nullable=False)
 
-    def __repr__(self):
-        return "<CartogramEntry {}>".format(self.string_key)
+        def __repr__(self):
+            return "<CartogramEntry {}>".format(self.string_key)
 
 # This function returns a random string containg lowercase letters and numbers that is *length* characters long.
 # This is used to generate the unique string key associated with each cartogram.
@@ -197,6 +203,9 @@ Message:
 @app.route('/cart/<string_key>', methods=['GET'])
 def cartogram_by_key(string_key):
 
+    if not settings.USE_DATABASE:
+        return Response('Not found', status=404)
+
     cartogram_entry = CartogramEntry.query.filter_by(string_key=string_key).first_or_404()
 
     if cartogram_entry.handler not in cartogram_handlers:
@@ -290,10 +299,11 @@ def cartogram_ui():
 
         json_response['unique_sharing_key'] = cartogram_entry_key
 
-        new_cartogram_entry = CartogramEntry(string_key=cartogram_entry_key, date_created=datetime.datetime.today(), handler=request.form['handler'], areas_string=cart_data[0], cartogram_data="{}", cartogramui_data=json.dumps(json_response))
+        if settings.USE_DATABASE:
+            new_cartogram_entry = CartogramEntry(string_key=cartogram_entry_key, date_created=datetime.datetime.today(), handler=request.form['handler'], areas_string=cart_data[0], cartogram_data="{}", cartogramui_data=json.dumps(json_response))
 
-        db.session.add(new_cartogram_entry)
-        db.session.commit()
+            db.session.add(new_cartogram_entry)
+            db.session.commit()
 
         return Response(json.dumps(json_response), status=200, content_type="application/json")
 
@@ -355,11 +365,16 @@ def cartogram():
                 
     cartogram_json['unique_sharing_key'] = unique_sharing_key
 
-    cartogram_entry = CartogramEntry.query.filter_by(string_key=unique_sharing_key).first()
+        if settings.USE_DATABASE:
+            cartogram_entry = CartogramEntry.query.filter_by(string_key=unique_sharing_key).first()
 
-    if cartogram_entry != None:
-        cartogram_entry.cartogram_data = json.dumps(cartogram_json)
-        db.session.commit()
+            if cartogram_entry != None:
+                cartogram_entry.cartogram_data = json.dumps(cartogram_json)
+                db.session.commit()
+
+        yield cartogram_json
+
+        yield "}"
     
     return Response(json.dumps({'cartogram_data': cartogram_json}), content_type='application/json', status=200)            
 

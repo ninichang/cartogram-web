@@ -49,8 +49,8 @@ xmlns:gocart="https://go-cart.io">
         
         path = "M {} z {}".format(polygon_path, " ".join(hole_paths))
 
-        #region = find_region_by_id(feature["id"])
+        #region = find_region_by_id(feature["properties"]["cartogram_id"])
 
-        svg_file.write('<path d="{}" id="polygon-{}" class="region-{}" fill="#aaaaaa" stroke="#000000" stroke-width="1"/>\n'.format(path, feature["properties"]["polygon_id"], feature["id"]))
+        svg_file.write('<path d="{}" id="polygon-{}" class="region-{}" fill="#aaaaaa" stroke="#000000" stroke-width="1"/>\n'.format(path, feature["properties"]["polygon_id"], feature["properties"]["cartogram_id"]))
     
     svg_file.write("</svg>")
