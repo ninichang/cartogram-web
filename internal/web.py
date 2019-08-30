@@ -365,16 +365,12 @@ def cartogram():
                 
     cartogram_json['unique_sharing_key'] = unique_sharing_key
 
-        if settings.USE_DATABASE:
-            cartogram_entry = CartogramEntry.query.filter_by(string_key=unique_sharing_key).first()
+    if settings.USE_DATABASE:
+        cartogram_entry = CartogramEntry.query.filter_by(string_key=unique_sharing_key).first()
 
-            if cartogram_entry != None:
-                cartogram_entry.cartogram_data = json.dumps(cartogram_json)
-                db.session.commit()
-
-        yield cartogram_json
-
-        yield "}"
+        if cartogram_entry != None:
+            cartogram_entry.cartogram_data = json.dumps(cartogram_json)
+            db.session.commit()
     
     return Response(json.dumps({'cartogram_data': cartogram_json}), content_type='application/json', status=200)            
 
