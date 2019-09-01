@@ -1,5 +1,18 @@
 <style>
-    @media screen and (max-width: 1100px) {
+  /* For mobile screens */
+    @media screen and (max-width: 600px){
+      #map-area, #cartogram-area{
+        margin-left: 0vw;
+      }
+    }
+
+    @media screen and (min-width: 600px) and (max-width: 1100px){
+      #map-area, #cartogram-area{
+        margin-left: 28vw;
+      }
+    }
+
+    @media screen and (min-width: 1100px) {
         #cartogram-row {
             display: block;
         }
@@ -52,11 +65,7 @@
       z-index: 1000;
     }
 
-    @media screen and (max-width: 1350px) {
-      #cartogram-row {
-        display: block;
-      }
-    }
+
 </style>
 
 <p id="tooltip">&nbsp;</p>
@@ -75,8 +84,6 @@
 </div>
 
 <div class="container-fluid">
-
-        
         
         <div class = "row">
           <div class="col-md-2">
@@ -160,9 +167,10 @@
            <!--<p id="tooltip">&nbsp;</p>-->
          </div>
          <div id = "map-area" style="margin-top: 20px">
+        
          <!--<p align="center"><img src="images/usa_ffb.png" width="300px"></p>-->
          <!-- <p align="center"><img src="images/india_ffb_comp.png" width="300px"></p> -->
-     </div>
+         </div>
        <p style="margin-top: 20px"><a class="btn btn-secondary" href="" download="" id="map-download">Download this Map</a></p>
 
        
@@ -183,6 +191,8 @@
          <!-- <p align="center"><img src="images/india_ffb_comp.png" width="300px"></p> -->
          
      </div>
+
+     <div> <h1> Legend </h1></div>
        <p style="margin-top: 20px"><a class="btn btn-secondary" href="" download="" id="cartogram-download">Download this Cartogram</a></p>
 
        <h4>Share on Social Media</h4>
