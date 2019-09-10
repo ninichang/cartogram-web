@@ -1,5 +1,6 @@
 import cartwrap, gen2dict, geojson_extrema, awslambda
 import settings
+import recaptcha_verify
 from handlers import usa, india, china, germany, brazil
 
 # !!!DO NOT MODFIY THE FOLLOWING SECTION
@@ -124,7 +125,7 @@ def contact():
         csrf_token = get_random_string(50)
         session['csrf_token'] = csrf_token
 
-        return render_template('contact.html', page_active='contact',name="",message="",email_address="",subject="", csrf_token=csrf_token)
+        return render_template('contact.html', page_active='contact',name="",message="",email_address="",subject="", csrf_token=csrf_token,recaptcha_site_key=settings.RECAPTCHA_SITE_KEY)
     else:
         
         name = request.form.get('name', '')
@@ -132,29 +133,34 @@ def contact():
         subject = request.form.get('subject', '')
         message = request.form.get('message', '')
         csrf = request.form.get('csrftoken', '')
+        recaptcha_response = request.form.get('g-recaptcha-response')
 
         if 'csrf_token' not in session:
             flash('Invalid CSRF token.', 'danger')
             csrf_token = get_random_string(50)
             session['csrf_token'] = csrf_token
-            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token)
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token,recaptcha_site_key=settings.RECAPTCHA_SITE_KEY)
         
         if session['csrf_token'] != csrf or len(session['csrf_token'].strip()) < 1:
             flash('Invalid CSRF token.', 'danger')
             csrf_token = get_random_string(50)
             session['csrf_token'] = csrf_token
-            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token)
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token,recaptcha_site_key=settings.RECAPTCHA_SITE_KEY)
         
         csrf_token = get_random_string(50)
         session['csrf_token'] = csrf_token
 
         if len(name.strip()) < 1 or len(subject.strip()) < 1 or len(message.strip()) < 1:
             flash('You must fill out all of the form fields', 'danger')
-            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject,csrf_token=csrf_token)
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token,recaptcha_site_key=settings.RECAPTCHA_SITE_KEY)
         
         if not validate_email.validate_email(email_address):
             flash('You must enter a valid email address.', 'danger')
-            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject,csrf_token=csrf_token)
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token,recaptcha_site_key=settings.RECAPTCHA_SITE_KEY)
+        
+        if not recaptcha_verify.verify_recaptcha_response(settings.RECAPTCHA_SECRET_KEY, recaptcha_response):
+            flash('Please retry completing the CAPTCHA.', 'danger')
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token,recaptcha_site_key=settings.RECAPTCHA_SITE_KEY)
         
         # Escape all of the variables:
         name = name.replace("<", "&lt;")
@@ -195,7 +201,7 @@ Message:
         # *sigh*
         except (smtplib.SMTPException,socket.gaierror):
             flash('There was an error sending your message.', 'danger')
-            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject,csrf_token=csrf_token)
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token,recaptcha_site_key=settings.RECAPTCHA_SITE_KEY)
 
         flash('Your message was successfully sent.', 'success')
         return redirect(url_for('contact'))
@@ -371,7 +377,7 @@ def cartogram():
         if cartogram_entry != None:
             cartogram_entry.cartogram_data = json.dumps(cartogram_json)
             db.session.commit()
-    
+
     return Response(json.dumps({'cartogram_data': cartogram_json}), content_type='application/json', status=200)            
 
 if __name__ == '__main__':
