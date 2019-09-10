@@ -3,7 +3,7 @@
 {% block head_extra %}
  <!-- Custom styles for this template -->
  <link href="{{ url_for('static', filename='starter-template.css') }}" rel="stylesheet">
- <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+ <script src="https://www.google.com/recaptcha/api.js?" async defer></script>
 {% endblock %}
 
 {% block content %}
@@ -62,9 +62,9 @@
                         </div>
                         <div class="col-md-12">
                             <input type="hidden" name="csrftoken" value="{{csrf_token}}"/>
-                            <div class="g-recaptcha" data-sitekey="{{recaptcha_site_key}}"></div>
+                            <div class="g-recaptcha" data-sitekey="{{recaptcha_site_key}}" data-callback="onCaptchaSubmit"></div>
                             <br/>
-                            <button type="submit" class="btn btn-primary pull-right" id="btnContactUs">
+                            <button type="submit" class="btn btn-primary pull-right" id="btnContactUs" disabled>
                                 Send Message</button>
                         </div>
                     </div>
@@ -97,8 +97,9 @@
 <script>
     var captchaSubmitted = false;
 
-    const onCaptchaSubmit = () => {
+    window.onCaptchaSubmit = () => {
         captchaSubmitted = true;
+        document.getElementById('btnContactUs').disabled = false;
     };
 
     const onContactFormSubmit = () => {
