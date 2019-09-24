@@ -3,6 +3,7 @@
 {% block head_extra %}
  <!-- Custom styles for this template -->
  <link href="{{ url_for('static', filename='starter-template.css') }}" rel="stylesheet">
+ <script src="https://www.google.com/recaptcha/api.js?" async defer></script>
 {% endblock %}
 
 {% block content %}
@@ -25,7 +26,14 @@
                           {% endfor %}
                         {% endif %}
                       {% endwith %}
-                    <form action="{{url_for('contact')}}" method="POST">
+
+                      <div class="alert alert-danger alert-dismissible fade show" style="display: none" role="alert" id="captcha-alert">
+                            You must complete the CAPTCHA.
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                      </div>
+                    <form action="{{url_for('contact')}}" method="POST" onsubmit="return onContactFormSubmit();">
                     <div class="row">
                         <div class="col-md-5">
                             <div class="form-group">
@@ -54,7 +62,9 @@
                         </div>
                         <div class="col-md-12">
                             <input type="hidden" name="csrftoken" value="{{csrf_token}}"/>
-                            <button type="submit" class="btn btn-primary pull-right" id="btnContactUs">
+                            <div class="g-recaptcha" data-sitekey="{{recaptcha_site_key}}" data-callback="onCaptchaSubmit"></div>
+                            <br/>
+                            <button type="submit" class="btn btn-primary pull-right" id="btnContactUs" disabled>
                                 Send Message</button>
                         </div>
                     </div>
@@ -81,5 +91,29 @@
             </div>-->
         </div>
     </div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    var captchaSubmitted = false;
+
+    window.onCaptchaSubmit = () => {
+        captchaSubmitted = true;
+        document.getElementById('btnContactUs').disabled = false;
+    };
+
+    const onContactFormSubmit = () => {
+
+        if(!captchaSubmitted) {
+            document.getElementById('captcha-alert').style.display = 'block';
+            return false;
+        }
+
+        return true;
+
+    };
+
+
+</script>
 {% endblock %}
 
