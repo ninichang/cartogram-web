@@ -1,0 +1,43 @@
+{% extends 'base_layout.html' %}
+
+{% block head_extra %}
+<style>
+@media only screen and (max-width: 1000px) {
+#welcome-row {
+    display: block;
+}
+
+#welcome-row .col-md-6 {
+    max-width: 100% !important;
+}
+
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+        <div class="row align-items-center" id="welcome-row">
+                <div class="col-md-6">
+                    <h1 class="display-3 text-primary text-center mb-3">Cartograms</h1>
+                    <h3 class="text-success text-center mb-3">Maps and data reimagined</h3>
+                    <div class="text-center">
+                            <a href="/cartogram" class="btn btn-lg btn-primary" style="border-radius: 1.2em">Make Your Cartogram</a>
+                    </div>                    
+                </div>
+                <div class="col-md-6">
+                    <div class="w-100 text-center">
+                            <img src="{{ url_for('static', filename='usacartogram.svg') }}" class="img-fluid" style="width: 150%"/>
+                    </div>
+                    
+                </div>
+            </div>
+</div>
+
+
+{% endblock %}
+
+{% block javascript %}
+
+{% endblock javascript %}

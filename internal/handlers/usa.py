@@ -7,6 +7,9 @@ class CartogramHandler(handlers.base_handler.BaseCartogramHandler):
     def get_name(self):
         return "Conterminous United States"
 
+    def selector_names(self):
+        return ["United States (Conterminous)"]
+
     def get_gen_file(self):
         return "{}/usa_low48conic.gen".format(settings.CARTOGRAM_DATA_DIR)
     

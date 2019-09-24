@@ -1,18 +1,19 @@
 {% extends 'base_layout.html' %}
 
 {% block head_extra %}
- <!-- Custom styles for this template -->
- <link href="{{ url_for('static', filename='starter-template.css') }}" rel="stylesheet">
  <script src="https://www.google.com/recaptcha/api.js?" async defer></script>
 {% endblock %}
 
 {% block content %}
     <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-          <div class="starter-template">
-            <h1>Contact Us</h1>
-         </div>
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                    <img src="{{ url_for('static', filename='usacartogram.svg') }}" class="img-fluid"/>
+            </div>
+            <div class="col-md-8">
+
+            <h1 class="text-primary display-4 text-center">Contact</h1>
+ 
 
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
@@ -35,29 +36,29 @@
                       </div>
                     <form action="{{url_for('contact')}}" method="POST" onsubmit="return onContactFormSubmit();">
                     <div class="row">
-                        <div class="col-md-5">
+                        <div class="col-md-5 d-flex flex-column justify-content-between">
                             <div class="form-group">
-                                <label for="name">
+                                <label for="name" class="text-success">
                                     Name</label>
-                                <input type="text" class="form-control" id="name" name="name" placeholder="Enter name" required="required" value="{{name}}"/>
+                                <input type="text" class="form-control" id="name" name="name" required="required" value="{{name}}"/>
                             </div>
                             <div class="form-group">
-                                <label for="email">
+                                <label for="email" class="text-success">
                                     Email Address</label>
-                                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required="required" value="{{email_address}}"/>
+                                    <input type="email" class="form-control" id="email" name="email"  required="required" value="{{email_address}}"/>
                             </div>
                             <div class="form-group">
-                                <label for="subject">
+                                <label for="subject" class="text-success">
                                     Subject</label>
-                                <input type="text" class="form-control" id="subject" name="subject" placeholder="Enter subject" required="required" value="{{subject}}"/>
+                                <input type="text" class="form-control" id="subject" name="subject"  required="required" value="{{subject}}"/>
                             </div>
                         </div>
                         <div class="col-md-7">
                             <div class="form-group">
-                                <label for="name">
+                                <label for="message" class="text-success">
                                     Message</label>
-                                <textarea name="message" id="message" class="form-control" rows="10" cols="25" required="required"
-                                    placeholder="Message">{{message}}</textarea>
+                                <textarea name="message" id="message" class="form-control" rows="8" cols="25" required="required"
+                                  >{{message}}</textarea>
                             </div>
                         </div>
                         <div class="col-md-12">

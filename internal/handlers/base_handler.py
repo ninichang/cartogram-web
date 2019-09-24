@@ -22,6 +22,9 @@ class BaseCartogramHandler:
     def expect_geojson_output(self):
         return False
 
+    def selector_names(self):
+        return [self.get_name()]
+
     
     # This function takes a CSVReader and returns a tuple containing:
     #   

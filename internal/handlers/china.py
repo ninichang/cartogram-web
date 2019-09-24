@@ -7,6 +7,9 @@ class CartogramHandler(handlers.base_handler.BaseCartogramHandler):
     def get_name(self):
         return "Mainland China and Taiwan"
 
+    def selector_names(self):
+        return ["China (Mainland China and Taiwan)", "Taiwan (Mainland China and Taiwan)"]
+
     def get_gen_file(self):
         return "{}/china_withSARandTWN_conic.gen".format(settings.CARTOGRAM_DATA_DIR)
     

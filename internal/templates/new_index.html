@@ -2,7 +2,7 @@
 
 {% block content %}
 
-{% include 'carousel.html' %}
+
 {% include 'cartogramui.html' %}
 
 {% endblock %}
@@ -24,7 +24,7 @@
 
             });
 
-            window.cartogram.switchMap("{{default_cartogram_handler}}", "");
+            window.cartogram.switchMap(document.getElementById('handler').value, "");
 
         };
     </script>

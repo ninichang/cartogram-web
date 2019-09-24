@@ -1,202 +1,44 @@
 {% extends 'base_layout.html' %}
 
-{% block head_extra %}
-    <!-- Custom styles for this template -->
-    <link href="{{ url_for('static', filename='starter-template.css') }}" rel="stylesheet">
-
-<style>
-    .faqHeader {
-        font-size: 28px;
-        margin: 20px;
-    }
-    .accordion-toggle {
-        color: #000;
-        font-size: 16px;
-        text-decoration: none;
-    }
-    .accordion-toggle:hover,.accordion-toggle:active,.accordion-toggle:focus {
-        color: #000;
-        text-decoration: none;
-    }
-    h4 {
-        font-size: 18px; 
-    }
-
-    .card-header [data-toggle="collapse"]:after {
-        font-family: "Times New Roman";
-        content: "▶";
-        float: right;
-        color: #000;
-        font-size: 20px;
-        line-height: 10px;
-
-        -webkit-transform: rotate(-90deg);
-        -moz-transform: rotate(-90deg);
-        -ms-transform: rotate(-90deg);
-        -o-transform: rotate(-90deg);
-        transform: rotate(-90deg);
-    }
-
-    .card-header [data-toggle="collapse"].collapsed:after {
-
-        -webkit-transform: rotate(90deg);
-        -moz-transform: rotate(90deg);
-        -ms-transform: rotate(90deg);
-        -o-transform: rotate(90deg);
-        transform: rotate(90deg);
-        color: #000;
-    }
-</style>
-{% endblock %}
 
 {% block content %}
+<div class="container mt-5">
+        <h1 class="text-primary">FAQ</h1>
 
-    <div class="container">
-         <div class="starter-template">
-            <!--<div class="alert alert-warning alert-dismissible" role="alert">
-            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            If you cannot find an answer to your question, 
-            make sure to contact us. 
-            </div>-->
-            <h1>FAQ</h1>
-            <p class="lead">Below are some of the most frequently asked questions we have received.</p>
+        <h2 class="text-primary">General Questions</h2>
+
+        <h3 id="why-no-cartogram-labels">Why aren’t the regions on the cartogram labeled?</h3>
+
+        <p class="text-justify">Automatic placement of region labels is a di cult problem that we haven’t had time to solve yet. As an interim measure, you can see the name and data associated with each region in a tooltip (i.e. a small information window) when you click on the region.</p>
+
+        <h3 id="download-and-edit">How can I download and edit the cartograms generated on this website?</h3>
+
+        <p class="text-justify">Below each map or cartogram displayed on this website there is a download button. By clicking it, you can download an SVG image containing the map. SVG files contain vector images, and can be edited and converted by Adobe Illustrator or <a href="https://inkscape.org">Inkscape</a>, a free, open source alternative. If you would simply like to convert your SVG map to a PNG image to use in a document or paper and don’t have access to these programs, you can use <a href="https://svgtopng.com">this website</a>.</p>
+
+        <h2 class="text-primary">Cartogram Generation</h2>
+
+        <h3 id="cartogram-generation-time">How long does it take to generate a cartogram?</h3>
+
+        <p class="text-justify">It usually takes just a few seconds to generate a cartogram using this website. A progress bar will give you an indication of how far the calculation has already proceeded. If you can’t see a cartogram at the end, please <a href="#what-went-wrong">read our answer</a> to “what went wrong?”</p>
+
+        <h3 id="cartogram-generation-process">How does this website generate cartograms?</h3>
+
+        <p class="text-justify">This website uses the Fast Flow-based method developed by Michael T. Gastner, Vivien Seguy, and Pratyush More. You can learn more about how this method works by reading <a href="https://www.pnas.org/content/115/10/E2156">the paper</a> they published in the journal PNAS. If you publish an image produced by <a href="https://go-cart.io">go-cart.io</a>, please include a reference to the PNAS paper.</p>
+
+        <h3 id="what-went-wrong">The website didn’t produce a cartogram. What went wrong?</h3>
+
+        <p class="text-justify">If the algorithm can’t finish within one minute, we’ll show you the data as a bar chart instead of a cartogram. The bar chart may reveal the cause of the problem. Have you tried to make a small
+region very large? For example, did you set the objective area of the Vatican City as large as the objective area of Russia? Or did you give a large region an objective area of zero? If yes, the algorithm will struggle with the severe distortions that would be necessary to show the data as a cartogram. In that case, a cartogram may not be the best way to represent your data. Please also see our answer to <a href="#what-kind-of-data">“What kind of data are suited for generating cartograms?”</a></p>
+
+        <h3 id="colors">How can I change the map colours?</h3>
+
+        <p class="text-justify">The colour of each map region can be changed by editing the values of the ‘Colour’ column in the downloadable CSV template for each map. You should use the hexadecimal colour code format to specify the colours you want. If you are not familiar with this format, you can learn more about it <a  href="https://appendto.com/2017/02/rgb-to-hex-understanding-the-major-web-color-codes/">here</a>.</p>
+
+        <h3 id="what-kind-of-data">What kind of data are suited for generating cartograms?</h3>
+
+        <p class="text-justify">Cartograms are designed to visualize totals, not indices. In general, if it is appropriate to use a pie chart or <a href="https://en.wikipedia.org/wiki/Mosaic_plot">mosaic plot</a> to visualize a dataset, then it should also be appropriate to use a cartogram. You can refer to the examples of appropriate and inapropriate  datasets for use with cartograms below for more guidance:</p>
+
+        <p class="text-justify">For some data, the algorithm may not be able to compute a solution. For more information, please see our answer to <a href="#what-went-wrong">“What went wrong?”</a></p>
         </div>
-        <div class="" id="accordion">
-            <div class="faqHeader">General questions</div>
-            <div class="card ">
-                <div class="card-header">
-                    <h4 class="card-header">
-                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseA">Why aren’t the regions on the cartogram labeled?</a>
-                    </h4>
-                </div>
-                <div id="collapseA" class="panel-collapse collapse">
-                    <div class="card-block">
-                            Automatic placement of region labels is a difficult problem that we haven’t had time to solve yet. As an interim measure, you can see the name and data associated with each region in the top left corner of the output section by hovering over the region you want.
-                    </div>
-                </div>
-            </div>
-            <!--<div class="card ">
-                <div class="card-header">
-                    <h4 class="card-header">
-                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseB">Why are the maps displayed without distance scales?</a>
-                    </h4>
-                </div>
-                <div id="collapseB" class="panel-collapse collapse">
-                    <div class="card-block">
-                            Distance scales are not present because they are not necessary. The conventional maps and cartograms generated on this website are carefully displayed so that they have the same total area. This means that you can gain insight from comparing them without needing a disstance scale.
-                    </div>
-                </div>
-            </div>-->
-
-            <div class="card ">
-                    <div class="card-header">
-                        <h4 class="card-header">
-                            <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseC">How can I download and edit the cartograms generated on this website?</a>
-                        </h4>
-                    </div>
-                    <div id="collapseC" class="panel-collapse collapse">
-                        <div class="card-block">
-                                Below each map or cartogram displayed on this website there is a download button. Clicking it will download an SVG image containing the map image. SVG files contain vector images, and can be edited and converted by Adobe Illustrator or <a href="https://inkscape.org/" target="_blank">Inkscape</a>, a free, open source alternative.
-                                <br/><br/>
-                                If you would simply like to convert your SVG map to a PNG image to use in a document or paper and don't have access to these programs, you can use <a href="https://svgtopng.com/" target="_blank">this website</a>.
-                        </div>
-                    </div>
-                </div>
-
-            <div class="faqHeader">Cartogram Generation</div>
-            <div class="card ">
-                <div class="card-header">
-                    <h4 class="card-header">
-                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">How long does it take to generate a cartogram?</a>
-                    </h4>
-                </div>
-                <div id="collapseTwo" class="panel-collapse collapse">
-                    <div class="card-block">
-                        It usually takes just a few seconds to generate a cartogram using this website.
-                    </div>
-                </div>
-            </div>
-            <div class="card ">
-            <div class="card ">
-                <div class="card-header">
-                    <h4 class="card-header">
-                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseEleven">How does this website generate cartograms?</a>
-                    </h4>
-                </div>
-                <div id="collapseEleven" class="panel-collapse collapse">
-                    <div class="card-block">
-                        This website uses the Fast Flow-based method developed by Michael T. Gastner, Vivien Seguy, and Pratyush More. You can learn more about how this method works by reading <a href="http://www.pnas.org/content/early/2018/02/15/1712674115">the paper</a> they published in the journal PNAS.
-                    </div>
-                </div>
-            </div>
-            <div class="card ">
-                <div class="card-header">
-                    <h4 class="card-header">
-                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseFive">How can I change the map colours?</a>
-                    </h4>
-                </div>
-                <div id="collapseFive" class="panel-collapse collapse">
-                    <div class="card-block">
-                            The colour of each map region can be changed by editing the values of the 'Colour' column in the downloadable CSV template for each map. You should use the hexadecimal colour code format to specify the colours you want. If you are not familiar with this format, you can learn more about it <a href="https://appendto.com/2017/02/rgb-to-hex-understanding-the-major-web-color-codes/">here</a>. 
-                        <br />
-                    </div>
-                </div>
-            </div>
-            <div class="card ">
-                <div class="card-header">
-                    <h4 class="card-header">
-                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseSix">What kind of data are suited for generating cartograms?</a>
-                    </h4>
-                </div>
-                <div id="collapseSix" class="panel-collapse collapse">
-                    <div class="card-block">
-                        Cartograms are designed to visualize totals, not indices. In general, if it is appropriate to use a <a href="https://en.wikipedia.org/wiki/Mosaic_plot" target="_blank">mosaic plot</a> or pie chart to visualize a dataset, then it should also be appropriate to use a cartogram. You can refer to the examples of appropriate and inapropriate datasets for use with cartograms below for more guidance:
-                        <br/><br/>
-                        <table class="table table-bordered">
-                            <thead>
-                            <tr>
-                                <th>
-                                    Appropriate
-                                </th>
-                                <th>
-                                    Inapropriate
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>
-                                    Total GDP by region
-                                </td>
-                                <td>
-                                    <a href="https://en.wikipedia.org/wiki/Human_Development_Index" target="_blank">Human Development Index</a> (or similar composite statistics)
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    Total population by region
-                                </td>
-                                <td>
-                                    Population density by region
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    Number of college gradates by region
-                                </td>
-                                <td>
-                                    Percentage of population that are college graduates by region
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                            
-                    </div>
-                </div>
-            </div>
-           
-        </div>
-    </div>
-</div>
 {% endblock %}
 
