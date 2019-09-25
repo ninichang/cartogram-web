@@ -18,12 +18,15 @@
 
             window.cartogram = new Cartogram("{{cartogram_url}}", "{{cartogramui_url}}", "{{cartogram_data_dir}}", "{{url_for('gridedit')}}", "{{cartogram_version}}");
 
+
+            // When user uses the dropdown list and changes the map
             document.getElementById('handler').addEventListener('change', function(e){
 
                 window.cartogram.switchMap(document.getElementById('handler').value, "");
 
             });
 
+            // load the default map
             window.cartogram.switchMap("{{default_cartogram_handler}}", "");
 
         };

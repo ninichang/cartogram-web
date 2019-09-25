@@ -630,7 +630,31 @@ class CartMap {
          * @type {number}
          */
         this.height = 0.0;
+        
+    }
+    /**
+     * getTotalValuesForVersion returns the sum of all region values for the specified map version.
+     * @param {string} sysname The sysname of the map version
+     * @returns {number} The total value of the specified map version
+     */
 
+    getTotalValuesForVersion(sysname) {
+        
+        var sum = 0;
+        
+        Object.keys(this.regions).forEach(function(region_id){
+            const regionValue = this.regions[region_id].getVersion(sysname).value;
+           
+            if(regionValue != 'NA') {
+                sum += regionValue;
+            }
+     
+        }, this);
+        //  this refers to the CartMap class
+
+        console.log(sum);
+
+        return sum;
     }
 
     /**
@@ -1030,8 +1054,9 @@ class CartMap {
 
         }, this);        
 
+        // this.model.map.getTotalValuesForVersion(new_sysname);
+        this.getTotalValuesForVersion(new_sysname);
     }
-
 }
 
 /**
@@ -1696,6 +1721,7 @@ class Cartogram {
 
         this.displayVersionSwitchButtons();
 
+        console.log(sysname);
     }
 
     /**
@@ -1812,6 +1838,8 @@ class Cartogram {
 
                     this.model.map.drawVersion("1-conventional", "map-area", ["map-area", "cartogram-area"]);
                     this.model.map.drawVersion("3-cartogram", "cartogram-area", ["map-area", "cartogram-area"]);
+                    
+                    
 
                     this.model.current_sysname = "3-cartogram";
 
