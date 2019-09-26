@@ -12,3 +12,4 @@ If you encounter issues using this code, or have any questions, please contact I
 # Structure
 To setup the map locally, refer to /doc
 
+![](images/cartogram-web.png)
