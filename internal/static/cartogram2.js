@@ -640,8 +640,7 @@ class CartMap {
 
     getTotalValuesForVersion(sysname) {
         
-        var sum = 0;
-        
+        var sum = 0;        
         Object.keys(this.regions).forEach(function(region_id){
             const regionValue = this.regions[region_id].getVersion(sysname).value;
            
@@ -650,11 +649,37 @@ class CartMap {
             }
      
         }, this);
-        //  this refers to the CartMap class
-
-        console.log(sum);
-
+        console.log("population:" + sum);
         return sum;
+    }
+
+
+    getTotalAreaForVersion(sysname) {
+        var area = 0;        
+        Object.keys(this.regions).forEach(function(region_id){
+            this.regions[region_id].getVersion(sysname).polygons.forEach(function(polygon){
+                const coordinates = polygon.coordinates;
+                const areaValue = d3.polygonArea(coordinates);
+                if(areaValue != 'NA') {
+                area += areaValue;
+                }
+            })
+        }, this);
+        console.log("area:" + area);
+        return area;
+    }
+
+    getPolygonRatio(sysname){
+        const scales = ["hundred", "thousand", "million"];
+        let ratio = Math.ceil(this.getTotalValuesForVersion(sysname)/this.getTotalAreaForVersion(sysname)/ 10) * 10;
+        console.log("population over area:" + ratio);
+
+        if(sysname != "1-conventional"){
+            document.getElementById("cartogram-legend").style.display = "inline";
+        } else {
+            document.getElementById("cartogram-legend").style.display = "none";
+        }
+        console.log(sysname);
     }
 
     /**
@@ -1008,6 +1033,9 @@ class CartMap {
 
     }
 
+
+
+
     /**
      * switchVersion switches the map version displayed in the element with the given ID with an animation.
      * @param {string} current_sysname The sysname of the currently displayed version
@@ -1054,8 +1082,9 @@ class CartMap {
 
         }, this);        
 
-        // this.model.map.getTotalValuesForVersion(new_sysname);
         this.getTotalValuesForVersion(new_sysname);
+        this.getTotalAreaForVersion(new_sysname);
+        this.getPolygonRatio(new_sysname);
     }
 }
 
@@ -1480,7 +1509,7 @@ class Cartogram {
             loading_height += document.getElementById('error').clientHeight;
         }
 
-        console.log(loading_height);
+        // console.log(loading_height);
 
         /* The loading div will be at least 100px tall */
         if(loading_height > 100)
@@ -1720,8 +1749,6 @@ class Cartogram {
         this.model.current_sysname = sysname;
 
         this.displayVersionSwitchButtons();
-
-        console.log(sysname);
     }
 
     /**
