@@ -649,7 +649,6 @@ class CartMap {
             }
      
         }, this);
-        console.log("population:" + sum);
         return sum;
     }
 
@@ -665,21 +664,33 @@ class CartMap {
                 }
             })
         }, this);
-        console.log("area:" + area);
         return area;
     }
 
-    getPolygonRatio(sysname){
-        const scales = ["hundred", "thousand", "million"];
-        let ratio = Math.ceil(this.getTotalValuesForVersion(sysname)/this.getTotalAreaForVersion(sysname)/ 10) * 10;
-        console.log("population over area:" + ratio);
+    drawLegend(sysname){
+        const scale_word = ["hundred", "thousand", "million"];
+        const scale_num = [100, 1000, 1000000];
+
+        // decide how to round the numbers based on the ratio. 
+        // If the ratio is smaller than 1000, round to the nearest hundred. Else, round to the nearest thousand
+        let original_ratio = this.getTotalValuesForVersion(sysname)/this.getTotalAreaForVersion(sysname);
+        
+        const round_ratio = (original_ratio < 1000) ? 100 : 1000;
+
+        // After rounding, multiply by 900 since the legend area is 900 pixels.
+        let ratio = Math.round(original_ratio/ round_ratio) * round_ratio * 900;
 
         if(sysname != "1-conventional"){
             document.getElementById("cartogram-legend").style.display = "inline";
+            console.log("legend population:" + ratio);
+            const scale_index = (ratio < 1000) ? 0 : ((ratio < 1000000) ? 1 : 2)
+            const number = ratio / (scale_num[scale_index])
+            
+            document.getElementById("legend-text").innerHTML = "= " + number + " " + scale_word[scale_index] + " people"
+
         } else {
             document.getElementById("cartogram-legend").style.display = "none";
         }
-        console.log(sysname);
     }
 
     /**
@@ -1084,7 +1095,7 @@ class CartMap {
 
         this.getTotalValuesForVersion(new_sysname);
         this.getTotalAreaForVersion(new_sysname);
-        this.getPolygonRatio(new_sysname);
+        this.drawLegend(new_sysname);
     }
 }
 
@@ -2066,6 +2077,11 @@ class Cartogram {
             this.generateSVGDownloadLinks();
             this.displayVersionSwitchButtons();
             this.updateGridDocument(mappack.griddocument);
+            this.model.map.getTotalValuesForVersion(this.model.current_sysname);
+            this.model.map.getTotalAreaForVersion(this.model.current_sysname);
+            this.model.map.drawLegend(this.model.current_sysname);
+
+
 
             document.getElementById('template-link').href = this.config.cartogram_data_dir+ "/" + sysname + "/template.csv";
 
