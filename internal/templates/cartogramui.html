@@ -6,6 +6,8 @@
         #cartogram-row .col-md-4 {
           margin: 0 auto;
         }
+
+        
     }
 
     .bar{
@@ -51,6 +53,7 @@
         display: block;
       }
     } */
+    
 </style> 
 
 
@@ -195,13 +198,12 @@
         </div>
 
         <div class="row">
-          <div class="col-6" id="cartogram-legend" style="fill:darkgrey;"> 
+          <div class="col-12" id="cartogram-legend" style="fill:darkgrey; left: 5vw; top: 5vh;bottom: 5vh"> 
             <svg width="10000" height="50">
               <rect x="0" y="0" width="30" height="30"/>
               <text id = "legend-text" x="40" y="20" fill="#5A5A5A"> </text>
             </svg>
-          </div>
-        </div>
+
 
        <p style="margin-top: 20px"><a class="btn btn-secondary" href="" download="" id="cartogram-download">Download this Cartogram</a></p>
 
@@ -220,8 +222,12 @@
           target="_blank" title="Share on Twitter" class="social-link" id="twitter-share"><i class="fab fa-twitter-square"></i></a></td>            
           </tr>
         </table>
-
+        <br>
+        <br>
+        </div>
       </div>
+      <!-- the "share on social media" and "download this cartogram" are inside the legend row div -->
+    </div> 
 
 
     </div>
