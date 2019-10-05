@@ -649,6 +649,7 @@ class CartMap {
             }
      
         }, this);
+
         return sum;
     }
 
@@ -668,26 +669,32 @@ class CartMap {
     }
 
     drawLegend(sysname){
-        const scale_word = ["hundred", "thousand", "million"];
-        const scale_num = [100, 1000, 1000000];
 
-        // decide how to round the numbers based on the ratio. 
-        // If the ratio is smaller than 1000, round to the nearest hundred. Else, round to the nearest thousand
-        let original_ratio = this.getTotalValuesForVersion(sysname)/this.getTotalAreaForVersion(sysname);
-        
-        const round_ratio = (original_ratio < 1000) ? 100 : 1000;
+        // Obtain the original ratio of the values over total area.
+        const original_ratio = this.getTotalValuesForVersion(sysname)/this.getTotalAreaForVersion(sysname);
 
-        // After rounding, multiply by 900 since the legend area is 900 pixels.
-        let ratio = Math.round(original_ratio/ round_ratio) * round_ratio * 900;
+        // square default is 30 by 30 px
+        const ratio = original_ratio*900;
+
+        // Calculate the number (10 to the power of something) that we need to round the ratio.
+        const round_ratio = Math.pow(10, (Math.round(ratio).toString().length-1));
+
+        // Round the ratio to a prettier number.
+        const final_ratio = Math.round(ratio/round_ratio)
+
+        // Calculate the width and height of the square
+        const width = Math.sqrt(final_ratio*round_ratio*900/ratio);
+        console.log(width);
 
         if(sysname != "1-conventional"){
-            document.getElementById("cartogram-legend").style.display = "inline";
-            console.log("legend population:" + ratio);
-            const scale_index = (ratio < 1000) ? 0 : ((ratio < 1000000) ? 1 : 2)
-            const number = ratio / (scale_num[scale_index])
-            
-            document.getElementById("legend-text").innerHTML = "= " + number + " " + scale_word[scale_index] + " people"
 
+            const scale_word = (round_ratio < 1000000) ? round_ratio.toString().substr(1) : "million";
+            console.log(scale_word)
+            document.getElementById('legend-square').setAttribute("width", width.toString() +"px");
+            document.getElementById('legend-square').setAttribute("height", width.toString() +"px");
+            document.getElementById("cartogram-legend").style.display = "inline";   
+            document.getElementById("legend-text").innerHTML = "= " + final_ratio + " " + scale_word + " people"
+    
         } else {
             document.getElementById("cartogram-legend").style.display = "none";
         }
