@@ -632,6 +632,27 @@ class CartMap {
         this.height = 0.0;
         
     }
+
+    /**
+     * getConvenArea returns the actual land areas of each region.
+     * 
+     */
+
+    getConvenArea(sysname){
+        var sum = 0;        
+        Object.keys(this.regions).forEach(function(region_id){
+            const regionArea = this.regions[region_id].getVersion("1-conventional").value;
+            
+            if(regionArea != 'NA') {
+                sum += regionArea;
+            }
+
+        }, this);
+        
+
+        return sum;
+    }
+
     /**
      * getTotalValuesForVersion returns the sum of all region values for the specified map version.
      * @param {string} sysname The sysname of the map version
@@ -648,23 +669,33 @@ class CartMap {
                 sum += regionValue;
             }
      
+            console.log(this.regions[region_id])
+
         }, this);
 
         return sum;
     }
 
 
+    /**
+     * The following returns the sum of all region polygon area values for the specified map version.
+     * @param {string} sysname The sysname of the map version
+     * @returns {number} The total value of the specified map version
+     */
     getTotalAreaForVersion(sysname) {
         var area = 0;        
         Object.keys(this.regions).forEach(function(region_id){
             this.regions[region_id].getVersion(sysname).polygons.forEach(function(polygon){
                 const coordinates = polygon.coordinates;
+                
                 const areaValue = d3.polygonArea(coordinates);
                 if(areaValue != 'NA') {
                 area += areaValue;
                 }
             })
         }, this);
+        console.log("totalArea: " + area);
+
         return area;
     }
 
@@ -678,26 +709,85 @@ class CartMap {
 
         // Calculate the number (10 to the power of something) that we need to round the ratio.
         const round_ratio = Math.pow(10, (Math.round(ratio).toString().length-1));
+        // Round the ratio to a prettier number, such that they start with 1, 2, or 5
+        const r = ratio/round_ratio;
+        var final_ratio = 0;
+        if(Math.abs(r - 10) < Math.abs(r - 5) && Math.abs(r - 10) < Math.abs(r - 2)){
+            final_ratio = 10;
+        } else if (Math.abs(r - 5) < Math.abs(r - 2)){
+            final_ratio = 5;
+        } else {
+            final_ratio = 2;
+        }
 
-        // Round the ratio to a prettier number.
-        const final_ratio = Math.round(ratio/round_ratio)
-
-        // Calculate the width and height of the square
+        // Calculate the scaled width and height of the square
         const width = Math.sqrt(final_ratio*round_ratio*900/ratio);
-        console.log(width);
-
+        const scale_word = (round_ratio > 999999) ? "million": round_ratio.toString().substr(1) ;
+    
         if(sysname != "1-conventional"){
-
-            const scale_word = (round_ratio < 1000000) ? round_ratio.toString().substr(1) : "million";
-            console.log(scale_word)
             document.getElementById('legend-square').setAttribute("width", width.toString() +"px");
             document.getElementById('legend-square').setAttribute("height", width.toString() +"px");
             document.getElementById("cartogram-legend").style.display = "inline";   
-            document.getElementById("legend-text").innerHTML = "= " + final_ratio + " " + scale_word + " people"
+
+            if(width > 35){
+                // adjust padding when the square is a bit too big
+                document.getElementById("legend-text").setAttribute("x", 50) 
+                document.getElementById("legend-text").innerHTML = "= " + final_ratio + " " + scale_word + " people"
+            } else{
+                document.getElementById("legend-text").innerHTML = "= " + final_ratio + " " + scale_word + " people"
+            }
     
         } else {
             document.getElementById("cartogram-legend").style.display = "none";
         }
+
+        // Now draw the legend for conventional map
+
+        const convenLegend= this.getConvenArea("1-conventional")/this.getTotalAreaForVersion("1-conventional");
+        console.log(this.getTotalAreaForVersion("1-conventional"))
+        // square default is 30 by 30 px
+        const conven_ratio = convenLegend*900;
+        var conven_round_ratio = Math.pow(10, (Math.round(conven_ratio).toString().length-1));
+        
+        if(conven_round_ratio.length == 2){
+            conven_round_ratio = 100
+        } else if(conven_round_ratio == 1){
+            conven_round_ratio = 10
+        }
+
+        console.log("conven_round_ratio:" + conven_round_ratio);
+        const r_conven = conven_ratio/conven_round_ratio;
+        var conven_final_ratio = 0;
+        if(Math.abs(r_conven - 10) < Math.abs(r_conven - 5) && Math.abs(r_conven - 10) < Math.abs(r_conven - 2)){
+            conven_final_ratio = 10;
+        } else if (Math.abs(r_conven - 5) < Math.abs(r_conven - 2)){
+            conven_final_ratio = 5;
+        } else {
+            conven_final_ratio = 2;
+        }
+
+        const width_conven = Math.sqrt(conven_final_ratio*conven_round_ratio*900/conven_ratio);
+        var conven_scale_word = (conven_round_ratio > 99999) ? "million" : conven_round_ratio.toString().substr(1);
+
+
+        document.getElementById('legend-square-conventional').setAttribute("width", width_conven.toString() +"px");
+        document.getElementById('legend-square-conventional').setAttribute("height", width_conven.toString() +"px")
+        if(conven_scale_word.length == 1){
+            document.getElementById('legend-text-conventional').innerHTML = "= " + conven_final_ratio + conven_scale_word + " km sq"
+        } else {
+            document.getElementById('legend-text-conventional').innerHTML = "= " + conven_final_ratio + " " + conven_scale_word + " km sq"
+        }
+
+
+                
+        console.log(this.getConvenArea("1-conventional"));
+        console.log(this.getTotalAreaForVersion("1-conventional"))
+        console.log("convenLegend:" + convenLegend)
+        console.log("conven_ratio : " + conven_ratio)
+        console.log("conven_round_ratio : " + conven_round_ratio)
+        console.log("conven_final_ratio : " + conven_final_ratio)
+
+
     }
 
     /**
@@ -1103,6 +1193,7 @@ class CartMap {
         this.getTotalValuesForVersion(new_sysname);
         this.getTotalAreaForVersion(new_sysname);
         this.drawLegend(new_sysname);
+        this.getConvenArea(new_sysname);
     }
 }
 
@@ -2087,6 +2178,7 @@ class Cartogram {
             this.model.map.getTotalValuesForVersion(this.model.current_sysname);
             this.model.map.getTotalAreaForVersion(this.model.current_sysname);
             this.model.map.drawLegend(this.model.current_sysname);
+            this.model.map.getConvenArea(this.model.current_sysname);
 
 
 

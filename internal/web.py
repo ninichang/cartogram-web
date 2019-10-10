@@ -70,7 +70,7 @@ cartogram_handlers = {
 # !!!END DO NOT MODFIY
 }
 
-default_cartogram_handler = "usa"
+default_cartogram_handler = "SriLanka"
 
 if settings.USE_DATABASE:
     class CartogramEntry(db.Model):
