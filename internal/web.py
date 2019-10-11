@@ -12,14 +12,15 @@ from handlers import singapore
 from handlers import japan2
 from handlers import france
 from handlers import uae
+#from handlers import spain
+from handlers import finland
+from handlers import czechia
 from handlers import austria
 from handlers import denmark
 from handlers import belgium
 #from handlers import russia
 from handlers import nigeria
 #from handlers import spain
-from handlers import czechrepublic
-from handlers import czechrepublic2
 # ---addmap.py header marker---
 # !!!END DO NOT MODFIY
 
@@ -76,13 +77,13 @@ cartogram_handlers = {
 'japan2': japan2.CartogramHandler(),
 'france': france.CartogramHandler(),
 'uae': uae.CartogramHandler(),
+'finland': finland.CartogramHandler(),
+#'spain': spain.CartogramHandler(),
+'czechia': czechia.CartogramHandler(),
 'austria': austria.CartogramHandler(),
 'denmark': denmark.CartogramHandler(),
 'belgium': belgium.CartogramHandler(),
 'nigeria': nigeria.CartogramHandler(),
-#'spain': spain.CartogramHandler(),
-'czechrepublic': czechrepublic.CartogramHandler(),
-'czechrepublic2': czechrepublic2.CartogramHandler(),
 # ---addmap.py body marker---
 # !!!END DO NOT MODFIY
 }
