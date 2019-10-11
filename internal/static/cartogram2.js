@@ -1737,7 +1737,7 @@ class Cartogram {
             var option = document.createElement('option');
             option.innerText = this.model.map.versions[sysname].name;
             option.value = sysname;
-            option.selected = (sysname == this.model.current_sysname);
+            option.selected = (sysname === this.model.current_sysname);
 
             select.appendChild(option);
 
@@ -2085,6 +2085,7 @@ class Cartogram {
             this.generateSVGDownloadLinks();
             this.displayVersionSwitchButtons();
             this.updateGridDocument(mappack.griddocument);
+
 
             document.getElementById('template-link').href = this.config.cartogram_data_dir+ "/" + sysname + "/template.csv";
 
