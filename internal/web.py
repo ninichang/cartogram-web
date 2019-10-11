@@ -1,5 +1,6 @@
-import cartwrap, gen2dict, geojson_extrema
+import cartwrap, gen2dict, geojson_extrema, awslambda
 import settings
+import recaptcha_verify
 from handlers import usa, india, china, germany, brazil
 
 # !!!DO NOT MODFIY THE FOLLOWING SECTION
@@ -11,8 +12,14 @@ from handlers import singapore
 from handlers import japan2
 from handlers import france
 from handlers import uae
-from handlers import spain
+#from handlers import spain
 from handlers import finland
+from handlers import czechia
+from handlers import austria
+from handlers import denmark
+from handlers import belgium
+#from handlers import russia
+from handlers import nigeria
 # ---addmap.py header marker---
 # !!!END DO NOT MODFIY
 
@@ -30,6 +37,7 @@ import validate_email
 import smtplib
 import email.mime.text
 import socket
+import redis
 
 app = Flask(__name__)
 
@@ -51,6 +59,8 @@ app.config['ENV'] = 'development' if settings.DEBUG else 'production'
 if settings.USE_DATABASE:
     db = SQLAlchemy(app)
 
+redis_conn = redis.Redis(host=settings.CARTOGRAM_REDIS_HOST,port=settings.CARTOGRAM_REDIS_PORT,db=0)
+
 cartogram_handlers = {
     'usa': usa.CartogramHandler(),
     'india': india.CartogramHandler(),
@@ -66,8 +76,13 @@ cartogram_handlers = {
 'japan2': japan2.CartogramHandler(),
 'france': france.CartogramHandler(),
 'uae': uae.CartogramHandler(),
-'spain': spain.CartogramHandler(),
 'finland': finland.CartogramHandler(),
+#'spain': spain.CartogramHandler(),
+'czechia': czechia.CartogramHandler(),
+'austria': austria.CartogramHandler(),
+'denmark': denmark.CartogramHandler(),
+'belgium': belgium.CartogramHandler(),
+'nigeria': nigeria.CartogramHandler(),
 # ---addmap.py body marker---
 # !!!END DO NOT MODFIY
 }
@@ -98,7 +113,7 @@ def index():
 
     cartogram_handlers_select = [{'id': key, 'display_name': handler.get_name()} for key, handler in cartogram_handlers.items()]
 
-    return render_template('new_index.html', page_active='home', cartogram_url=url_for('cartogram'), cartogramui_url=url_for('cartogram_ui'), cartogram_data_dir=url_for('static', filename='cartdata'), cartogram_handlers=cartogram_handlers_select, default_cartogram_handler=default_cartogram_handler, cartogram_version=settings.VERSION)
+    return render_template('new_index.html', page_active='home', cartogram_url=url_for('cartogram'), cartogramui_url=url_for('cartogram_ui'), getprogress_url=url_for('getprogress'),cartogram_data_dir=url_for('static', filename='cartdata'), cartogram_handlers=cartogram_handlers_select, default_cartogram_handler=default_cartogram_handler, cartogram_version=settings.VERSION)
 
 @app.route('/faq', methods=['GET'])
 def faq():
@@ -123,7 +138,7 @@ def contact():
         csrf_token = get_random_string(50)
         session['csrf_token'] = csrf_token
 
-        return render_template('contact.html', page_active='contact',name="",message="",email_address="",subject="", csrf_token=csrf_token)
+        return render_template('contact.html', page_active='contact',name="",message="",email_address="",subject="", csrf_token=csrf_token,recaptcha_site_key=settings.RECAPTCHA_SITE_KEY)
     else:
         
         name = request.form.get('name', '')
@@ -131,29 +146,34 @@ def contact():
         subject = request.form.get('subject', '')
         message = request.form.get('message', '')
         csrf = request.form.get('csrftoken', '')
+        recaptcha_response = request.form.get('g-recaptcha-response')
 
         if 'csrf_token' not in session:
             flash('Invalid CSRF token.', 'danger')
             csrf_token = get_random_string(50)
             session['csrf_token'] = csrf_token
-            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token)
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token,recaptcha_site_key=settings.RECAPTCHA_SITE_KEY)
         
         if session['csrf_token'] != csrf or len(session['csrf_token'].strip()) < 1:
             flash('Invalid CSRF token.', 'danger')
             csrf_token = get_random_string(50)
             session['csrf_token'] = csrf_token
-            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token)
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token,recaptcha_site_key=settings.RECAPTCHA_SITE_KEY)
         
         csrf_token = get_random_string(50)
         session['csrf_token'] = csrf_token
 
         if len(name.strip()) < 1 or len(subject.strip()) < 1 or len(message.strip()) < 1:
             flash('You must fill out all of the form fields', 'danger')
-            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject,csrf_token=csrf_token)
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token,recaptcha_site_key=settings.RECAPTCHA_SITE_KEY)
         
         if not validate_email.validate_email(email_address):
             flash('You must enter a valid email address.', 'danger')
-            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject,csrf_token=csrf_token)
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token,recaptcha_site_key=settings.RECAPTCHA_SITE_KEY)
+        
+        if not recaptcha_verify.verify_recaptcha_response(settings.RECAPTCHA_SECRET_KEY, recaptcha_response):
+            flash('Please retry completing the CAPTCHA.', 'danger')
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token,recaptcha_site_key=settings.RECAPTCHA_SITE_KEY)
         
         # Escape all of the variables:
         name = name.replace("<", "&lt;")
@@ -194,7 +214,7 @@ Message:
         # *sigh*
         except (smtplib.SMTPException,socket.gaierror):
             flash('There was an error sending your message.', 'danger')
-            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject,csrf_token=csrf_token)
+            return render_template('contact.html', page_active='contact',name=name,message=message,email_address=email_address,subject=subject, csrf_token=csrf_token,recaptcha_site_key=settings.RECAPTCHA_SITE_KEY)
 
         flash('Your message was successfully sent.', 'success')
         return redirect(url_for('contact'))
@@ -212,9 +232,53 @@ def cartogram_by_key(string_key):
     
     cartogram_handlers_select = [{'id': key, 'display_name': handler.get_name()} for key, handler in cartogram_handlers.items()]
 
-    return render_template('new_cartogram.html', page_active='home',cartogram_url=url_for('cartogram'), cartogramui_url=url_for('cartogram_ui'), cartogram_data_dir=url_for('static', filename='cartdata'), cartogram_handlers=cartogram_handlers_select, default_cartogram_handler=cartogram_entry.handler, cartogram_data=cartogram_entry.cartogram_data, cartogramui_data=cartogram_entry.cartogramui_data, cartogram_version=settings.VERSION)
+    return render_template('new_cartogram.html', page_active='home',cartogram_url=url_for('cartogram'), cartogramui_url=url_for('cartogram_ui'), getprogress_url=url_for('getprogress'), cartogram_data_dir=url_for('static', filename='cartdata'), cartogram_handlers=cartogram_handlers_select, default_cartogram_handler=cartogram_entry.handler, cartogram_data=cartogram_entry.cartogram_data, cartogramui_data=cartogram_entry.cartogramui_data, cartogram_version=settings.VERSION)
     
 
+@app.route('/setprogress', methods=['POST'])
+def setprogress():
+
+    params = json.loads(request.data)
+
+    if params['secret'] != settings.CARTOGRAM_PROGRESS_SECRET:
+        return Response("", status=200)
+    
+    current_progress = redis_conn.get("cartprogress-{}".format(params['key']))
+
+    if current_progress is None:
+
+        current_progress = {
+            'order': params['order'],
+            'stderr': params['stderr'],
+            'progress': params['progress']
+        }
+    
+    else:
+
+        current_progress = json.loads(current_progress.decode())
+
+        if current_progress['order'] < params['order']:
+            current_progress = {
+                'order': params['order'],
+                'stderr': params['stderr'],
+                'progress': params['progress']
+            }
+    
+    redis_conn.set("cartprogress-{}".format(params['key']), json.dumps(current_progress))
+    redis_conn.expire("cartprogress-{}".format(params['key']), 300)
+
+    return Response('', status=200)
+
+@app.route('/getprogress', methods=['GET'])
+def getprogress():
+
+    current_progress = redis_conn.get("cartprogress-{}".format(request.args["key"]))    
+
+    if current_progress == None:
+        return Response(json.dumps({'progress': None, 'stderr': ''}), status=200, content_type='application/json')
+    else:
+        current_progress = json.loads(current_progress.decode())
+        return Response(json.dumps({'progress': current_progress['progress'], 'stderr': current_progress['stderr']}), status=200, content_type='application/json')
 
 @app.route('/cartogramui', methods=['POST'])
 def cartogram_ui():
@@ -305,64 +369,29 @@ def cartogram():
     if 'unique_sharing_key' in request.form:
         unique_sharing_key = request.form['unique_sharing_key']
     
-    #cartogram_output = cartwrap.generate_cartogram(cartogram_handler.gen_area_data(values), cartogram_handler.get_gen_file(), "{}/cartogram".format(settings.CARTOGRAM_DATA_DIR))
+    lambda_result = awslambda.generate_cartogram(cartogram_handler.gen_area_data(values), cartogram_handler.get_gen_file(), settings.CARTOGRAM_LAMBDA_URL, settings.CARTOGRAM_LAMDA_API_KEY, unique_sharing_key)
 
-    #return Response(json.dumps(gen2dict.translate(cartogram_output, settings.CARTOGRAM_COLOR)), status=200, content_type="application/json")
+    cartogram_gen_output = lambda_result['stdout']
 
-    # This function returns a generator used by Flask to generate a streaming HTTP response.
-    # It uses output from stderr to determine the generation progress (particularly the value 'max abs. error')
-    # When generation is done, it returns the .gen output converted into JSON by gen2dict
-    def generate_streamed_json_response():
+    if cartogram_handler.expect_geojson_output():
+        # Just confirm that we've been given valid JSON. Calculate the extrema if necessary
+        cartogram_json = json.loads(cartogram_gen_output)
 
-        cartogram_gen_output = b''
-        current_loading_point = "null"
-
-        # We have to format our JSON manually, since we're not sending a complete object.
-        # On the client side, Oboe.js is intelligent enough to parse this and get the loading information and cartogram output
-        yield '{"loading_progress_points":['
-
-        for source, line in cartwrap.generate_cartogram(cartogram_handler.gen_area_data(values), cartogram_handler.get_gen_file(), settings.CARTOGRAM_EXE):
-
-            if source == "stdout":
-                cartogram_gen_output += line
-            else:
-                s = re.search(r'max\. abs\. area error: (.+)', line.decode())
-
-                if s != None:
-                    current_loading_point = s.groups(1)[0]
+        if "bbox" not in cartogram_json:
+            cartogram_json["bbox"] = geojson_extrema.get_extrema_from_geojson(cartogram_json)
+    else:
+        cartogram_json = gen2dict.translate(io.StringIO(cartogram_gen_output), settings.CARTOGRAM_COLOR, cartogram_handler.remove_holes())        
                 
-                # We always include the loading progress, even if it hasn't changed.
-                # This makes life easier on the client side
-                yield '{{"loading_point": {}, "stderr_line": "{}"}},'.format(current_loading_point, line.decode())
-        
-        # We create a fake last entry because you can't have dangling commas in JSON
-        yield '{"loading_point":0, "stderr_line": ""}],"cartogram_data":'
+    cartogram_json['unique_sharing_key'] = unique_sharing_key
 
-        if cartogram_handler.expect_geojson_output():
-            # Just confirm that we've been given valid JSON. Calculate the extrema if necessary
-            cartogram_json = json.loads(cartogram_gen_output.decode())
+    if settings.USE_DATABASE:
+        cartogram_entry = CartogramEntry.query.filter_by(string_key=unique_sharing_key).first()
 
-            if "bbox" not in cartogram_json:
-                cartogram_json["bbox"] = geojson_extrema.get_extrema_from_geojson(cartogram_json)
-        else:
-            cartogram_json = gen2dict.translate(io.StringIO(cartogram_gen_output.decode()), settings.CARTOGRAM_COLOR, cartogram_handler.remove_holes())        
-                
-        cartogram_json['unique_sharing_key'] = unique_sharing_key
-        
-        cartogram_json = json.dumps(cartogram_json)
+        if cartogram_entry != None:
+            cartogram_entry.cartogram_data = json.dumps(cartogram_json)
+            db.session.commit()
 
-        if settings.USE_DATABASE:
-            cartogram_entry = CartogramEntry.query.filter_by(string_key=unique_sharing_key).first()
-
-            if cartogram_entry != None:
-                cartogram_entry.cartogram_data = cartogram_json
-                db.session.commit()
-
-        yield cartogram_json
-
-        yield "}"
-    
-    return Response(generate_streamed_json_response(), content_type='application/json', status=200)            
+    return Response(json.dumps({'cartogram_data': cartogram_json}), content_type='application/json', status=200)            
 
 if __name__ == '__main__':
     app.run(debug=settings.DEBUG,host=settings.HOST,port=settings.PORT)
