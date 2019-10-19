@@ -383,7 +383,6 @@ class MapVersion {
         this.extrema = extrema;
         this.labels = labels;
     }
-
 }
 
 /**
@@ -634,23 +633,44 @@ class CartMap {
     }
 
     /**
-     * getConvenArea returns the actual land areas of each region.
+     * getConvenFirstArea returns the conventional map original ratio.
      * 
      */
 
-    getConvenArea(sysname){
-        var sum = 0;        
-        Object.keys(this.regions).forEach(function(region_id){
-            const regionArea = this.regions[region_id].getVersion("1-conventional").value;
-            
-            if(regionArea != 'NA') {
-                sum += regionArea;
+    getConvenFirstArea(sysname){
+  
+        var sum = 0;
+        Object.keys(this.regions).forEach(function(region_id){       
+
+            const actual_area = this.regions[region_id].getVersion("1-conventional").value;
+            if(actual_area != 'NA') {
+                sum += actual_area;
             }
 
         }, this);
-        
-
         return sum;
+
+    }
+
+    /**
+     * The following returns the sum of all region polygon area values for the specified map version.
+     * @param {string} sysname The sysname of the map version
+     * @returns {number} The total value of the specified map version
+     */
+    getConvenFirstPolygon(sysname) {
+        var area = [];        
+        Object.keys(this.regions).forEach(function(region_id){
+            this.regions[region_id].getVersion(sysname).polygons.forEach(function(polygon){
+                const coordinates = polygon.coordinates;
+                const areaValue = d3.polygonArea(coordinates);
+                area.push(areaValue);
+                
+            })
+
+        }, this);
+        
+        console.log("conven_first: "+ area[0]);
+        return area[0];
     }
 
     /**
@@ -668,14 +688,10 @@ class CartMap {
             if(regionValue != 'NA') {
                 sum += regionValue;
             }
-     
-            console.log(this.regions[region_id])
-
         }, this);
 
         return sum;
     }
-
 
     /**
      * The following returns the sum of all region polygon area values for the specified map version.
@@ -694,7 +710,7 @@ class CartMap {
                 }
             })
         }, this);
-        console.log("totalArea: " + area);
+        console.log("carto-area: " + area)
 
         return area;
     }
@@ -720,6 +736,7 @@ class CartMap {
             final_ratio = 2;
         }
 
+
         // Calculate the scaled width and height of the square
         const width = Math.sqrt(final_ratio*round_ratio*900/ratio);
         const scale_word = (round_ratio > 999999) ? "million": round_ratio.toString().substr(1) ;
@@ -741,10 +758,18 @@ class CartMap {
             document.getElementById("cartogram-legend").style.display = "none";
         }
 
-        // Now draw the legend for conventional map
-
-        const convenLegend= this.getConvenArea("1-conventional")/this.getTotalAreaForVersion("1-conventional");
-        console.log(this.getTotalAreaForVersion("1-conventional"))
+        // console.log(this.getTotalValuesForVersion(sysname));
+        // console.log(this.getTotalAreaForVersion(sysname));
+        // console.log("original_ratio: " + original_ratio);
+        // console.log("ratio: " + ratio);
+        // console.log("round_ratio: " + round_ratio);
+        // console.log("final_ratio: " + final_ratio);
+        // console.log("scale_word: " + scale_word);
+    
+        // Draw legend for conventional map.
+        const convenLegend= this.getConvenFirstArea("1-conventional")/this.getTotalAreaForVersion(sysname);
+        console.log(this.getConvenFirstArea("1-conventional"));
+        console.log(this.getConvenFirstPolygon("1-conventional"));
         // square default is 30 by 30 px
         const conven_ratio = convenLegend*900;
         var conven_round_ratio = Math.pow(10, (Math.round(conven_ratio).toString().length-1));
@@ -755,7 +780,6 @@ class CartMap {
             conven_round_ratio = 10
         }
 
-        console.log("conven_round_ratio:" + conven_round_ratio);
         const r_conven = conven_ratio/conven_round_ratio;
         var conven_final_ratio = 0;
         if(Math.abs(r_conven - 10) < Math.abs(r_conven - 5) && Math.abs(r_conven - 10) < Math.abs(r_conven - 2)){
@@ -767,7 +791,7 @@ class CartMap {
         }
 
         const width_conven = Math.sqrt(conven_final_ratio*conven_round_ratio*900/conven_ratio);
-        var conven_scale_word = (conven_round_ratio > 99999) ? "million" : conven_round_ratio.toString().substr(1);
+        var conven_scale_word = (conven_round_ratio > 999999) ? "million" : conven_round_ratio.toString().substr(1);
 
 
         document.getElementById('legend-square-conventional').setAttribute("width", width_conven.toString() +"px");
@@ -778,10 +802,6 @@ class CartMap {
             document.getElementById('legend-text-conventional').innerHTML = "= " + conven_final_ratio + " " + conven_scale_word + " km sq"
         }
 
-
-                
-        console.log(this.getConvenArea("1-conventional"));
-        console.log(this.getTotalAreaForVersion("1-conventional"))
         console.log("convenLegend:" + convenLegend)
         console.log("conven_ratio : " + conven_ratio)
         console.log("conven_round_ratio : " + conven_round_ratio)
@@ -1193,7 +1213,7 @@ class CartMap {
         this.getTotalValuesForVersion(new_sysname);
         this.getTotalAreaForVersion(new_sysname);
         this.drawLegend(new_sysname);
-        this.getConvenArea(new_sysname);
+        this.getConvenFirstArea(new_sysname);
     }
 }
 
@@ -2178,7 +2198,7 @@ class Cartogram {
             this.model.map.getTotalValuesForVersion(this.model.current_sysname);
             this.model.map.getTotalAreaForVersion(this.model.current_sysname);
             this.model.map.drawLegend(this.model.current_sysname);
-            this.model.map.getConvenArea(this.model.current_sysname);
+            this.model.map.getConvenFirstArea(this.model.current_sysname);
 
 
 
