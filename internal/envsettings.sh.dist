@@ -11,6 +11,9 @@ export CARTOGRAM_VERSION=$(git rev-parse HEAD)
 export CARTOGRAM_DATABASE_URI="postgresql://username:password@localhost/database"
 export CARTOGRAM_USE_DATABASE=TRUE
 
+export CARTOGRAM_RECAPTCHA_SITE_KEY=""
+export CARTOGARM_RECAPTCHA_SECRET_KEY=""
+
 export CARTOGRAM_SMTP_HOST="stmp.example.com"
 export CARTOGRAM_SMTP_PORT="25"
 export CARTOGRAM_SMTP_AUTHENTICATION_REQUIRED=TRUE
@@ -21,3 +24,10 @@ export CARTOGRAM_SMTP_DESTINATION="destination@example.net"
 
 export CARTOGRAM_GUNICORN_WORKERS=$(echo `cat /proc/cpuinfo | grep -c "processor.*:"` "*2 + 1" | bc)
 export CARTOGRAM_GUNICORN_OPTIONS="" #If you want to run Gunicorn in daemon mode (unnecessary with PM2, use -D)
+
+export CARTOGRAM_LAMBDA_URL="http://localhost:5050/cartogram"
+export CARTOGRAM_LAMBDA_API_KEY=""
+
+export CARTOGRAM_PROGRESS_SECRET=""
+export CARTOGRAM_REDIS_HOST="127.0.0.1"
+export CARTOGRAM_REDIS_PORT="6379"
