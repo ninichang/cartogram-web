@@ -19,7 +19,7 @@
 
     window.onload = function() {
 
-            window.cartogram = new Cartogram("{{cartogram_url}}", "{{cartogramui_url}}", "{{cartogram_data_dir}}", "{{url_for('gridedit')}}", "{{cartogram_version}}");
+            window.cartogram = new Cartogram("{{cartogram_url}}", "{{cartogramui_url}}", "{{cartogram_data_dir}}", "{{url_for('gridedit')}}", "{{getprogress_url}}", "{{cartogram_version}}");
 
             document.getElementById('handler').addEventListener('change', function(e){
 
