@@ -12,6 +12,7 @@ from handlers import singapore
 from handlers import japan2
 from handlers import france
 from handlers import uae
+from handlers import czechrepublic3
 from handlers import hungary
 from handlers import unitedkingdom2
 #from handlers import spain
@@ -78,6 +79,7 @@ cartogram_handlers = {
 'japan2': japan2.CartogramHandler(),
 'france': france.CartogramHandler(),
 'uae': uae.CartogramHandler(),
+'czechrepublic3': czechrepublic3.CartogramHandler(),
 'hungary': hungary.CartogramHandler(),
 'unitedkingdom2': unitedkingdom2.CartogramHandler(),
 'finland': finland.CartogramHandler(),
