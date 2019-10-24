@@ -728,11 +728,14 @@ class CartMap {
         return area;
     }
 
+    /**
+     * The following draws the legend for the cartogram
+     * @param {string} sysname The sysname of the map version
+     */
     drawLegend(sysname){
 
-        // Get units for both maps.
+        // Get unit for the cartogram
         const unit_carto = this.getLegendUnit(sysname);
-        const unit_conven = this.getLegendUnit("1-conventional");
 
         // Obtain the original ratio of the values over total area.
         const original_ratio = this.getTotalValuesForVersion(sysname)/this.getTotalAreaForVersion(sysname);
@@ -753,10 +756,22 @@ class CartMap {
             final_ratio = 2;
         }
 
-
         // Calculate the scaled width and height of the square
         const width = Math.sqrt(final_ratio*round_ratio*900/ratio);
-        const scale_word = (round_ratio > 999999) ? "million": round_ratio.toString().substr(1) ;
+        let scale_word = (round_ratio > 999999) ? " million": round_ratio.toString().substr(1);
+        console.log("round_ratio" + round_ratio);
+        console.log("ratio" + ratio);
+        if(scale_word != " million" && scale_word.length >= 3){
+            const set_of_zeros = Math.floor(scale_word.length/3)
+            const remaining_zeros = scale_word.length%3
+            if(set_of_zeros == 1 && remaining_zeros == 0){
+                scale_word = "000".repeat(set_of_zeros)
+            } else{
+                scale_word = "0".repeat(remaining_zeros) + " 000".repeat(set_of_zeros);
+            }
+            console.log("carto scale word " + scale_word)
+        }
+        
     
         if(sysname != "1-conventional"){
             document.getElementById('legend-square').setAttribute("width", width.toString() +"px");
@@ -766,20 +781,27 @@ class CartMap {
             if(width > 35){
                 // adjust padding when the square is a bit too big
                 document.getElementById("legend-text").setAttribute("x", 50) 
-                document.getElementById("legend-text").innerHTML = "= " + final_ratio + " " + scale_word + " " + unit_carto
+                document.getElementById("legend-text").innerHTML = "= " + final_ratio + scale_word + " " + unit_carto
             } else{
-                document.getElementById("legend-text").innerHTML = "= " + final_ratio + " " + scale_word + " " + unit_carto
+                document.getElementById("legend-text").innerHTML = "= " + final_ratio + scale_word + " " + unit_carto
             }
     
         } else {
             document.getElementById("cartogram-legend").style.display = "none";
         }
-    
-        // Draw legend for conventional map.
-        const [scale_x, scale_y]= this.getConvenPolygonScale("1-conventional");
+    }
 
+    /**
+     * The following draws the legend for the conventional map
+     * @param {string} sysname The sysname of the map version
+     */
+    drawConvenLegend(sysname){
+        // Get unit for the conventional map
+        const unit_conven = this.getLegendUnit("1-conventional");
+
+        const [scale_x, scale_y]= this.getConvenPolygonScale("1-conventional");
         // Obtain the scaling factors from the conventional map to cartogram map.
-        const convenLegend= this.getConvenAllArea("1-conventional")/(this.getTotalAreaForVersion(sysname)*scale_x*scale_y);
+        const convenLegend= this.getConvenAllArea("1-conventional")/(this.getTotalAreaForVersion("2-population")*scale_x*scale_y);
         
         // square default is 30 by 30 px
         const conven_ratio = convenLegend*900;
@@ -802,16 +824,26 @@ class CartMap {
         }
 
         const width_conven = Math.sqrt(conven_final_ratio*conven_round_ratio*900/conven_ratio);
-        var conven_scale_word = (conven_round_ratio > 999999) ? "million" : conven_round_ratio.toString().substr(1);
+        var conven_scale_word = (conven_round_ratio > 999999) ? " million" : conven_round_ratio.toString().substr(1);
+        if(conven_scale_word != " million" && conven_scale_word.length >= 3){
+            const set_of_zeros = Math.floor(conven_scale_word.length/3)
+            const remaining_zeros = conven_scale_word.length%3
+            if(set_of_zeros == 1 && remaining_zeros == 0){
+                conven_scale_word = "000".repeat(set_of_zeros);
+            } else{
+                conven_scale_word = "0".repeat(remaining_zeros) + " 000".repeat(set_of_zeros);
+            }
+        }
 
         document.getElementById('legend-square-conventional').setAttribute("width", width_conven.toString() +"px");
         document.getElementById('legend-square-conventional').setAttribute("height", width_conven.toString() +"px")
         if(conven_scale_word.length == 1){
             document.getElementById('legend-text-conventional').innerHTML = "= " + conven_final_ratio + conven_scale_word + " " + unit_conven
         } else {
-            document.getElementById('legend-text-conventional').innerHTML = "= " + conven_final_ratio + " " + conven_scale_word + " " + unit_conven
+            document.getElementById('legend-text-conventional').innerHTML = "= " + conven_final_ratio + conven_scale_word + " " + unit_conven
         }
     }
+
 
     /**
      * addVersion adds a new version to the map. If a version with the specified sysname already exists, it will be overwritten.
@@ -1201,7 +1233,6 @@ class CartMap {
 
                     } else {
                         document.getElementById('path-' + element_id + '-' + polygon.id).setAttribute('fill', this.colors[region_id]);
-
                         document.getElementById('path-' + element_id + '-' + polygon.id).classList.add('path-' + element_id + '-' + region_id);
                         document.getElementById('path-' + element_id + '-' + polygon.id).classList.remove('path-' + element_id + '-' + region_id + '-na');
                     }
@@ -2202,6 +2233,7 @@ class Cartogram {
             this.model.map.getTotalAreaForVersion(this.model.current_sysname);
             this.model.map.drawLegend(this.model.current_sysname);
             this.model.map.getConvenAllArea(this.model.current_sysname);
+            this.model.map.drawConvenLegend(this.model.current_sysname);
 
 
 
