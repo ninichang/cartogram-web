@@ -30,7 +30,7 @@
  * @property {Array<{x1: number, y1: number, x2: number, y2: number}>} lines Line labels
  */
 
- function clearFileInput(ctrl) {
+function clearFileInput(ctrl) {
     try {
       ctrl.value = null;
     } catch(ex) { }
@@ -641,39 +641,17 @@ class CartMap {
         var unit = "";
         Object.keys(this.regions).forEach(function(region_id){
             unit = this.regions[region_id].getVersion(sysname).unit;
-            if(unit === ""){
-                unit = "people"
-            }
         }, this);
         return unit;
     }
 
 
     /**
-     * getConvenAllArea returns the area value of the conventional map
+     * The following returns the scaling factors (x and y) of map of specified version.
      * @param {string} sysname The sysname of the map version
-     * @returns {number} The total value of the specified map version
+     * @returns {number} The total polygon area of the specified map version
      */
-
-    getConvenAllArea(sysname){
-  
-        var sum = 0;
-        Object.keys(this.regions).forEach(function(region_id){       
-
-            const actual_area = this.regions[region_id].getVersion("1-conventional").value;
-            if(actual_area != 'NA') {
-                sum += actual_area;
-            }
-        }, this);
-        return sum;
-    }
-
-    /**
-     * The following returns the scaling factors (x and y) of conventional map
-     * @param {string} sysname The sysname of the map version
-     * @returns {number} The total value of the specified map version
-     */
-    getConvenPolygonScale(sysname) {
+    getVersionPolygonScale(sysname) {
 
         var scale_x = 0;
         var scale_y = 0;
@@ -759,8 +737,7 @@ class CartMap {
         // Calculate the scaled width and height of the square
         const width = Math.sqrt(final_ratio*round_ratio*900/ratio);
         let scale_word = (round_ratio > 999999) ? " million": round_ratio.toString().substr(1);
-        console.log("round_ratio" + round_ratio);
-        console.log("ratio" + ratio);
+
         if(scale_word != " million" && scale_word.length >= 3){
             const set_of_zeros = Math.floor(scale_word.length/3)
             const remaining_zeros = scale_word.length%3
@@ -769,7 +746,6 @@ class CartMap {
             } else{
                 scale_word = "0".repeat(remaining_zeros) + " 000".repeat(set_of_zeros);
             }
-            console.log("carto scale word " + scale_word)
         }
         
     
@@ -799,9 +775,9 @@ class CartMap {
         // Get unit for the conventional map
         const unit_conven = this.getLegendUnit("1-conventional");
 
-        const [scale_x, scale_y]= this.getConvenPolygonScale("1-conventional");
+        const [scale_x, scale_y]= this.getVersionPolygonScale("1-conventional");
         // Obtain the scaling factors from the conventional map to cartogram map.
-        const convenLegend= this.getConvenAllArea("1-conventional")/(this.getTotalAreaForVersion("2-population")*scale_x*scale_y);
+        const convenLegend= this.getTotalValuesForVersion("1-conventional")/(this.getTotalAreaForVersion("2-population")*scale_x*scale_y);
         
         // square default is 30 by 30 px
         const conven_ratio = convenLegend*900;
@@ -1244,10 +1220,7 @@ class CartMap {
 
         }, this);        
 
-        this.getTotalValuesForVersion(new_sysname);
-        this.getTotalAreaForVersion(new_sysname);
         this.drawLegend(new_sysname);
-        this.getConvenAllArea(new_sysname);
     }
 }
 
@@ -2229,10 +2202,7 @@ class Cartogram {
             this.generateSVGDownloadLinks();
             this.displayVersionSwitchButtons();
             this.updateGridDocument(mappack.griddocument);
-            this.model.map.getTotalValuesForVersion(this.model.current_sysname);
-            this.model.map.getTotalAreaForVersion(this.model.current_sysname);
             this.model.map.drawLegend(this.model.current_sysname);
-            this.model.map.getConvenAllArea(this.model.current_sysname);
             this.model.map.drawConvenLegend(this.model.current_sysname);
 
 
