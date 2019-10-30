@@ -707,23 +707,39 @@ class CartMap {
     }
 
     /**
-     * The following draws the legend for the cartogram
+     * The following draws the legend for each map
      * @param {string} sysname The sysname of the map version
      */
-    drawLegend(sysname){
 
-        // Get unit for the cartogram
-        const unit_carto = this.getLegendUnit(sysname);
+    drawLegend(sysname, legend_square_id, legend_text_id){
+        
+        var legend_square_id = document.getElementById(legend_square_id);
+        var legend_text_id = document.getElementById(legend_text_id);
 
-        // Obtain the original ratio of the values over total area.
-        const original_ratio = this.getTotalValuesForVersion(sysname)/this.getTotalAreaForVersion(sysname);
+
+        // Get unit for the map that we wish to draw legend for.
+        const unit = this.getLegendUnit(sysname);
+
+        // Obtain the scaling factors for this map.
+        const [scale_x, scale_y]= this.getVersionPolygonScale(sysname);
+        if(sysname == "1-conventional"){
+            var legend = this.getTotalValuesForVersion("1-conventional")/(this.getTotalAreaForVersion("2-population")*scale_x*scale_y);
+        }
+        else{
+            var legend = this.getTotalValuesForVersion(sysname)/(this.getTotalAreaForVersion(sysname)*scale_x*scale_y);
+        }
+
 
         // square default is 30 by 30 px
-        const ratio = original_ratio*900;
+        const ratio = legend*900;
+        var round_ratio = Math.pow(10, (Math.round(ratio).toString().length-1));
+        
+        if(round_ratio.length == 2){
+            round_ratio = 100
+        } else if(round_ratio == 1){
+            round_ratio = 10
+        }
 
-        // Calculate the number (10 to the power of something) that we need to round the ratio.
-        const round_ratio = Math.pow(10, (Math.round(ratio).toString().length-1));
-        // Round the ratio to a prettier number, such that they start with 1, 2, or 5
         const r = ratio/round_ratio;
         var final_ratio = 0;
         if(Math.abs(r - 10) < Math.abs(r - 5) && Math.abs(r - 10) < Math.abs(r - 2)){
@@ -734,90 +750,26 @@ class CartMap {
             final_ratio = 2;
         }
 
-        // Calculate the scaled width and height of the square
         const width = Math.sqrt(final_ratio*round_ratio*900/ratio);
-        let scale_word = (round_ratio > 999999) ? " million": round_ratio.toString().substr(1);
-
+        var scale_word = (round_ratio > 999999) ? " million" : round_ratio.toString().substr(1);
         if(scale_word != " million" && scale_word.length >= 3){
             const set_of_zeros = Math.floor(scale_word.length/3)
             const remaining_zeros = scale_word.length%3
             if(set_of_zeros == 1 && remaining_zeros == 0){
-                scale_word = "000".repeat(set_of_zeros)
+                scale_word = "000".repeat(set_of_zeros);
             } else{
                 scale_word = "0".repeat(remaining_zeros) + " 000".repeat(set_of_zeros);
             }
         }
-        
-    
-        if(sysname != "1-conventional"){
-            document.getElementById('legend-square').setAttribute("width", width.toString() +"px");
-            document.getElementById('legend-square').setAttribute("height", width.toString() +"px");
-            document.getElementById("cartogram-legend").style.display = "inline";   
 
-            if(width > 35){
-                // adjust padding when the square is a bit too big
-                document.getElementById("legend-text").setAttribute("x", 50) 
-                document.getElementById("legend-text").innerHTML = "= " + final_ratio + scale_word + " " + unit_carto
-            } else{
-                document.getElementById("legend-text").innerHTML = "= " + final_ratio + scale_word + " " + unit_carto
-            }
-    
+        legend_square_id.setAttribute("width", width.toString() +"px");
+        legend_square_id.setAttribute("height", width.toString() +"px")
+        if(scale_word.length == 1){
+            legend_text_id.innerHTML = "= " + final_ratio + scale_word + " " + unit
         } else {
-            document.getElementById("cartogram-legend").style.display = "none";
+            legend_text_id.innerHTML = "= " + final_ratio + scale_word + " " + unit
         }
-    }
-
-    /**
-     * The following draws the legend for the conventional map
-     * @param {string} sysname The sysname of the map version
-     */
-    drawConvenLegend(sysname){
-        // Get unit for the conventional map
-        const unit_conven = this.getLegendUnit("1-conventional");
-
-        const [scale_x, scale_y]= this.getVersionPolygonScale("1-conventional");
-        // Obtain the scaling factors from the conventional map to cartogram map.
-        const convenLegend= this.getTotalValuesForVersion("1-conventional")/(this.getTotalAreaForVersion("2-population")*scale_x*scale_y);
         
-        // square default is 30 by 30 px
-        const conven_ratio = convenLegend*900;
-        var conven_round_ratio = Math.pow(10, (Math.round(conven_ratio).toString().length-1));
-        
-        if(conven_round_ratio.length == 2){
-            conven_round_ratio = 100
-        } else if(conven_round_ratio == 1){
-            conven_round_ratio = 10
-        }
-
-        const r_conven = conven_ratio/conven_round_ratio;
-        var conven_final_ratio = 0;
-        if(Math.abs(r_conven - 10) < Math.abs(r_conven - 5) && Math.abs(r_conven - 10) < Math.abs(r_conven - 2)){
-            conven_final_ratio = 10;
-        } else if (Math.abs(r_conven - 5) < Math.abs(r_conven - 2)){
-            conven_final_ratio = 5;
-        } else {
-            conven_final_ratio = 2;
-        }
-
-        const width_conven = Math.sqrt(conven_final_ratio*conven_round_ratio*900/conven_ratio);
-        var conven_scale_word = (conven_round_ratio > 999999) ? " million" : conven_round_ratio.toString().substr(1);
-        if(conven_scale_word != " million" && conven_scale_word.length >= 3){
-            const set_of_zeros = Math.floor(conven_scale_word.length/3)
-            const remaining_zeros = conven_scale_word.length%3
-            if(set_of_zeros == 1 && remaining_zeros == 0){
-                conven_scale_word = "000".repeat(set_of_zeros);
-            } else{
-                conven_scale_word = "0".repeat(remaining_zeros) + " 000".repeat(set_of_zeros);
-            }
-        }
-
-        document.getElementById('legend-square-conventional').setAttribute("width", width_conven.toString() +"px");
-        document.getElementById('legend-square-conventional').setAttribute("height", width_conven.toString() +"px")
-        if(conven_scale_word.length == 1){
-            document.getElementById('legend-text-conventional').innerHTML = "= " + conven_final_ratio + conven_scale_word + " " + unit_conven
-        } else {
-            document.getElementById('legend-text-conventional').innerHTML = "= " + conven_final_ratio + conven_scale_word + " " + unit_conven
-        }
     }
 
 
@@ -1220,7 +1172,10 @@ class CartMap {
 
         }, this);        
 
-        this.drawLegend(new_sysname);
+        this.drawLegend(new_sysname, "legend-square-" + new_sysname, "legend-text-" + new_sysname);
+        if(new_sysname == "1-conventional"){
+            this.drawLegend(new_sysname, "legend-square-2-population", "legend-text-2-population")
+        }
     }
 }
 
@@ -2202,13 +2157,11 @@ class Cartogram {
             this.generateSVGDownloadLinks();
             this.displayVersionSwitchButtons();
             this.updateGridDocument(mappack.griddocument);
-            this.model.map.drawLegend(this.model.current_sysname);
-            this.model.map.drawConvenLegend(this.model.current_sysname);
-
-
-
+            this.model.map.drawLegend(this.model.current_sysname, "legend-square-" + this.model.current_sysname, "legend-text-" + this.model.current_sysname);
+            
+            // The following line draws the conventional legend when the page first loads.
+            this.model.map.drawLegend("1-conventional", "legend-square-1-conventional", "legend-text-1-conventional")
             document.getElementById('template-link').href = this.config.cartogram_data_dir+ "/" + sysname + "/template.csv";
-
             document.getElementById('cartogram').style.display = 'block';
 
         }.bind(this));       
