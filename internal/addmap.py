@@ -586,6 +586,7 @@ def data(map_name):
 
             try:
                 population_cartogramui = map_handler.csv_to_area_string_and_colors(population_csv)
+                population_cartogramui[2]["unit"] = "people"
             except Exception as e:
                 print(repr(e))
                 cleanup()
