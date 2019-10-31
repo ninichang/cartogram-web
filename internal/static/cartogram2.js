@@ -663,11 +663,61 @@ class CartMap {
     }
 
     /**
+     * getTotalAreasAndValuesForVersion returns the sum of all region values and area for the specified map version.
+     * @param {string} sysname The sysname of the map version
+     * @returns {number[]} The total value and area of the specified map version
+     */
+    getTotalAreasAndValuesForVersion(sysname) {
+
+        var area = 0;
+        var sum = 0;
+        const na_regions = [];
+        Object.keys(this.regions).forEach(function(region_id){
+            var areaValue = 0;
+            this.regions[region_id].getVersion(sysname).polygons.forEach(function(polygon){
+                const coordinates = polygon.coordinates;
+
+                areaValue += d3.polygonArea(coordinates);
+
+                polygon.holes.forEach(function(hole){
+
+                    areaValue -= d3.polygonArea(hole);
+
+                }, this);
+
+            }, this);
+
+
+
+            const regionValue = this.regions[region_id].getVersion(sysname).value;
+
+            if(regionValue !== 'NA') {
+                sum += regionValue;
+            } else {
+
+                na_regions.push({id: region_id, area: areaValue});
+            }
+
+            area += areaValue;
+        }, this);
+
+        const avg_density = sum/area;
+
+        na_regions.forEach(function(na_region){
+
+
+            sum += avg_density * na_region.area;
+
+        }, this);
+
+        return [area, sum];
+    }
+
+    /**
      * getTotalValuesForVersion returns the sum of all region values for the specified map version.
      * @param {string} sysname The sysname of the map version
      * @returns {number} The total value of the specified map version
      */
-
     getTotalValuesForVersion(sysname) {
         
         var sum = 0;        
@@ -694,9 +744,9 @@ class CartMap {
                 const coordinates = polygon.coordinates;
                 
                 const areaValue = d3.polygonArea(coordinates);
-                if(areaValue != 'NA') {
+
                 area += areaValue;
-                }
+
             })
         }, this);
         return area;
@@ -718,7 +768,8 @@ class CartMap {
 
         // Obtain the scaling factors for this map.
         const [scale_x, scale_y]= this.getVersionPolygonScale(sysname);
-        const legend = this.getTotalValuesForVersion(sysname)/(this.getTotalAreaForVersion(sysname)*scale_x*scale_y);
+        const [version_area, version_values] = this.getTotalAreasAndValuesForVersion(sysname);
+        const legend = version_values/(version_area*scale_x*scale_y);
 
         // square default is 30 by 30 px
         const ratio = legend*900;
@@ -1980,6 +2031,11 @@ class Cartogram {
                     if(update_grid_document) {
                         this.updateGridDocument(response.grid_document);
                     }
+
+                    this.model.map.drawLegend(this.model.current_sysname, "legend-square-cartogram-area", "legend-text-cartogram-area");
+
+                    // The following line draws the conventional legend when the page first loads.
+                    this.model.map.drawLegend("1-conventional", "legend-square-map-area", "legend-text-map-area");
 
                     this.exitLoadingState();
                     document.getElementById('cartogram').style.display = "block";
