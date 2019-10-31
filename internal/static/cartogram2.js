@@ -649,19 +649,15 @@ class CartMap {
     /**
      * The following returns the scaling factors (x and y) of map of specified version.
      * @param {string} sysname The sysname of the map version
-     * @returns {number} The total polygon area of the specified map version
+     * @returns {number[]} The total polygon area of the specified map version
      */
     getVersionPolygonScale(sysname) {
 
-        var scale_x = 0;
-        var scale_y = 0;
-        Object.keys(this.versions).forEach(function(sysname){
+        const version_width = this.versions[sysname].extrema.max_x - this.versions[sysname].extrema.min_x;
+        const version_height = this.versions[sysname].extrema.max_y - this.versions[sysname].extrema.min_y;
 
-                var version_width = this.versions[sysname].extrema.max_x - this.versions[sysname].extrema.min_x;
-                var version_height = this.versions[sysname].extrema.max_y - this.versions[sysname].extrema.min_y;
-                scale_x = this.width / version_width;
-                scale_y = this.height / version_height;
-        }, this);
+        const scale_x = this.width / version_width;
+        const scale_y = this.height / version_height;
 
         return [scale_x, scale_y];
     }
@@ -713,7 +709,7 @@ class CartMap {
 
     drawLegend(sysname, legend_square_id, legend_text_id){
         
-        var legend_square_id = document.getElementById(legend_square_id);
+        var legend_square = document.getElementById(legend_square_id);
         var legend_text_id = document.getElementById(legend_text_id);
 
 
@@ -722,21 +718,15 @@ class CartMap {
 
         // Obtain the scaling factors for this map.
         const [scale_x, scale_y]= this.getVersionPolygonScale(sysname);
-        if(sysname == "1-conventional"){
-            var legend = this.getTotalValuesForVersion("1-conventional")/(this.getTotalAreaForVersion("2-population")*scale_x*scale_y);
-        }
-        else{
-            var legend = this.getTotalValuesForVersion(sysname)/(this.getTotalAreaForVersion(sysname)*scale_x*scale_y);
-        }
-
+        const legend = this.getTotalValuesForVersion(sysname)/(this.getTotalAreaForVersion(sysname)*scale_x*scale_y);
 
         // square default is 30 by 30 px
         const ratio = legend*900;
         var round_ratio = Math.pow(10, (Math.round(ratio).toString().length-1));
         
-        if(round_ratio.length == 2){
+        if(round_ratio.length === 2){
             round_ratio = 100
-        } else if(round_ratio == 1){
+        } else if(round_ratio === 1){
             round_ratio = 10
         }
 
@@ -752,19 +742,19 @@ class CartMap {
 
         const width = Math.sqrt(final_ratio*round_ratio*900/ratio);
         var scale_word = (round_ratio > 999999) ? " million" : round_ratio.toString().substr(1);
-        if(scale_word != " million" && scale_word.length >= 3){
+        if(scale_word !== " million" && scale_word.length >= 3){
             const set_of_zeros = Math.floor(scale_word.length/3)
             const remaining_zeros = scale_word.length%3
-            if(set_of_zeros == 1 && remaining_zeros == 0){
+            if(set_of_zeros === 1 && remaining_zeros === 0){
                 scale_word = "000".repeat(set_of_zeros);
             } else{
                 scale_word = "0".repeat(remaining_zeros) + " 000".repeat(set_of_zeros);
             }
         }
 
-        legend_square_id.setAttribute("width", width.toString() +"px");
-        legend_square_id.setAttribute("height", width.toString() +"px")
-        if(scale_word.length == 1){
+        legend_square.setAttribute("width", width.toString() +"px");
+        legend_square.setAttribute("height", width.toString() +"px")
+        if(scale_word.length === 1){
             legend_text_id.innerHTML = "= " + final_ratio + scale_word + " " + unit
         } else {
             legend_text_id.innerHTML = "= " + final_ratio + scale_word + " " + unit
@@ -1172,10 +1162,10 @@ class CartMap {
 
         }, this);        
 
-        this.drawLegend(new_sysname, "legend-square-" + new_sysname, "legend-text-" + new_sysname);
-        if(new_sysname == "1-conventional"){
+        this.drawLegend(new_sysname, "legend-square-" + element_id, "legend-text-" + element_id);
+        /*if(new_sysname == "1-conventional"){
             this.drawLegend(new_sysname, "legend-square-2-population", "legend-text-2-population")
-        }
+        }*/
     }
 }
 
@@ -2157,10 +2147,10 @@ class Cartogram {
             this.generateSVGDownloadLinks();
             this.displayVersionSwitchButtons();
             this.updateGridDocument(mappack.griddocument);
-            this.model.map.drawLegend(this.model.current_sysname, "legend-square-" + this.model.current_sysname, "legend-text-" + this.model.current_sysname);
+            this.model.map.drawLegend(this.model.current_sysname, "legend-square-cartogram-area", "legend-text-cartogram-area");
             
             // The following line draws the conventional legend when the page first loads.
-            this.model.map.drawLegend("1-conventional", "legend-square-1-conventional", "legend-text-1-conventional")
+            this.model.map.drawLegend("1-conventional", "legend-square-map-area", "legend-text-map-area");
             document.getElementById('template-link').href = this.config.cartogram_data_dir+ "/" + sysname + "/template.csv";
             document.getElementById('cartogram').style.display = 'block';
 
