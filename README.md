@@ -9,4 +9,7 @@ To add a map to the website, please follow the Add Map Wizard guide at `doc/addm
 If you encounter issues using this code, or have any questions, please contact Ian Duncan at ian.duncan@u.yale-nus.edu.sg.
 
 
+# Structure
+To setup the map locally, refer to /doc
 
+![](cartogram-web.png)

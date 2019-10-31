@@ -30,7 +30,7 @@
  * @property {Array<{x1: number, y1: number, x2: number, y2: number}>} lines Line labels
  */
 
- function clearFileInput(ctrl) {
+function clearFileInput(ctrl) {
     try {
       ctrl.value = null;
     } catch(ex) { }
@@ -383,7 +383,6 @@ class MapVersion {
         this.extrema = extrema;
         this.labels = labels;
     }
-
 }
 
 /**
@@ -630,8 +629,139 @@ class CartMap {
          * @type {number}
          */
         this.height = 0.0;
-
+        
     }
+
+    /**
+     * getConvenLegendUnit returns the a legend unit of the conventional map
+     * @param {string} sysname The sysname of the map version
+     * @returns {string} The legend unit of the map
+     */
+    getLegendUnit(sysname){
+        var unit = "";
+        Object.keys(this.regions).forEach(function(region_id){
+            unit = this.regions[region_id].getVersion(sysname).unit;
+        }, this);
+        return unit;
+    }
+
+
+    /**
+     * The following returns the scaling factors (x and y) of map of specified version.
+     * @param {string} sysname The sysname of the map version
+     * @returns {number[]} The total polygon area of the specified map version
+     */
+    getVersionPolygonScale(sysname) {
+
+        const version_width = this.versions[sysname].extrema.max_x - this.versions[sysname].extrema.min_x;
+        const version_height = this.versions[sysname].extrema.max_y - this.versions[sysname].extrema.min_y;
+
+        const scale_x = this.width / version_width;
+        const scale_y = this.height / version_height;
+
+        return [scale_x, scale_y];
+    }
+
+    /**
+     * getTotalValuesForVersion returns the sum of all region values for the specified map version.
+     * @param {string} sysname The sysname of the map version
+     * @returns {number} The total value of the specified map version
+     */
+
+    getTotalValuesForVersion(sysname) {
+        
+        var sum = 0;        
+        Object.keys(this.regions).forEach(function(region_id){
+            const regionValue = this.regions[region_id].getVersion(sysname).value;
+           
+            if(regionValue != 'NA') {
+                sum += regionValue;
+            }
+        }, this);
+
+        return sum;
+    }
+
+    /**
+     * The following returns the sum of all region polygon area values for the specified map version.
+     * @param {string} sysname The sysname of the map version
+     * @returns {number} The total value of the specified map version
+     */
+    getTotalAreaForVersion(sysname) {
+        var area = 0;        
+        Object.keys(this.regions).forEach(function(region_id){
+            this.regions[region_id].getVersion(sysname).polygons.forEach(function(polygon){
+                const coordinates = polygon.coordinates;
+                
+                const areaValue = d3.polygonArea(coordinates);
+                if(areaValue != 'NA') {
+                area += areaValue;
+                }
+            })
+        }, this);
+        return area;
+    }
+
+    /**
+     * The following draws the legend for each map
+     * @param {string} sysname The sysname of the map version
+     */
+
+    drawLegend(sysname, legend_square_id, legend_text_id){
+        
+        var legend_square = document.getElementById(legend_square_id);
+        var legend_text_id = document.getElementById(legend_text_id);
+
+
+        // Get unit for the map that we wish to draw legend for.
+        const unit = this.getLegendUnit(sysname);
+
+        // Obtain the scaling factors for this map.
+        const [scale_x, scale_y]= this.getVersionPolygonScale(sysname);
+        const legend = this.getTotalValuesForVersion(sysname)/(this.getTotalAreaForVersion(sysname)*scale_x*scale_y);
+
+        // square default is 30 by 30 px
+        const ratio = legend*900;
+        var round_ratio = Math.pow(10, (Math.round(ratio).toString().length-1));
+        
+        if(round_ratio.length === 2){
+            round_ratio = 100
+        } else if(round_ratio === 1){
+            round_ratio = 10
+        }
+
+        const r = ratio/round_ratio;
+        var final_ratio = 0;
+        if(Math.abs(r - 10) < Math.abs(r - 5) && Math.abs(r - 10) < Math.abs(r - 2)){
+            final_ratio = 10;
+        } else if (Math.abs(r - 5) < Math.abs(r - 2)){
+            final_ratio = 5;
+        } else {
+            final_ratio = 2;
+        }
+
+        const width = Math.sqrt(final_ratio*round_ratio*900/ratio);
+        var scale_word = (round_ratio > 999999) ? " million" : round_ratio.toString().substr(1);
+        if(scale_word !== " million" && scale_word.length >= 3){
+            const set_of_zeros = Math.floor(scale_word.length/3)
+            const remaining_zeros = scale_word.length%3
+            if(set_of_zeros === 1 && remaining_zeros === 0){
+                scale_word = "000".repeat(set_of_zeros);
+            } else{
+                scale_word = "0".repeat(remaining_zeros) + " 000".repeat(set_of_zeros);
+            }
+        }
+
+        legend_square.setAttribute("width", width.toString() +"px");
+        legend_square.setAttribute("height", width.toString() +"px")
+        if(scale_word.length === 1){
+            legend_text_id.innerHTML = "= " + final_ratio + scale_word + " " + unit
+        } else {
+            legend_text_id.innerHTML = "= " + final_ratio + scale_word + " " + unit
+        }
+        
+    }
+
 
     /**
      * addVersion adds a new version to the map. If a version with the specified sysname already exists, it will be overwritten.
@@ -984,6 +1114,9 @@ class CartMap {
 
     }
 
+
+
+
     /**
      * switchVersion switches the map version displayed in the element with the given ID with an animation.
      * @param {string} current_sysname The sysname of the currently displayed version
@@ -1018,7 +1151,6 @@ class CartMap {
 
                     } else {
                         document.getElementById('path-' + element_id + '-' + polygon.id).setAttribute('fill', this.colors[region_id]);
-
                         document.getElementById('path-' + element_id + '-' + polygon.id).classList.add('path-' + element_id + '-' + region_id);
                         document.getElementById('path-' + element_id + '-' + polygon.id).classList.remove('path-' + element_id + '-' + region_id + '-na');
                     }
@@ -1030,8 +1162,11 @@ class CartMap {
 
         }, this);        
 
+        this.drawLegend(new_sysname, "legend-square-" + element_id, "legend-text-" + element_id);
+        /*if(new_sysname == "1-conventional"){
+            this.drawLegend(new_sysname, "legend-square-2-population", "legend-text-2-population")
+        }*/
     }
-
 }
 
 /**
@@ -1455,7 +1590,7 @@ class Cartogram {
             loading_height += document.getElementById('error').clientHeight;
         }
 
-        console.log(loading_height);
+        // console.log(loading_height);
 
         /* The loading div will be at least 100px tall */
         if(loading_height > 100)
@@ -1695,7 +1830,6 @@ class Cartogram {
         this.model.current_sysname = sysname;
 
         this.displayVersionSwitchButtons();
-
     }
 
     /**
@@ -1812,6 +1946,8 @@ class Cartogram {
 
                     this.model.map.drawVersion("1-conventional", "map-area", ["map-area", "cartogram-area"]);
                     this.model.map.drawVersion("3-cartogram", "cartogram-area", ["map-area", "cartogram-area"]);
+                    
+                    
 
                     this.model.current_sysname = "3-cartogram";
 
@@ -2011,9 +2147,11 @@ class Cartogram {
             this.generateSVGDownloadLinks();
             this.displayVersionSwitchButtons();
             this.updateGridDocument(mappack.griddocument);
-
+            this.model.map.drawLegend(this.model.current_sysname, "legend-square-cartogram-area", "legend-text-cartogram-area");
+            
+            // The following line draws the conventional legend when the page first loads.
+            this.model.map.drawLegend("1-conventional", "legend-square-map-area", "legend-text-map-area");
             document.getElementById('template-link').href = this.config.cartogram_data_dir+ "/" + sysname + "/template.csv";
-
             document.getElementById('cartogram').style.display = 'block';
 
         }.bind(this));       
