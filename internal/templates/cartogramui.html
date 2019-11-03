@@ -6,6 +6,8 @@
 
         #cartogram-row .col-md-6 {
             max-width: 100% !important;
+
+
         }
     }
 
@@ -17,31 +19,25 @@
     .bar{
         fill: steelblue;
     }
-
     .bar:hover{
         fill: brown;
     }
-
     .axis {
     font: 11px sans-serif;
     }
-
     .axis path,
     .axis line {
     fill: none;
     stroke: #000;
     shape-rendering: crispEdges;
     }
-
     #barchart svg {
         overflow: visible !important;
     }
-
     #barchart text.label {
         font-size: .8rem;
         letter-spacing: -0.01rem;
     }
-
     #tooltip {
       display: none;
       background: rgba(255,255,255,0.7);
@@ -57,13 +53,18 @@
       z-index: 1000;
     }
 
+
     @media screen and (min-width:1600px) {
-      .main-content {
-        padding-left: 250px;
-        padding-right: 250px;
-      }
+        .main-content {
+            padding-left: 250px;
+            padding-right: 250px;
+        }
     }
-</style>
+
+
+    
+</style> 
+
 
 <p id="tooltip">&nbsp;</p>
 
@@ -117,6 +118,7 @@
          </div>
        </div>
 
+
        <input type="file" name="csv" id="csv" class="form-control-file" accept="text/csv,.csv" style="display: none" onchange="if(this.value != null) { window.cartogram.requestAndDrawCartogram(); }"/>
 
        <p class="lead">Output:</p>
@@ -163,6 +165,15 @@
 
                <div id = "map-area" style="margin-top: 20px"></div>
 
+              <div class="col-12">
+                    <svg width="1000" height="50">
+            <rect id = "legend-square-map-area" x="0" y="0" fill="#5A5A5A" width="30" height="30"/>
+            <text id = "legend-text-map-area" x="40" y="20" fill="#5A5A5A"> </text>
+
+
+          </svg>
+                </div>
+
                <p style="margin-top: 20px"><a class="btn btn-primary" href="" id="map-download">Download</a></p>
 
           </div>
@@ -181,6 +192,15 @@
                 </div>
 
                 <div id = "cartogram-area" style="margin-top: 20px"></div>
+
+                <div class="col-12">
+                    <svg width="1000" height="50">
+            <rect id = "legend-square-cartogram-area" x="0" y="0" fill="#5A5A5A" width="30" height="30"/>
+            <text id = "legend-text-cartogram-area" x="40" y="20" fill="#5A5A5A"> </text>
+
+
+          </svg>
+                </div>
 
                 <div class="d-flex">
                     <p style="margin-top: 20px" class="d-inline-block"><a class="btn btn-info mr-2 text-light" href="" data-toggle="modal" data-target="#share-modal" >Share</a></p>
@@ -269,5 +289,6 @@
         </div>
       </div>
     </div>
+
 
     
