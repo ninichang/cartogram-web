@@ -763,7 +763,6 @@ class CartMap {
         var legend_square = document.getElementById(legend_square_id);
         var legend_text_id = document.getElementById(legend_text_id);
 
-
         // Get unit for the map that we wish to draw legend for.
         const unit = this.getLegendUnit(sysname);
 
@@ -772,52 +771,69 @@ class CartMap {
         const [version_area, version_values] = this.getTotalAreasAndValuesForVersion(sysname);
         const legend = version_values/(version_area*scale_x*scale_y);
 
-        console.log(`${sysname} ${legend}`);
+        // console.log(`${sysname} ${legend}`);
 
         // square default is 30 by 30 px
-        const ratio = legend*900;
-        var round_ratio = Math.pow(10, (Math.round(ratio).toString().length-1));
-
-        console.log(`${sysname} round_ratio before =${round_ratio}`);
-        
-        if(round_ratio.length === 2){
-            round_ratio = 100
-        } else if(round_ratio === 1){
-            round_ratio = 10
+        var ratio = legend*900 >= 1 ? legend*900: 1;
+        if(ratio == 1){
+            var exp_num = (legend*900).toExponential().split("e");
+            var first_num = exp_num[0];
+            if(Math.abs(first_num - 10) < Math.abs(first_num - 5) && Math.abs(first_num - 10) < Math.abs(first_num - 2)){
+                first_num = 10;
+            } else if (Math.abs(first_num - 5) < Math.abs(first_num - 2)){
+                first_num = 5;
+            } else {
+                first_num = 2;
+            }
+            legend_text_id.innerHTML = "= " + first_num + " times 10 to the power of " + exp_num[1] + unit
         }
+        else{
+            var round_ratio = Math.pow(10, (Math.round(ratio).toString().length-1));            
+            if(round_ratio.length === 2){
+                round_ratio = 100
+            } else if(round_ratio === 1){
+                round_ratio = 10
+            }
 
-        console.log(`${sysname} round_ratio after =${round_ratio}`);
 
-        const r = ratio/round_ratio;
-        var final_ratio = 0;
-        if(Math.abs(r - 10) < Math.abs(r - 5) && Math.abs(r - 10) < Math.abs(r - 2)){
-            final_ratio = 10;
-        } else if (Math.abs(r - 5) < Math.abs(r - 2)){
-            final_ratio = 5;
-        } else {
-            final_ratio = 2;
-        }
+            const r = ratio/round_ratio;
+            var final_ratio = 0;
+            if(Math.abs(r - 1) < Math.abs(r - 5) && Math.abs(r - 1) < Math.abs(r - 2)){
+                final_ratio = 1;
+            } else if (Math.abs(r - 5) < Math.abs(r - 2)){
+                final_ratio = 5;
+            } else {
+                final_ratio = 2;
+            }
 
-        const width = Math.sqrt(final_ratio*round_ratio*900/ratio);
-        var scale_word = (round_ratio > 999999) ? " million" : round_ratio.toString().substr(1);
-        if(scale_word !== " million" && scale_word.length >= 3){
-            const set_of_zeros = Math.floor(scale_word.length/3)
-            const remaining_zeros = scale_word.length%3
-            if(set_of_zeros === 1 && remaining_zeros === 0){
-                scale_word = "000".repeat(set_of_zeros);
-            } else{
-                scale_word = "0".repeat(remaining_zeros) + " 000".repeat(set_of_zeros);
+            const width = Math.sqrt(final_ratio*round_ratio*900/ratio);
+            var scale_word = (round_ratio > 999999) ? " million" : round_ratio.toString().substr(1);
+            if(scale_word == " million" && round_ratio >= 10000000){
+                console.log("yes")
+                scale_word = round_ratio/10000000 + " million"
+            } else if(scale_word !== " million" && scale_word.length >= 3){
+                const set_of_zeros = Math.floor(scale_word.length/3)
+                const remaining_zeros = scale_word.length%3
+                console.log(`${sysname} , set of zeros : ${set_of_zeros} , remaining zeros: ${remaining_zeros}`)
+                if(set_of_zeros === 1 && remaining_zeros === 0){
+                    scale_word = "000".repeat(set_of_zeros);
+                    console.log(`second ${scale_word}`)
+                } else{
+                    scale_word = "0".repeat(remaining_zeros) + " 000".repeat(set_of_zeros);
+                    console.log(`third ${scale_word}`)
+                }
+            }
+
+            legend_square.setAttribute("width", width.toString() +"px");
+            legend_square.setAttribute("height", width.toString() +"px");
+            legend_text_id.setAttribute("x", (width+10).toString() + "px");
+
+            if(scale_word.length === 1){
+                legend_text_id.innerHTML = "= " + final_ratio + scale_word + " " + unit
+            } else {
+                legend_text_id.innerHTML = "= " + final_ratio + scale_word + " " + unit
             }
         }
-
-        legend_square.setAttribute("width", width.toString() +"px");
-        legend_square.setAttribute("height", width.toString() +"px")
-        if(scale_word.length === 1){
-            legend_text_id.innerHTML = "= " + final_ratio + scale_word + " " + unit
-        } else {
-            legend_text_id.innerHTML = "= " + final_ratio + scale_word + " " + unit
-        }
-        
     }
 
 
