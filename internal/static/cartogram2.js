@@ -801,8 +801,6 @@ class CartMap {
         
         // If the legend ratio is smaller than 1, set to 1 in case the legend square becomes too big.
         if(ratio == 1){
-            legend_square.setAttribute("width", 30 +"px");
-            legend_square.setAttribute("height", 30 +"px");
             var exp_num = (legend*900).toExponential().split("e");
             var first_num = exp_num[0];
             if(Math.abs(first_num - 10) < Math.abs(first_num - 5) && Math.abs(first_num - 10) < Math.abs(first_num - 2)){
@@ -813,8 +811,15 @@ class CartMap {
                 first_num = 2;
             }
             if(exp_num[1] >= -4){
-                legend_text.innerHTML = "= " + first_num * Math.pow(10, parseInt(exp_num[1])) + unit
+                legend_text.innerHTML = "= " + first_num * Math.pow(10, parseInt(exp_num[1])) + unit;
+                const width = Math.sqrt(first_num * Math.pow(10, parseInt(exp_num[1]))*900/(legend*900).toExponential());
+                legend_square.setAttribute("width", width.toString() +"px");
+                legend_square.setAttribute("height", width.toString() +"px");
+                console.log(`original: ${exp_num}; new : ${width}`);
+                
             } else{
+                legend_square.setAttribute("width", 30 +"px");
+                legend_square.setAttribute("height", 30 +"px");
                 legend_superscript.style.display = "inline-block";
                 legend_superscript_unit_id.style.display = "inline-block";
                 legend_superscript.innerHTML = exp_num[1];
@@ -822,7 +827,6 @@ class CartMap {
                 legend_superscript_unit_id.innerHTML = unit;
             }
             this.verifyLegend(sysname, 30, first_num * Math.pow(10, parseInt(exp_num[1])));
-
         }
         else{
             legend_superscript_unit_id.style.display = "none";
