@@ -778,8 +778,8 @@ class CartMap {
 
         // If the legend ratio is smaller than 1, set to 1 in case the legend square becomes too big.
         if(ratio == 1){
-            legend_superscript.style.display = "inline-block";
-            legend_superscript_unit_id.style.display = "inline-block";
+            legend_square.setAttribute("width", 30 +"px");
+            legend_square.setAttribute("height", 30 +"px");
             var exp_num = (legend*900).toExponential().split("e");
             var first_num = exp_num[0];
             if(Math.abs(first_num - 10) < Math.abs(first_num - 5) && Math.abs(first_num - 10) < Math.abs(first_num - 2)){
@@ -792,6 +792,8 @@ class CartMap {
             if(exp_num[1] >= -4){
                 legend_text.innerHTML = "= " + first_num * Math.pow(10, exp_num[1]) + unit
             } else{
+                legend_superscript.style.display = "inline-block";
+                legend_superscript_unit_id.style.display = "inline-block";
                 legend_superscript.innerHTML = exp_num[1];
                 legend_text.innerHTML = "= " + first_num + " x 10 "
                 legend_superscript_unit_id.innerHTML = unit;
@@ -807,7 +809,6 @@ class CartMap {
             } else if(round_ratio === 1){
                 round_ratio = 10
             }
-
 
             const r = ratio/round_ratio;
             var final_ratio = 0;
