@@ -821,15 +821,7 @@ class CartMap {
                 legend_text.innerHTML = "= " + first_num + " x 10 "
                 legend_superscript_unit_id.innerHTML = unit;
             }
-
-            /* You need to set the width here.
-
-            const width = ???;
-            legend_square.setAttribute("width", width.toString() +"px");
-            legend_square.setAttribute("height", width.toString() +"px");
-            legend_text.setAttribute("x", (width+10).toString() + "px");
-
-            this.verifyLegend(sysname, width, first_num * Math.pow(10, parseInt(exp_num[1])));*/
+            this.verifyLegend(sysname, 30, first_num * Math.pow(10, parseInt(exp_num[1])));
 
         }
         else{
