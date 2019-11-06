@@ -754,6 +754,28 @@ class CartMap {
     }
 
     /**
+     * Determines if the computed legend area and value is correct
+     * @param sysname
+     * @param width
+     * @param value
+     */
+    verifyLegend(sysname, width, value) {
+
+        const [scale_x, scale_y] = this.getVersionPolygonScale(sysname);
+        const [version_area, version_values] = this.getTotalAreasAndValuesForVersion(sysname);
+        const tolerance = 0.001;
+
+        const legendTotalValue = (version_area * scale_x * scale_y / (width * width)) * value;
+
+        if(!(Math.abs(version_values - legendTotalValue) < tolerance)) {
+            console.warn(`The legend value (${value}) and width (${width}px) for ${sysname} is not correct. Calculating the total value from the legend yields ${legendTotalValue}, but it should be ${version_values}`);
+        } else {
+            console.log(`The legend value (${value}) and width (${width}px) for ${sysname} is correct (calculated total value=${legendTotalValue}, actual total value=${version_values})`);
+        }
+
+    }
+
+    /**
      * The following draws the legend for each map
      * @param {string} sysname The sysname of the map version
      */
@@ -791,7 +813,7 @@ class CartMap {
                 first_num = 2;
             }
             if(exp_num[1] >= -4){
-                legend_text.innerHTML = "= " + first_num * Math.pow(10, exp_num[1]) + unit
+                legend_text.innerHTML = "= " + first_num * Math.pow(10, parseInt(exp_num[1])) + unit
             } else{
                 legend_superscript.style.display = "inline-block";
                 legend_superscript_unit_id.style.display = "inline-block";
@@ -799,6 +821,15 @@ class CartMap {
                 legend_text.innerHTML = "= " + first_num + " x 10 "
                 legend_superscript_unit_id.innerHTML = unit;
             }
+
+            /* You need to set the width here.
+
+            const width = ???;
+            legend_square.setAttribute("width", width.toString() +"px");
+            legend_square.setAttribute("height", width.toString() +"px");
+            legend_text.setAttribute("x", (width+10).toString() + "px");
+
+            this.verifyLegend(sysname, width, first_num * Math.pow(10, parseInt(exp_num[1])));*/
 
         }
         else{
@@ -837,6 +868,8 @@ class CartMap {
                     scale_word = "0".repeat(remaining_zeros) + " 000".repeat(set_of_zeros);
                 }
             }
+
+            this.verifyLegend(sysname, width, final_ratio*round_ratio);
 
             legend_square.setAttribute("width", width.toString() +"px");
             legend_square.setAttribute("height", width.toString() +"px");
