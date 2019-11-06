@@ -776,6 +776,7 @@ class CartMap {
         // square default is 30 by 30 px
         var ratio = legend*900 >= 1 ? legend*900: 1;
 
+        
         // If the legend ratio is smaller than 1, set to 1 in case the legend square becomes too big.
         if(ratio == 1){
             legend_square.setAttribute("width", 30 +"px");
