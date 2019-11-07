@@ -810,17 +810,13 @@ class CartMap {
             } else {
                 first_num = 2;
             }
-            legend_text.innerHTML = "= " + first_num * Math.pow(10, parseInt(exp_num[1])) + unit;
             const width = Math.sqrt(first_num * Math.pow(10, parseInt(exp_num[1]))*900/(legend*900).toExponential());
-  
+            legend_square.setAttribute("width", width.toString() +"px");
+            legend_square.setAttribute("height", width.toString() +"px");
+
             if(exp_num[1] >= -4){
-                legend_square.setAttribute("width", width.toString() +"px");
-                legend_square.setAttribute("height", width.toString() +"px");
-                console.log(`original: ${exp_num}; new : ${width}`);
-                
+                legend_text.innerHTML = "= " + first_num * Math.pow(10, parseInt(exp_num[1])) + unit;
             } else{
-                legend_square.setAttribute("width", width +"px");
-                legend_square.setAttribute("height", width +"px");
                 legend_superscript.style.display = "inline-block";
                 legend_superscript_unit_id.style.display = "inline-block";
                 legend_superscript.innerHTML = exp_num[1];
