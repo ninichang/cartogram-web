@@ -816,6 +816,8 @@ class CartMap {
                 legend_square.setAttribute("width", width.toString() +"px");
                 legend_square.setAttribute("height", width.toString() +"px");
                 console.log(`original: ${exp_num}; new : ${width}`);
+                this.verifyLegend(sysname, width, first_num * Math.pow(10, parseInt(exp_num[1])));
+
                 
             } else{
                 legend_square.setAttribute("width", 30 +"px");
@@ -825,8 +827,9 @@ class CartMap {
                 legend_superscript.innerHTML = exp_num[1];
                 legend_text.innerHTML = "= " + first_num + " x 10 "
                 legend_superscript_unit_id.innerHTML = unit;
+                this.verifyLegend(sysname, width, first_num * Math.pow(10, parseInt(exp_num[1])));
+
             }
-            this.verifyLegend(sysname, 30, first_num * Math.pow(10, parseInt(exp_num[1])));
         }
         else{
             legend_superscript_unit_id.style.display = "none";
