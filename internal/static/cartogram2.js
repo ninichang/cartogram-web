@@ -820,7 +820,7 @@ class CartMap {
                 legend_superscript.style.display = "inline-block";
                 legend_superscript_unit_id.style.display = "inline-block";
                 legend_superscript.innerHTML = exp_num[1];
-                legend_text.innerHTML = "= " + first_num + " x 10 "
+                legend_text.innerHTML = "= " + first_num + " &times; 10 "
                 legend_superscript_unit_id.innerHTML = unit;
             }
             this.verifyLegend(sysname, width, first_num * Math.pow(10, parseInt(exp_num[1])));
@@ -849,9 +849,18 @@ class CartMap {
             const width = Math.sqrt(final_ratio*round_ratio*900/ratio);
             var scale_word = (round_ratio > 999999) ? " million" : round_ratio.toString().substr(1);
             if(scale_word == " million" && round_ratio >= 10000000){
-                if(round_ratio >= 10000000000000){
-                    scale_word = round_ratio / 10000000000000 + " billion"
-                }
+
+                // If there's more than 1 billion then show the scientific notation e.g. 10^(13)
+                if(ratio >= 1000000000000){
+                    var exp_num = ratio.toExponential().split("e");
+                    var first_num = exp_num[0];
+                    legend_superscript.style.display = "inline-block";
+                    legend_superscript_unit_id.style.display = "inline-block";
+                    legend_superscript.innerHTML = exp_num[1];
+                    legend_text.innerHTML = "= " + first_num + " &times; 10 "
+                    legend_superscript_unit_id.innerHTML = unit;
+                } 
+                
                 scale_word = round_ratio/10000000 + " million"
             } else if(scale_word !== " million" && scale_word.length >= 3){
                 const set_of_zeros = Math.floor(scale_word.length/3)
