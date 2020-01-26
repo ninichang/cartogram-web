@@ -4,6 +4,8 @@ This project uses the cartogram generation algorithm written by Gastner et. al. 
 
 To add a map to the website, please follow the Add Map Wizard guide at `doc/addmap/addmap.md`.
 
+To see the live website: go to https://go-cart.io
+
 # Contact
 
 If you encounter issues using this code, or have any questions, please contact Ian Duncan at ian.duncan@u.yale-nus.edu.sg.
@@ -11,5 +13,3 @@ If you encounter issues using this code, or have any questions, please contact I
 
 # Structure
 To setup the map locally, refer to /doc
-
-![](cartogram-web.png)
